@@ -1,0 +1,3451 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Idol Phone Simulator</title>
+<style>
+/* ===================== RESET & BASE ===================== */
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:#0a0a0a;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;
+  padding:24px;
+}
+#app-root{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;}
+input{font-family:inherit;}
+img{display:block;max-width:100%;}
+
+/* ===================== THEME TOKENS ===================== */
+#phone[data-theme="dark"]{
+  --bg:#000000;
+  --surface:#161617;
+  --surface-2:#1f1f20;
+  --surface-3:#2a2a2b;
+  --text:#f2f2f3;
+  --text-2:#9a9a9d;
+  --text-3:#6b6b6e;
+  --border:#2e2e2f;
+  --accent:#f2f2f3;
+  --accent-text:#000000;
+  --sent-bg:#f2f2f3;
+  --sent-text:#0a0a0a;
+  --recv-bg:#262627;
+  --recv-text:#f2f2f3;
+  --danger:#cfcfcf;
+  --shadow:0 18px 48px rgba(0,0,0,0.55);
+}
+#phone[data-theme="light"]{
+  --bg:#f4f4f5;
+  --surface:#ffffff;
+  --surface-2:#f6f6f7;
+  --surface-3:#ececee;
+  --text:#0e0e0f;
+  --text-2:#6f6f74;
+  --text-3:#9b9b9f;
+  --border:#e3e3e5;
+  --accent:#0e0e0f;
+  --accent-text:#ffffff;
+  --sent-bg:#0e0e0f;
+  --sent-text:#ffffff;
+  --recv-bg:#ececee;
+  --recv-text:#0e0e0f;
+  --danger:#3a3a3a;
+  --shadow:0 18px 48px rgba(0,0,0,0.18);
+}
+
+/* ===================== PHONE FRAME ===================== */
+#phone{
+  width:390px;
+  height:844px;
+  background:var(--bg);
+  color:var(--text);
+  border-radius:46px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+.statusbar{
+  height:46px;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 28px;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:0.2px;
+  color:var(--text);
+  background:var(--bg);
+  position:relative;
+  z-index:50;
+}
+.statusbar:before{
+  content:"";
+  position:absolute;
+  top:8px;left:50%;
+  transform:translateX(-50%);
+  width:90px;height:24px;
+  background:#000000;
+  border-radius:14px;
+}
+.sb-right{display:flex;gap:7px;align-items:center;}
+.sb-signal{display:flex;align-items:flex-end;gap:2px;height:11px;}
+.sb-signal-bar{width:3px;background:var(--text);border-radius:1px;}
+.sb-signal-bar:nth-child(1){height:4px;}
+.sb-signal-bar:nth-child(2){height:6px;}
+.sb-signal-bar:nth-child(3){height:8.5px;}
+.sb-signal-bar:nth-child(4){height:11px;}
+.sb-wifi{width:16px;height:11px;display:flex;align-items:center;}
+.sb-wifi svg{width:100%;height:100%;}
+.sb-battery{display:flex;align-items:center;}
+.sb-battery-body{
+  width:25px;height:12px;border:1.5px solid var(--text);border-radius:3.5px;
+  position:relative;padding:1.5px;
+}
+.sb-battery-body:after{
+  content:"";position:absolute;left:100%;top:50%;transform:translateY(-50%);
+  width:2px;height:5px;background:var(--text);border-radius:0 1.5px 1.5px 0;
+}
+.sb-battery-fill{height:100%;width:100%;background:#30d158;border-radius:1.5px;}
+.sb-battery-nub{display:none;}
+
+.screen{
+  position:absolute;
+  top:46px;left:0;right:0;bottom:0;
+  background:var(--bg);
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+}
+.screen.visible{display:flex;}
+.home-screen{position:relative;top:0;height:100%;padding:18px 22px 28px;}
+
+/* ===================== HOME SCREEN ===================== */
+.owner-switch{
+  display:flex;flex-direction:column;align-items:center;
+  padding:22px 0 26px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.owner-avatar{
+  width:72px;height:72px;border-radius:24px;
+  background:var(--surface-3);
+  background-size:cover;background-position:center;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:600;color:var(--text-2);
+  border:1px solid var(--border);
+  margin-bottom:10px;
+  transition:transform .15s ease;
+}
+.owner-switch:active .owner-avatar{transform:scale(0.94);}
+.owner-name{font-size:15px;font-weight:600;color:var(--text);}
+.owner-hint{font-size:11px;color:var(--text-3);margin-top:3px;letter-spacing:.2px;}
+
+.app-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:22px 14px;
+}
+.app-icon-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  -webkit-tap-highlight-color:transparent;
+}
+.app-icon{
+  width:60px;height:60px;border-radius:16px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  background-size:cover;background-position:center;
+  transition:transform .12s ease;
+}
+.app-icon-wrap:active .app-icon{transform:scale(0.92);}
+.app-icon svg{width:28px;height:28px;stroke:var(--text);fill:none;stroke-width:1.4;}
+.app-icon-label{font-size:11px;color:var(--text-2);font-weight:500;text-align:center;}
+
+/* ===================== APP HEADER ===================== */
+.app-screen{padding-top:0;}
+.app-header{
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+  position:relative;
+  z-index:10;
+}
+.hdr-title{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  font-size:16px;font-weight:600;letter-spacing:.2px;
+  white-space:nowrap;
+  pointer-events:none;
+}
+.hdr-btn{
+  font-size:14px;font-weight:500;color:var(--text);
+  padding:6px 10px;border-radius:10px;
+  white-space:nowrap;
+  position:relative;z-index:1;
+  display:inline-flex;align-items:center;gap:3px;
+}
+.hdr-btn:active{background:var(--surface-2);}
+.hdr-spacer{width:34px;display:inline-block;}
+.refresh-btn{color:var(--text-2);}
+.back-btn:before{
+  content:"";
+  width:8px;height:8px;
+  border-left:1.6px solid currentColor;
+  border-bottom:1.6px solid currentColor;
+  transform:rotate(45deg);
+  margin-right:1px;
+}
+.icon-btn{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  padding:0;
+}
+.icon-btn svg{width:17px;height:17px;stroke:var(--text-2);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+
+input, textarea{ outline:none; }
+.field-input:focus, .field-textarea:focus, .thin-input:focus,
+.prompt-card textarea:focus, #iconEditorName:focus{
+  border-color:var(--text-2);
+}
+
+/* ===================== BUBBLE APP ===================== */
+.bubble-feed{
+  flex:1 1 auto;overflow-y:auto;
+  padding:16px 14px 10px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.bubble-round{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.bubble-row{display:flex;}
+.bubble-row.sent{justify-content:flex-end;}
+.bubble-row.recv{justify-content:flex-start;}
+.bubble{
+  max-width:74%;
+  padding:10px 14px;
+  border-radius:18px;
+  font-size:14.5px;
+  line-height:1.45;
+  word-break:break-word;
+}
+.bubble.sent{background:var(--sent-bg);color:var(--sent-text);border-bottom-right-radius:5px;}
+.bubble.recv{background:var(--recv-bg);color:var(--recv-text);border-bottom-left-radius:5px;}
+.bubble-photo{
+  width:170px;height:170px;
+  border-radius:16px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  padding:14px;text-align:center;
+  font-size:12px;color:var(--text-2);
+  line-height:1.5;
+}
+.bubble-meta{font-size:11px;color:var(--text-3);margin:2px 4px;}
+.fan-name{font-size:11px;color:var(--text-3);margin:0 4px 1px;}
+.expand-toggle{
+  align-self:flex-start;
+  margin:2px 4px 0;
+  font-size:12.5px;color:var(--text-2);
+  text-decoration:underline;
+  text-decoration-color:var(--border);
+}
+.fan-replies{
+  display:flex;flex-direction:column;gap:8px;
+  margin-top:6px;padding-left:2px;
+  border-left:1px solid var(--border);
+  padding-left:12px;margin-left:4px;
+}
+.fan-reply-item{display:flex;flex-direction:column;gap:2px;}
+.bubble-inputbar{
+  flex:0 0 auto;
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;
+  border-top:1px solid var(--border);
+  background:var(--surface);
+}
+.thin-input{
+  flex:1 1 auto;
+  height:32px;
+  border-radius:16px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  padding:0 14px;
+  font-size:13.5px;
+  color:var(--text);
+}
+.thin-input::placeholder{color:var(--text-3);}
+.photo-btn{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  flex:0 0 auto;
+  position:relative;
+}
+.photo-btn:before{
+  content:"";position:absolute;inset:9px;
+  border:1.3px solid var(--text-2);border-radius:3px;
+}
+.photo-btn:after{
+  content:"";position:absolute;
+  width:5px;height:5px;border-radius:50%;
+  border:1.3px solid var(--text-2);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+}
+.send-btn{
+  flex:0 0 auto;
+  width:30px;height:30px;
+  border-radius:50%;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  padding:0;
+}
+.send-btn svg{width:15px;height:15px;stroke:var(--text);fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;}
+.send-btn:disabled{opacity:.4;}
+.chat-trigger-btn{
+  flex:0 0 auto;
+  width:30px;height:30px;
+  border-radius:50%;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  padding:0;
+}
+.chat-trigger-btn svg{width:15px;height:15px;stroke:var(--text-2);fill:none;stroke-width:1.4;}
+.loading-row{
+  text-align:center;font-size:12px;color:var(--text-3);
+  padding:10px 0;
+}
+
+/* ===================== INSTAGRAM ===================== */
+.ig-tabs{
+  flex:0 0 auto;
+  display:flex;border-bottom:1px solid var(--border);
+}
+.ig-tab{
+  flex:1 1 auto;
+  padding:10px 0;font-size:13px;color:var(--text-3);font-weight:600;
+  border-bottom:2px solid transparent;
+}
+.ig-tab.active{color:var(--text);border-bottom-color:var(--text);}
+.ig-body{flex:1 1 auto;overflow-y:auto;}
+.ig-pane{display:none;padding:14px;}
+.ig-pane.active{display:block;}
+
+.ig-post{
+  border-bottom:1px solid var(--border);
+  padding-bottom:14px;margin-bottom:14px;
+}
+.ig-post-head{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.ig-avatar{
+  width:34px;height:34px;border-radius:11px;
+  background:var(--surface-2);border:1px solid var(--border);
+  background-size:cover;background-position:center;
+  flex:0 0 auto;
+}
+.ig-post-name{font-size:13.5px;font-weight:600;}
+.ig-post-time{font-size:11px;color:var(--text-3);}
+.ig-image-block{
+  width:100%;aspect-ratio:1/1;
+  border-radius:14px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:20px;
+  font-size:12.5px;color:var(--text-2);line-height:1.6;
+  margin-bottom:9px;
+}
+.ig-caption{font-size:13.5px;line-height:1.5;margin-bottom:7px;}
+.ig-likes{font-size:12px;color:var(--text-3);margin-bottom:7px;}
+.ig-stats{display:flex;gap:16px;margin-bottom:8px;}
+.ig-stat{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-2);}
+.ig-stat svg{width:15px;height:15px;stroke:var(--text-2);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+.ig-comment{font-size:12.5px;margin-bottom:4px;line-height:1.4;}
+.ig-comment b{font-weight:600;margin-right:5px;}
+
+.ig-alt-trigger{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:10px;height:10px;
+  margin-left:4px;
+  opacity:.55;
+  pointer-events:auto;
+  cursor:pointer;
+  vertical-align:middle;
+  position:relative;
+  top:-1px;
+}
+.ig-alt-trigger:after{content:"";width:6px;height:6px;border-radius:50%;background:var(--text);}
+.ig-alt-trigger-wrap{display:inline-flex;align-items:center;width:auto;}
+
+.home-screen{background-size:cover;background-position:center;}
+.home-screen.has-wallpaper .owner-name,
+.home-screen.has-wallpaper .owner-hint,
+.home-screen.has-wallpaper .app-icon-label{
+  text-shadow:0 1px 5px rgba(0,0,0,0.65);
+}
+
+#phone.fit-screen{
+  width:100vw;height:100vh;border-radius:0;border:none;
+}
+body.has-fit-screen{padding:0;}
+
+.search-history-wrap{margin-bottom:18px;}
+.section-label{font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px;}
+.search-history-item{font-size:13px;color:var(--text-2);padding:7px 0;border-bottom:1px solid var(--border);}
+.trend-item{
+  display:flex;align-items:baseline;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+}
+.trend-rank{font-size:13px;font-weight:700;color:var(--text-3);width:18px;flex:0 0 auto;}
+.trend-title{font-size:13.5px;font-weight:600;}
+.trend-sub{font-size:11.5px;color:var(--text-3);margin-top:2px;}
+
+.dm-list-item{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 0;border-bottom:1px solid var(--border);
+}
+.dm-list-name{font-size:13.5px;font-weight:600;}
+.dm-list-tag{font-size:10.5px;color:var(--text-3);margin-left:6px;font-weight:500;}
+.dm-list-preview{font-size:12.5px;color:var(--text-3);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;}
+.dm-list-text{flex:1 1 auto;min-width:0;}
+
+.detail-body{flex:1 1 auto;overflow-y:auto;padding:16px;}
+.detail-text{font-size:14px;line-height:1.85;white-space:pre-wrap;}
+.detail-comments{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+
+.dm-feed{
+  flex:1 1 auto;overflow-y:auto;padding:14px;
+  display:flex;flex-direction:column;gap:9px;
+}
+
+/* ===================== X LIVE ===================== */
+.x-screen{background:#000;}
+.x-screen .app-header{background:rgba(0,0,0,0.0);border-bottom:1px solid rgba(255,255,255,0.12);}
+.x-header .hdr-title,.x-header .hdr-btn{color:#f2f2f3;}
+.x-header .icon-btn svg{stroke:#f2f2f3;}
+.x-live-stage{
+  flex:1 1 auto;position:relative;
+  background:radial-gradient(circle at 50% 20%, #1c1c1d 0%, #060606 70%);
+  overflow:hidden;
+  display:flex;align-items:flex-end;
+}
+.x-live-topbar{
+  position:absolute;top:14px;left:14px;right:14px;
+  display:flex;align-items:center;justify-content:space-between;
+  z-index:5;
+}
+.x-live-tag{
+  background:#f2f2f3;color:#000;
+  font-size:11px;font-weight:700;padding:4px 9px;border-radius:6px;
+  letter-spacing:.04em;
+}
+.x-live-viewers{font-size:12px;color:#cfcfcf;font-weight:500;}
+.x-scene-desc{
+  position:relative;z-index:4;
+  margin:0 16px 70px;
+  background:rgba(20,20,21,0.72);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  padding:16px;
+  font-size:13.5px;color:#f0f0f1;line-height:1.7;
+  backdrop-filter:blur(6px);
+}
+.x-danmaku-layer{
+  position:absolute;inset:0;z-index:3;
+  overflow:hidden;pointer-events:none;
+}
+.x-danmaku-item{
+  position:absolute;
+  white-space:nowrap;
+  font-size:12.5px;
+  color:#f2f2f3;
+  background:rgba(40,40,41,0.55);
+  padding:3px 10px;border-radius:11px;
+  right:-10%;
+  animation:danmakuFly linear forwards;
+}
+@keyframes danmakuFly{
+  from{transform:translateX(0);}
+  to{transform:translateX(-480px);}
+}
+.x-danmaku-toggle{
+  position:absolute;left:16px;bottom:18px;z-index:8;
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(40,40,41,0.7);
+  border:1px solid rgba(255,255,255,0.14);
+  display:flex;align-items:center;justify-content:center;
+}
+.x-danmaku-toggle svg{width:16px;height:16px;stroke:#f2f2f3;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.x-danmaku-panel{
+  position:absolute;left:0;right:0;bottom:0;
+  max-height:46%;
+  background:rgba(15,15,16,0.92);
+  border-top:1px solid rgba(255,255,255,0.12);
+  border-radius:18px 18px 0 0;
+  padding:14px 16px;
+  overflow-y:auto;
+  display:none;
+  z-index:9;
+  backdrop-filter:blur(10px);
+}
+.x-danmaku-panel.open{display:block;}
+.x-danmaku-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.x-danmaku-panel-title{font-size:12px;color:#aeaeaf;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.x-danmaku-close{
+  width:24px;height:24px;border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.x-danmaku-close:before, .x-danmaku-close:after{
+  content:"";position:absolute;width:10px;height:1.4px;background:#f2f2f3;
+}
+.x-danmaku-close:before{transform:rotate(45deg);}
+.x-danmaku-close:after{transform:rotate(-45deg);}
+.x-danmaku-line{font-size:12.5px;color:#e6e6e7;margin-bottom:8px;line-height:1.4;}
+.x-danmaku-line b{color:#f2f2f3;font-weight:600;margin-right:5px;}
+
+/* ===================== PAYPAL ===================== */
+.paypal-body{flex:1 1 auto;overflow-y:auto;padding:18px;}
+.pp-card{
+  background:linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+  border:1px solid rgba(255,255,255,0.12);
+  color:#ffffff;
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:20px;
+  position:relative;
+  overflow:hidden;
+}
+.pp-card:before{
+  content:"";
+  position:absolute;
+  top:-30px;right:-30px;
+  width:120px;height:120px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.06);
+}
+.pp-card:after{
+  content:"";
+  position:absolute;
+  bottom:-50px;right:20px;
+  width:160px;height:160px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,0.04);
+}
+.pp-card-top{position:relative;z-index:1;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8e8e93;margin-bottom:20px;}
+.pp-card-number{position:relative;z-index:1;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:15px;letter-spacing:.1em;color:#c7c7cc;margin-bottom:16px;}
+.pp-card-balance-label{position:relative;z-index:1;font-size:10px;color:#8e8e93;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.pp-card-balance{position:relative;z-index:1;font-size:26px;font-weight:300;color:#ffffff;margin-bottom:0;letter-spacing:-0.3px;}
+.pp-card-holder{position:relative;z-index:1;font-size:12px;color:#c7c7cc;margin-top:16px;letter-spacing:.04em;text-transform:uppercase;}
+.pp-tx-list .section-label{margin-top:4px;}
+.pp-tx-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 0;border-bottom:1px solid var(--border);
+}
+.pp-tx-icon{
+  width:40px;height:40px;border-radius:13px;
+  background:var(--surface-2);border:1px solid var(--border);
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+}
+.pp-tx-icon svg{width:18px;height:18px;stroke:var(--text-2);fill:none;stroke-width:1.4;}
+.pp-tx-mid{flex:1 1 auto;min-width:0;}
+.pp-tx-name{font-size:13.5px;font-weight:600;}
+.pp-tx-date{font-size:11.5px;color:var(--text-3);margin-top:1px;}
+.pp-tx-amt{font-size:14px;font-weight:700;flex:0 0 auto;}
+.pp-tx-amt.neg{color:var(--text-2);font-weight:600;}
+
+/* ===================== MAPS ===================== */
+.maps-body{flex:1 1 auto;overflow-y:auto;padding:0;}
+.maps-abstract{
+  height:150px;
+  background:var(--surface-2);
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.maps-abstract svg{width:100%;height:100%;}
+.maps-title{font-size:13px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;padding:16px 16px 8px;}
+.maps-timeline{padding:0 16px 24px;}
+.maps-stop{display:flex;gap:13px;padding:11px 0;}
+.maps-stop-rail{display:flex;flex-direction:column;align-items:center;flex:0 0 auto;width:10px;}
+.maps-stop-dot{width:9px;height:9px;border-radius:50%;background:var(--text);margin-top:5px;}
+.maps-stop-line{flex:1 1 auto;width:1px;background:var(--border);margin-top:4px;}
+.maps-stop-body{flex:1 1 auto;padding-bottom:6px;}
+.maps-stop-time{font-size:11.5px;color:var(--text-3);font-weight:600;}
+.maps-stop-place{font-size:14px;font-weight:600;margin-top:2px;}
+.maps-stop-desc{font-size:12.5px;color:var(--text-2);margin-top:3px;line-height:1.5;}
+
+/* ===================== NOTES ===================== */
+.notes-body{flex:1 1 auto;overflow-y:auto;padding:6px 16px;}
+.note-item{padding:13px 0;border-bottom:1px solid var(--border);}
+.note-title{font-size:14.5px;font-weight:600;}
+.note-preview{font-size:12.5px;color:var(--text-2);margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.note-date{font-size:11px;color:var(--text-3);margin-top:4px;}
+
+/* ===================== SETTINGS ===================== */
+.settings-body{flex:1 1 auto;overflow-y:auto;padding:18px 16px;}
+.settings-group{margin-bottom:24px;}
+.settings-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:13px 15px;
+  font-size:14px;
+}
+.settings-row:first-child{border-radius:13px 13px 0 0;}
+.settings-row:last-child{border-radius:0 0 13px 13px;}
+.settings-row + .settings-row{border-top:none;}
+.settings-row.single{border-radius:13px;}
+.settings-row-label{font-weight:500;}
+.settings-row-value{color:var(--text-3);font-size:13px;}
+.settings-chevron{color:var(--text-3);font-size:14px;}
+.seg-control{display:flex;background:var(--surface-2);border-radius:9px;padding:2px;}
+.seg-btn{
+  flex:1 1 auto;text-align:center;padding:6px 12px;
+  font-size:12.5px;font-weight:600;color:var(--text-2);border-radius:7px;
+}
+.seg-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.12);}
+
+.field-label{font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin:18px 0 8px;}
+.field-label:first-child{margin-top:0;}
+.field-input{
+  width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:11px;padding:11px 13px;font-size:13.5px;color:var(--text);
+}
+.field-textarea{
+  width:100%;min-height:110px;background:var(--surface);border:1px solid var(--border);
+  border-radius:11px;padding:11px 13px;font-size:13.5px;color:var(--text);
+  resize:vertical;line-height:1.6;font-family:inherit;
+}
+.field-hint{font-size:11.5px;color:var(--text-3);margin-top:6px;line-height:1.5;}
+.field-row-check{display:flex;align-items:center;gap:9px;padding:4px 0;}
+.checkbox{
+  width:20px;height:20px;border-radius:6px;border:1.4px solid var(--border);
+  flex:0 0 auto;position:relative;background:var(--surface);
+}
+.checkbox.checked{background:var(--accent);border-color:var(--accent);}
+.checkbox.checked:after{
+  content:"";position:absolute;left:6px;top:2px;width:5px;height:9px;
+  border-right:2px solid var(--accent-text);border-bottom:2px solid var(--accent-text);
+  transform:rotate(45deg);
+}
+.avatar-upload{
+  width:64px;height:64px;border-radius:18px;background:var(--surface-2);
+  border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:var(--text-3);text-align:center;cursor:pointer;
+  background-size:cover;background-position:center;
+}
+.avatar-row{display:flex;gap:14px;align-items:center;margin-bottom:4px;}
+.btn-block{
+  width:100%;padding:12px 0;border-radius:12px;
+  background:var(--accent);color:var(--accent-text);
+  font-size:14px;font-weight:600;text-align:center;margin-top:6px;
+}
+.btn-block.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+.btn-block.danger{background:var(--surface-2);color:var(--danger);border:1px solid var(--border);}
+
+.model-list{
+  max-height:260px;overflow-y:auto;
+  border:1px solid var(--border);border-radius:11px;margin-top:8px;
+}
+.model-item{
+  padding:11px 13px;font-size:13px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.model-item:last-child{border-bottom:none;}
+.model-item.selected{background:var(--surface-2);font-weight:600;}
+
+.char-card{
+  display:flex;align-items:center;gap:12px;
+  padding:13px;border:1px solid var(--border);border-radius:14px;margin-bottom:10px;
+  background:var(--surface);
+}
+.char-card.active{border-color:var(--text);}
+.char-card-avatars{display:flex;flex:0 0 auto;}
+.char-card-avatars .ig-avatar:nth-child(2){margin-left:-12px;}
+.char-card-mid{flex:1 1 auto;min-width:0;}
+.char-card-title{font-size:14px;font-weight:600;}
+.char-card-sub{font-size:12px;color:var(--text-3);margin-top:2px;}
+.char-card-edit{font-size:12px;color:var(--text-2);padding:6px 10px;}
+
+.icon-row{
+  display:flex;align-items:center;gap:13px;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.icon-row-name{flex:1 1 auto;font-size:13.5px;font-weight:500;}
+.icon-row-edit{font-size:12px;color:var(--text-2);padding:5px 9px;}
+
+.empty-state{
+  text-align:center;color:var(--text-3);font-size:13px;padding:60px 20px;line-height:1.7;
+}
+
+.toast{
+  position:fixed;bottom:40px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:rgba(30,30,31,0.94);color:#f2f2f3;
+  font-size:13px;padding:10px 18px;border-radius:12px;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s, transform .2s;
+  z-index:9999;
+  max-width:80vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@keyframes ellipsis{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+
+.sheet-overlay{
+  position:absolute;inset:0;z-index:200;
+  background:rgba(0,0,0,0.32);
+  display:none;
+  align-items:flex-end;justify-content:center;
+}
+.sheet-overlay.open{display:flex;}
+.action-sheet{
+  width:100%;
+  background:var(--surface);
+  border-radius:18px 18px 0 0;
+  padding:8px 10px calc(env(safe-area-inset-bottom,0px) + 10px);
+  animation:sheetUp .18s ease;
+}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-title{
+  text-align:center;font-size:12px;color:var(--text-3);
+  padding:12px 0 8px;border-bottom:1px solid var(--border);
+}
+.sheet-option{
+  display:block;width:100%;text-align:center;
+  padding:14px 0;font-size:15px;color:var(--text);
+  border-bottom:1px solid var(--border);
+}
+.sheet-option:last-of-type{border-bottom:none;}
+.sheet-cancel{
+  display:block;width:100%;text-align:center;
+  padding:14px 0;margin-top:8px;
+  font-size:15px;font-weight:600;color:var(--text);
+  background:var(--surface-2);border-radius:13px;
+}
+
+.prompt-overlay{
+  position:absolute;inset:0;z-index:210;
+  background:rgba(0,0,0,0.32);
+  display:none;align-items:center;justify-content:center;
+  padding:30px;
+}
+.prompt-overlay.open{display:flex;}
+.prompt-card{
+  width:100%;max-width:300px;
+  background:var(--surface);border-radius:16px;
+  padding:18px;
+  animation:sheetUp .16s ease;
+}
+.prompt-card-title{font-size:14px;font-weight:600;margin-bottom:10px;text-align:center;}
+.prompt-card textarea{
+  width:100%;min-height:80px;background:var(--surface-2);
+  border:1px solid var(--border);border-radius:10px;
+  padding:10px;font-size:13.5px;color:var(--text);
+  font-family:inherit;resize:vertical;
+}
+.prompt-card-actions{display:flex;gap:8px;margin-top:12px;}
+.prompt-card-actions button{
+  flex:1 1 auto;padding:10px 0;border-radius:10px;font-size:13.5px;font-weight:600;
+}
+.prompt-card-actions .pc-cancel{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+.prompt-card-actions .pc-ok{background:var(--accent);color:var(--accent-text);}
+
+@media (max-width:420px){
+  body{padding:0;}
+  #phone{width:100vw;height:100vh;border-radius:0;border:none;}
+}
+
+/* ===== Refresh button spin when loading ===== */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.refresh-btn.spinning svg{
+  animation:spin .8s linear infinite;
+  transform-origin:center center;
+  display:block;
+}
+
+/* ===== In-phone generating indicator (for chat/DM reply) ===== */
+#phone-gen-indicator{
+  display:none;
+  position:absolute;
+  bottom:80px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:9000;
+  background:rgba(40,40,42,0.82);
+  color:#e8e8ea;
+  font-size:13px;
+  letter-spacing:.04em;
+  padding:8px 18px;
+  border-radius:20px;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.10);
+  white-space:nowrap;
+  pointer-events:none;
+}
+#phone[data-theme="light"] #phone-gen-indicator{
+  background:rgba(230,230,232,0.88);
+  color:#1a1a1b;
+  border:1px solid rgba(0,0,0,0.08);
+}
+#gen-indicator{
+  display:none;
+  text-align:center;
+  font-size:13px;
+  color:#6b6b6e;
+  letter-spacing:.04em;
+  margin-top:14px;
+  width:390px; /* match phone width in fixed mode */
+}
+/* In fit-screen mode the phone fills viewport; overlay indicator at bottom */
+body.has-fit-screen #gen-indicator{
+  position:fixed;
+  bottom:16px;
+  left:0;right:0;
+  margin:0;
+  width:100%;
+  z-index:10000;
+  color:rgba(255,255,255,0.40);
+  font-size:12px;
+  background:transparent;
+}
+
+</style>
+</head>
+<body>
+
+<div id="app-root">
+
+  <!-- ================= PHONE FRAME ================= -->
+  <div id="phone" data-theme="dark">
+
+    <div class="statusbar">
+      <span class="sb-time" id="sbTime">9:41</span>
+      <span class="sb-right">
+        <span class="sb-signal">
+          <span class="sb-signal-bar"></span><span class="sb-signal-bar"></span><span class="sb-signal-bar"></span><span class="sb-signal-bar"></span>
+        </span>
+        <span class="sb-wifi"><svg viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <circle cx="10" cy="12.5" r="1.6" fill="var(--text)"/>
+          <path d="M5.8 8.9a6 6 0 0 1 8.4 0" stroke="var(--text)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M2.2 5.3a11 11 0 0 1 15.6 0" stroke="var(--text)" stroke-width="2.2" stroke-linecap="round"/>
+        </svg></span>
+        <span class="sb-battery">
+          <span class="sb-battery-body"><span class="sb-battery-fill"></span></span>
+        </span>
+      </span>
+    </div>
+
+    <!-- ---------- HOME SCREEN ---------- -->
+    <div id="screen-home" class="screen home-screen">
+      <div class="owner-switch" id="ownerSwitch">
+        <div class="owner-avatar" id="ownerAvatar"></div>
+        <div class="owner-name" id="ownerName">—</div>
+        <div class="owner-hint" id="ownerHint" data-i18n="hint.tapToSwitch">点击切换手机</div>
+      </div>
+
+      <div class="app-grid" id="appGrid"></div>
+    </div>
+
+    <!-- ---------- BUBBLE APP ---------- -->
+    <div id="screen-bubble" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">Bubble</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="bubbleRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div class="bubble-feed" id="bubbleFeed"></div>
+      <div class="bubble-inputbar">
+        <button class="photo-btn" id="bubblePhotoBtn" title="photo"></button>
+        <input type="text" id="bubbleInput" class="thin-input" placeholder="Type a message...">
+        <button class="chat-trigger-btn" id="bubbleTriggerBtn" aria-label="Get fan replies"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
+        <button class="send-btn" id="bubbleSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
+      </div>
+    </div>
+
+    <!-- ---------- INSTAGRAM APP (idol) ---------- -->
+    <div id="screen-instagram" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">Instagram<span class="ig-alt-trigger-wrap"><span class="ig-alt-trigger" id="igAltTrigger"></span></span></div>
+        <button class="hdr-btn icon-btn refresh-btn" id="igRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div class="ig-tabs" id="igTabs">
+        <button class="ig-tab active" data-tab="posts" data-i18n="tab.posts">帖子</button>
+        <button class="ig-tab" data-tab="search" data-i18n="tab.search">搜索</button>
+        <button class="ig-tab" data-tab="trending" data-i18n="tab.trending">热搜</button>
+        <button class="ig-tab" data-tab="dm" data-i18n="tab.dm">私信</button>
+      </div>
+      <div class="ig-body" id="igBody"></div>
+    </div>
+
+    <!-- ---------- INSTAGRAM ALT (idol's secret account) ---------- -->
+    <div id="screen-instagram-alt" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="ig.altTitle">Secret Account</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="igAltRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div class="ig-tabs" id="igAltTabs">
+        <button class="ig-tab active" data-tab="posts" data-i18n="tab.posts">帖子</button>
+        <button class="ig-tab" data-tab="search" data-i18n="tab.search">搜索</button>
+        <button class="ig-tab" data-tab="dm" data-i18n="tab.dm">私信</button>
+      </div>
+      <div class="ig-body" id="igAltBody"></div>
+    </div>
+
+    <!-- ---------- IG topic detail ---------- -->
+    <div id="screen-ig-topic" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="igTopicTitle">Topic</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="igTopicBody"></div>
+    </div>
+
+    <!-- ---------- IG dm conversation ---------- -->
+    <div id="screen-ig-dm" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="igDmTitle">DM</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="dm-feed" id="igDmFeed"></div>
+      <div class="bubble-inputbar" id="igDmInputBar">
+        <input type="text" id="igDmInput" class="thin-input" placeholder="Type a message...">
+        <button class="chat-trigger-btn" id="igDmTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
+        <button class="send-btn" id="igDmSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
+      </div>
+    </div>
+
+    <!-- ---------- X LIVE APP ---------- -->
+    <div id="screen-x" class="screen app-screen x-screen">
+      <div class="app-header x-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">X</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="xRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div class="x-live-stage" id="xLiveStage">
+        <div class="x-live-topbar">
+          <span class="x-live-tag" data-i18n="x.live">直播中</span>
+          <span class="x-live-viewers" id="xViewers">0 watching</span>
+        </div>
+        <div class="x-danmaku-layer" id="xDanmakuLayer"></div>
+        <div class="x-scene-desc" id="xSceneDesc"></div>
+      </div>
+      <button class="x-danmaku-toggle" id="xDanmakuToggle" aria-label="Comments"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h11M4 18h14"/></svg></button>
+      <div class="x-danmaku-panel" id="xDanmakuPanel">
+        <div class="x-danmaku-panel-head">
+          <span class="x-danmaku-panel-title" data-i18n="x.comments">弹幕</span>
+          <button class="x-danmaku-close" id="xDanmakuClose" aria-label="Close"></button>
+        </div>
+        <div class="x-danmaku-list" id="xDanmakuList"></div>
+      </div>
+    </div>
+
+    <!-- ---------- PAYPAL APP ---------- -->
+    <div id="screen-paypal" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">PayPal</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="paypalRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div class="paypal-body" id="paypalBody"></div>
+    </div>
+
+    <!-- ---------- MAPS APP ---------- -->
+    <div id="screen-maps" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">Maps</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="mapsRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div class="maps-body" id="mapsBody"></div>
+    </div>
+
+    <!-- ---------- NOTES APP ---------- -->
+    <div id="screen-notes" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">Notes</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="notesRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div class="notes-body" id="notesBody"></div>
+    </div>
+
+    <!-- ---------- NOTE DETAIL ---------- -->
+    <div id="screen-note-detail" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="app.notes">Notes</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="noteDetailBody"></div>
+    </div>
+
+    <!-- ---------- USER CHAT APP ---------- -->
+    <div id="screen-userchat" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="userChatTitle" style="cursor:pointer;pointer-events:all;" title="点击修改备注名">Chat</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="dm-feed" id="userChatFeed"></div>
+      <div class="bubble-inputbar">
+        <input type="text" id="userChatInput" class="thin-input" placeholder="Type a message...">
+        <button class="chat-trigger-btn" id="userChatTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
+        <button class="send-btn" id="userChatSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
+      </div>
+    </div>
+
+    <!-- ---------- USER INSTAGRAM ---------- -->
+    <div id="screen-user-instagram" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">Instagram</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="userIgRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div class="ig-tabs" id="userIgTabs">
+        <button class="ig-tab active" data-tab="feed" data-i18n="tab.feed">动态</button>
+        <button class="ig-tab" data-tab="explore" data-i18n="tab.trending">热搜</button>
+        <button class="ig-tab" data-tab="dm" data-i18n="tab.dm">私信</button>
+      </div>
+      <div class="ig-body" id="userIgBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS APP ---------- -->
+    <div id="screen-settings" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">Settings</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="settings-body" id="settingsBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS: API ---------- -->
+    <div id="screen-settings-api" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="settings.api">API</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="settingsApiBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS: CHARACTERS LIST ---------- -->
+    <div id="screen-settings-characters" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="settings.characters">Characters</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="settingsCharactersBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS: CHARACTER EDIT ---------- -->
+    <div id="screen-settings-character-edit" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="charEditTitle" data-i18n="settings.newCharacter">New Character</div>
+        <button class="hdr-btn refresh-btn" id="charSaveBtn" data-i18n="btn.save">保存</button>
+      </div>
+      <div class="detail-body" id="charEditBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS: ICONS ---------- -->
+    <div id="screen-settings-icons" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="settings.icons">App Icons</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="settingsIconsBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS: WORLD BOOK LIST ---------- -->
+    <div id="screen-settings-worldbook" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="settings.worldbook">World Book</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="settingsWorldbookBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS: WORLD BOOK ENTRY EDIT ---------- -->
+    <div id="screen-settings-worldbook-edit" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="wbEditTitle" data-i18n="settings.worldbook">World Book</div>
+        <button class="hdr-btn refresh-btn" id="wbSaveBtn" data-i18n="btn.save">保存</button>
+      </div>
+      <div class="detail-body" id="wbEditBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS: WALLPAPER ---------- -->
+    <div id="screen-settings-wallpaper" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="settings.wallpaper">Wallpaper</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="settingsWallpaperBody"></div>
+    </div>
+
+    <div class="sheet-overlay" id="sheetOverlay">
+      <div class="action-sheet" id="actionSheet"></div>
+    </div>
+    <div class="prompt-overlay" id="promptOverlay">
+      <div class="prompt-card" id="promptCard"></div>
+    </div>
+    <div id="phone-gen-indicator">Generating...</div>
+
+  </div>
+  <!-- ================= /PHONE FRAME ================= -->
+
+  <div id="toast" class="toast"></div>
+  <div id="gen-indicator"></div>
+</div>
+
+<script>
+
+
+
+
+
+'use strict';
+
+/* ===================================================================
+   I18N — app names / Refresh / Back are ALWAYS English regardless of
+   language setting. Everything else switches between zh / en.
+   API generated content is always requested in Chinese.
+=================================================================== */
+const I18N = {
+  zh:{
+    'hint.tapToSwitch':'点击切换手机',
+    'owner.idol':'idol 的手机',
+    'owner.user':'我的手机',
+    'tab.posts':'帖子','tab.search':'搜索','tab.trending':'热搜','tab.dm':'私信','tab.feed':'动态',
+    'btn.send':'发送','btn.save':'保存','btn.cancel':'取消','btn.delete':'删除',
+    'btn.fetchModels':'拉取模型列表','btn.connectTest':'保存设置',
+    'btn.newCharacter':'+ 新建角色','btn.use':'选择','btn.edit':'编辑',
+    'btn.uploadImage':'上传图片','btn.reset':'恢复默认','btn.applyIcon':'保存图标',
+    'btn.refreshAll':'全部刷新','btn.refreshPosts':'刷新帖子','btn.refreshSearch':'刷新搜索',
+    'btn.refreshTrending':'刷新热搜','btn.refreshDm':'刷新私信','btn.sendPhoto':'发送图片描述',
+    'btn.addEntry':'+ 添加条目','btn.deleteEntry':'删除该条目',
+    'btn.uploadWallpaper':'上传壁纸','btn.resetWallpaper':'恢复默认壁纸',
+    'ph.photoDesc':'描述这张照片的内容…',
+    'ph.idolName':'例如：林夏',
+    'ph.idolAltName':'小号的用户名（选填，如 @night_wander）',
+    'ph.idolBio':'idol 的身份、人设、性格、风格…',
+    'ph.userName':'例如：阿岚',
+    'ph.userBio':'用户的身份、与idol的关系背景…',
+    'ph.worldBookEntry':'写下这一条世界观设定或生成要求…',
+    'ph.apiUrl':'https://api.example.com/v1',
+    'ph.apiKey':'sk-••••••••',
+    'ph.iconName':'自定义名称',
+    'settings.api':'API','settings.characters':'Characters','settings.icons':'App Icons',
+    'settings.worldbook':'World Book','settings.wallpaper':'Wallpaper',
+    'settings.newCharacter':'New Character','settings.editCharacter':'Edit Character',
+    'settings.title':'设置',
+    'settings.row.api':'API 设置',
+    'settings.row.characters':'角色管理',
+    'settings.row.worldbook':'世界书',
+    'settings.row.language':'语言',
+    'settings.row.theme':'主题',
+    'settings.row.icons':'软件图标',
+    'settings.row.wallpaper':'手机壁纸',
+    'settings.row.fitscreen':'屏幕尺寸',
+    'settings.lang.zh':'中文','settings.lang.en':'English',
+    'settings.theme.dark':'深色','settings.theme.light':'浅色',
+    'settings.fitscreen.fixed':'固定尺寸','settings.fitscreen.fit':'自适应设备',
+    'settings.apiUrlLabel':'API 链接','settings.apiKeyLabel':'API 密钥',
+    'settings.modelLabel':'模型','settings.noModel':'未选择模型',
+    'settings.modelListEmpty':'暂无模型，请先拉取模型列表',
+    'settings.idolSection':'IDOL','settings.userSection':'用户（你）',
+    'settings.relationLabel':'设为地下恋关系',
+    'settings.relationHint':'勾选后，私信、聊天与世界书生成内容会体现出隐秘亲密的恋人关系；不勾选则用户以普通粉丝身份出现。',
+    'settings.worldbookEntryHint':'每一条都会在生成内容时被 API 完整读取，可以用来分别记录世界观、人物关系、时间线、风格要求等。',
+    'settings.worldbookEmpty':'还没有世界书条目，点击下方按钮添加第一条。',
+    'settings.noCharacters':'还没有创建角色，点击下方按钮新建一个。',
+    'settings.iconHint':'点击任意图标可自定义名称与图片。',
+    'settings.wallpaperHint':'壁纸只会显示在主屏幕上，软件内部界面不受影响。',
+    'settings.entryTitlePrefix':'条目',
+    'app.bubble':'Bubble','app.instagram':'Instagram','app.x':'X','app.paypal':'PayPal',
+    'app.maps':'Maps','app.notes':'Notes','app.settings':'Settings','app.chat':'Chat',
+    'x.live':'直播中','x.comments':'弹幕',
+    'ig.altTitle':'Secret Account',
+    'toast.apiMissing':'请先在 Settings → API 中填写并保存 API 信息',
+    'toast.charMissing':'请先在 Settings → Characters 中创建并选择一个角色',
+    'toast.generating':'Generating...',
+    'toast.fetchingModels':'正在拉取模型列表…',
+    'toast.modelsFetched':'模型列表已更新',
+    'toast.modelsFailed':'拉取模型列表失败，请检查链接与密钥',
+    'toast.saved':'已保存',
+    'toast.genFailed':'生成失败',
+    'toast.charSaved':'角色已保存',
+    'toast.needName':'请至少填写 idol 或用户的名字',
+    'toast.iconSaved':'图标已更新',
+    'toast.iconReset':'已恢复默认图标',
+    'toast.wallpaperSaved':'壁纸已更新',
+    'toast.wallpaperReset':'已恢复默认壁纸',
+    'toast.entrySaved':'世界书条目已保存',
+    'toast.entryDeleted':'条目已删除',
+    'empty.bubble':'点击右上角 Refresh 加载内容',
+    'empty.ig':'点击右上角 Refresh 加载内容',
+    'empty.dm':'暂无私信',
+    'empty.notes':'还没有备忘录，点击 Refresh 生成',
+    'empty.maps':'还没有行程，点击 Refresh 生成',
+    'empty.paypal':'还没有交易记录，点击 Refresh 生成',
+    'empty.x':'点击右上角 Refresh 开始直播',
+    'label.searchHistory':'搜索记录','label.trending':'热搜',
+    'label.balance':'余额','label.transactions':'交易记录',
+    'label.todayItinerary':"Today's Itinerary",
+    'label.comments':'评论',
+    'label.likes':'赞','label.shares':'转发',
+    'expand.show':'查看 8 条粉丝回复','expand.hide':'收起回复',
+    'noresult.idolReplyNone':'（idol 未回复）',
+    'chat.triggerHint':'点击左侧图标让 idol 回复',
+  },
+  en:{
+    'hint.tapToSwitch':'Tap to switch phone',
+    'owner.idol':"Idol's phone",
+    'owner.user':'My phone',
+    'tab.posts':'Posts','tab.search':'Search','tab.trending':'Trending','tab.dm':'DM','tab.feed':'Feed',
+    'btn.send':'Send','btn.save':'Save','btn.cancel':'Cancel','btn.delete':'Delete',
+    'btn.fetchModels':'Fetch model list','btn.connectTest':'Save settings',
+    'btn.newCharacter':'+ New character','btn.use':'Select','btn.edit':'Edit',
+    'btn.uploadImage':'Upload image','btn.reset':'Reset to default','btn.applyIcon':'Save icon',
+    'btn.refreshAll':'Refresh all','btn.refreshPosts':'Refresh posts','btn.refreshSearch':'Refresh search',
+    'btn.refreshTrending':'Refresh trending','btn.refreshDm':'Refresh DM','btn.sendPhoto':'Send photo description',
+    'btn.addEntry':'+ Add entry','btn.deleteEntry':'Delete this entry',
+    'btn.uploadWallpaper':'Upload wallpaper','btn.resetWallpaper':'Reset to default wallpaper',
+    'ph.photoDesc':'Describe what this photo shows…',
+    'ph.idolName':'e.g. Lin Xia',
+    'ph.idolAltName':'Secret account username (optional, e.g. @night_wander)',
+    'ph.idolBio':"Idol's identity, persona, personality, style…",
+    'ph.userName':'e.g. Lan',
+    'ph.userBio':"User's identity and relationship to the idol…",
+    'ph.worldBookEntry':'Write this world-setting or generation rule entry…',
+    'ph.apiUrl':'https://api.example.com/v1',
+    'ph.apiKey':'sk-••••••••',
+    'ph.iconName':'Custom name',
+    'settings.api':'API','settings.characters':'Characters','settings.icons':'App Icons',
+    'settings.worldbook':'World Book','settings.wallpaper':'Wallpaper',
+    'settings.newCharacter':'New Character','settings.editCharacter':'Edit Character',
+    'settings.title':'Settings',
+    'settings.row.api':'API settings',
+    'settings.row.characters':'Characters',
+    'settings.row.worldbook':'World Book',
+    'settings.row.language':'Language',
+    'settings.row.theme':'Theme',
+    'settings.row.icons':'App icons',
+    'settings.row.wallpaper':'Wallpaper',
+    'settings.row.fitscreen':'Screen size',
+    'settings.lang.zh':'中文','settings.lang.en':'English',
+    'settings.theme.dark':'Dark','settings.theme.light':'Light',
+    'settings.fitscreen.fixed':'Fixed','settings.fitscreen.fit':'Fit device',
+    'settings.apiUrlLabel':'API URL','settings.apiKeyLabel':'API Key',
+    'settings.modelLabel':'Model','settings.noModel':'No model selected',
+    'settings.modelListEmpty':'No models yet — fetch the model list first',
+    'settings.idolSection':'IDOL','settings.userSection':'USER (you)',
+    'settings.relationLabel':'Secret relationship',
+    'settings.relationHint':'When checked, DMs, chat and generated content reflect a hidden, intimate relationship. When unchecked, the user appears as an ordinary fan.',
+    'settings.worldbookEntryHint':'Each entry is fully read by the API before generating content — use separate entries for world setting, relationships, timeline, style rules, etc.',
+    'settings.worldbookEmpty':'No world book entries yet. Tap the button below to add the first one.',
+    'settings.noCharacters':'No characters yet. Tap the button below to create one.',
+    'settings.iconHint':'Tap any icon to customize its name and image.',
+    'settings.wallpaperHint':'The wallpaper only shows on the home screen — app interiors are unaffected.',
+    'settings.entryTitlePrefix':'Entry',
+    'app.bubble':'Bubble','app.instagram':'Instagram','app.x':'X','app.paypal':'PayPal',
+    'app.maps':'Maps','app.notes':'Notes','app.settings':'Settings','app.chat':'Chat',
+    'x.live':'LIVE','x.comments':'Comments',
+    'ig.altTitle':'Secret Account',
+    'toast.apiMissing':'Please fill in API info under Settings → API first',
+    'toast.charMissing':'Please create and select a character under Settings → Characters first',
+    'toast.generating':'Generating...',
+    'toast.fetchingModels':'Fetching model list…',
+    'toast.modelsFetched':'Model list updated',
+    'toast.modelsFailed':'Failed to fetch models — check URL and key',
+    'toast.saved':'Saved',
+    'toast.genFailed':'Generation failed',
+    'toast.charSaved':'Character saved',
+    'toast.needName':'Please enter at least an idol name or a user name',
+    'toast.iconSaved':'Icon updated',
+    'toast.iconReset':'Icon reset to default',
+    'toast.wallpaperSaved':'Wallpaper updated',
+    'toast.wallpaperReset':'Wallpaper reset to default',
+    'toast.entrySaved':'World book entry saved',
+    'toast.entryDeleted':'Entry deleted',
+    'empty.bubble':'Tap Refresh in the top right to load content',
+    'empty.ig':'Tap Refresh in the top right to load content',
+    'empty.dm':'No messages',
+    'empty.notes':'No notes yet — tap Refresh to generate',
+    'empty.maps':'No itinerary yet — tap Refresh to generate',
+    'empty.paypal':'No transactions yet — tap Refresh to generate',
+    'empty.x':'Tap Refresh in the top right to go live',
+    'label.searchHistory':'Search history','label.trending':'Trending',
+    'label.balance':'Balance','label.transactions':'Transactions',
+    'label.todayItinerary':"Today's Itinerary",
+    'label.comments':'Comments',
+    'label.likes':'Likes','label.shares':'Shares',
+    'expand.show':'View 8 fan replies','expand.hide':'Hide replies',
+    'noresult.idolReplyNone':'(idol has not replied)',
+    'chat.triggerHint':'Tap the icon on the left to get a reply',
+  }
+};
+function t(key){
+  const lang = state.settings.language || 'zh';
+  return (I18N[lang] && I18N[lang][key]) || I18N.zh[key] || key;
+}
+
+/* ===================================================================
+   STATE
+=================================================================== */
+const STORAGE_KEY = 'idolPhoneAppState_v1';
+
+function defaultState(){
+  return {
+    settings:{
+      language:'zh',
+      theme:'dark',
+      apiUrl:'',
+      apiKey:'',
+      model:'',
+      modelList:[],
+      customIcons:{}, // appKey -> {name, icon(dataURL)}
+      wallpaper:'',
+      fitScreen:false
+    },
+    characters:[],
+    currentCharacterId:null,
+    currentOwner:'idol' // 'idol' | 'user'
+  };
+}
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    const base = defaultState();
+    return Object.assign(base, parsed, {
+      settings:Object.assign(base.settings, parsed.settings||{}),
+    });
+  }catch(e){
+    console.warn('loadState failed', e);
+    return defaultState();
+  }
+}
+
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    console.warn('saveState failed', e);
+    showToast(t('toast.genFailed')+': '+(e && e.message ? e.message : String(e)));
+  }
+}
+
+function getCurrentChar(){
+  return state.characters.find(c=>c.id===state.currentCharacterId) || null;
+}
+
+function ensurePhoneData(ch){
+  if(!ch.phoneData) ch.phoneData = {};
+  const pd = ch.phoneData;
+  if(!pd.bubble) pd.bubble = {rounds:[]};
+  if(!pd.instagram) pd.instagram = {posts:[], searchHistory:[], trending:[], dms:[], topicCache:{}, searchCache:{}};
+  if(!pd.instagramAlt) pd.instagramAlt = {posts:[], searchHistory:[], dms:[], searchCache:{}, topicCache:{}};
+  if(!pd.live) pd.live = {scene:'', viewers:0, danmaku:[]};
+  if(!pd.paypal) pd.paypal = {cardNumber:'', balance:0, transactions:[]};
+  if(!pd.maps) pd.maps = {stops:[]};
+  if(!pd.notes) pd.notes = {items:[]};
+  if(!pd.userChat) pd.userChat = {messages:[], idolNickname:''};
+  if(!pd.userInstagram) pd.userInstagram = {feed:[], trending:[], dms:[], topicCache:{}};
+  return pd;
+}
+
+function newCharacterTemplate(){
+  return {
+    id:'c'+Date.now()+Math.floor(Math.random()*1000),
+    idolName:'', idolBio:'', idolAvatar:'',
+    idolAltName:'', // secret account username
+    userName:'', userBio:'', userAvatar:'',
+    secretRelationship:false,
+    worldBookEntries:[],
+    phoneData:null
+  };
+}
+
+/* Migrate legacy single worldBook string (if present) into entries, and
+   ensure the array always exists. Safe to call repeatedly. */
+function ensureWorldBookEntries(ch){
+  if(!Array.isArray(ch.worldBookEntries)){
+    ch.worldBookEntries = [];
+    if(ch.worldBook && ch.worldBook.trim()){
+      ch.worldBookEntries.push({id:uid('wb'), title:t('settings.entryTitlePrefix')+' 1', content:ch.worldBook});
+    }
+    delete ch.worldBook;
+  }
+  return ch.worldBookEntries;
+}
+
+function worldBookCombinedText(ch){
+  const entries = ensureWorldBookEntries(ch);
+  if(!entries.length) return '';
+  return entries.map(e=>'【'+(e.title||'')+'】\n'+(e.content||'')).join('\n\n');
+}
+
+/* ===================================================================
+   UTILS
+=================================================================== */
+function uid(prefix){ return (prefix||'id')+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+function escapeHtml(str){
+  if(str===undefined || str===null) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function showToast(msg, duration){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), duration||2200);
+}
+let _genCount = 0;
+let _genDotInterval = null;
+function _activeRefreshBtn(){
+  const visible = document.querySelector('.screen.visible');
+  if(!visible) return null;
+  return visible.querySelector('.refresh-btn');
+}
+function showGenerating(){
+  _genCount++;
+  const btn = _activeRefreshBtn();
+  if(btn) btn.classList.add('spinning');
+  // fallback external indicator for screens with no refresh btn
+  const el = document.getElementById('gen-indicator');
+  if(el) el.style.display = 'block';
+}
+function hideGenerating(){
+  _genCount = Math.max(0, _genCount - 1);
+  if(_genCount > 0) return;
+  document.querySelectorAll('.refresh-btn.spinning').forEach(b=>b.classList.remove('spinning'));
+  const el = document.getElementById('gen-indicator');
+  if(el) el.style.display = 'none';
+}
+
+/* Phone-internal pill indicator — used for Bubble/DM trigger reply button */
+let _phoneGenCount = 0;
+let _phoneGenTimer = null;
+function showPhoneGenerating(){
+  _phoneGenCount++;
+  const el = document.getElementById('phone-gen-indicator');
+  if(!el) return;
+  el.style.display = 'block';
+  let dots = 0;
+  clearInterval(_phoneGenTimer);
+  _phoneGenTimer = setInterval(()=>{
+    dots = (dots+1)%4;
+    el.textContent = 'Generating'+'.'.repeat(dots);
+  }, 400);
+}
+function hidePhoneGenerating(){
+  _phoneGenCount = Math.max(0, _phoneGenCount-1);
+  if(_phoneGenCount>0) return;
+  clearInterval(_phoneGenTimer);
+  _phoneGenTimer = null;
+  const el = document.getElementById('phone-gen-indicator');
+  if(el){ el.style.display='none'; el.textContent='Generating...'; }
+}
+
+/* Generic bottom action sheet. options: [{label, value}], callback(value) */
+function showActionSheet(title, options, callback){
+  const overlay = document.getElementById('sheetOverlay');
+  const sheet = document.getElementById('actionSheet');
+  let html = '';
+  if(title) html += '<div class="sheet-title">'+escapeHtml(title)+'</div>';
+  options.forEach(o=>{
+    html += '<button class="sheet-option" data-value="'+escapeHtml(o.value)+'">'+escapeHtml(o.label)+'</button>';
+  });
+  html += '<button class="sheet-cancel" data-value="__cancel">'+escapeHtml(t('btn.cancel'))+'</button>';
+  sheet.innerHTML = html;
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onOverlay); }
+  function onOverlay(e){
+    if(e.target===overlay){ close(); return; }
+    const btn = e.target.closest('[data-value]');
+    if(!btn) return;
+    const val = btn.getAttribute('data-value');
+    close();
+    if(val!=='__cancel') callback(val);
+  }
+  overlay.addEventListener('click', onOverlay);
+}
+
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function pick(arr){ return arr[randInt(0,arr.length-1)]; }
+function formatCount(n){
+  n = Number(n)||0;
+  if(n>=1000000) return (n/1000000).toFixed(1).replace(/\.0$/,'')+'M';
+  if(n>=1000) return (n/1000).toFixed(1).replace(/\.0$/,'')+'k';
+  return String(n);
+}
+
+function formatClock(){
+  const d = new Date();
+  let h = d.getHours(); let m = d.getMinutes();
+  return (h<10?'0'+h:h)+':'+(m<10?'0'+m:m);
+}
+
+/* Resize an image file to a small square dataURL to keep localStorage light */
+function fileToResizedDataUrl(file, maxSize){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const size = maxSize||240;
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        const scale = Math.min(1, size/Math.max(w,h));
+        canvas.width = Math.round(w*scale);
+        canvas.height = Math.round(h*scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL('image/jpeg',0.82));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function avatarStyle(dataUrl){
+  return dataUrl ? ('background-image:url('+dataUrl+')') : '';
+}
+function avatarInitial(name){
+  return name ? escapeHtml(name.trim().slice(0,1)) : '?';
+}
+
+
+/* ===================================================================
+   NAVIGATION
+=================================================================== */
+let navStack = [];
+let currentScreenId = 'screen-home';
+
+function showScreenRaw(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('visible');
+  currentScreenId = id;
+}
+function goTo(id){
+  navStack.push(currentScreenId);
+  showScreenRaw(id);
+}
+function goHome(){
+  navStack = [];
+  showScreenRaw('screen-home');
+}
+function goBack(){
+  if(currentScreenId==='screen-x' && typeof stopDanmaku==='function') stopDanmaku();
+  const prev = navStack.pop();
+  showScreenRaw(prev || 'screen-home');
+}
+
+/* ===================================================================
+   ICONS (minimalist monochrome line glyphs, no emoji)
+=================================================================== */
+const ICONS = {
+  bubble:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/><circle cx="9" cy="10" r="0.6" fill="currentColor" stroke="none"/><circle cx="13" cy="10" r="0.6" fill="currentColor" stroke="none"/><circle cx="17" cy="10" r="0.6" fill="currentColor" stroke="none"/></svg>',
+  instagram:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.4"/><circle cx="16.2" cy="7.8" r="0.6" fill="currentColor" stroke="none"/></svg>',
+  x:'<svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg>',
+  paypal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2.4"/><path d="M3.5 10h17"/></svg>',
+  maps:'<svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.3A7 7 0 0 0 5 9.7C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.6" r="2.2"/></svg>',
+  notes:'<svg viewBox="0 0 24 24"><path d="M6 4h9l4 4v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M14.5 4.2V8a1 1 0 0 0 1 1h3.8"/><path d="M8 12h8M8 15.5h8M8 8.5h4"/></svg>',
+  settings:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1h-.2a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.5 7.6a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5v-.2a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  chat:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.8-9.4A5 5 0 0 1 12 6a5 5 0 0 1 9.8 4.6C19.5 15.4 12 20 12 20z"/></svg>',
+  commentIcon:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg>',
+  share:'<svg viewBox="0 0 24 24"><path d="M7 7h8a3 3 0 0 1 3 3v2M17 17H9a3 3 0 0 1-3-3v-2"/><path d="M5 9l2-2-2-2M19 15l-2 2 2 2"/></svg>'
+};
+
+function iconMarkup(appKey){
+  const custom = state.settings.customIcons[appKey];
+  if(custom && custom.icon){
+    return '<div class="app-icon" style="'+avatarStyle(custom.icon)+'"></div>';
+  }
+  return '<div class="app-icon">'+(ICONS[appKey]||'')+'</div>';
+}
+function appDisplayName(appKey, fallback){
+  const custom = state.settings.customIcons[appKey];
+  if(custom && custom.name) return custom.name;
+  return fallback;
+}
+
+const APP_DEFS_IDOL = [
+  {key:'bubble', name:'Bubble', screen:'screen-bubble'},
+  {key:'instagram', name:'Instagram', screen:'screen-instagram'},
+  {key:'x', name:'X', screen:'screen-x'},
+  {key:'paypal', name:'PayPal', screen:'screen-paypal'},
+  {key:'maps', name:'Maps', screen:'screen-maps'},
+  {key:'notes', name:'Notes', screen:'screen-notes'},
+  {key:'settings', name:'Settings', screen:'screen-settings'},
+];
+const APP_DEFS_USER = [
+  {key:'chat', name:'Chat', screen:'screen-userchat'},
+  {key:'instagram_user', name:'Instagram', screen:'screen-user-instagram'},
+  {key:'settings', name:'Settings', screen:'screen-settings'},
+];
+
+/* ===================================================================
+   THEME / LANGUAGE APPLY
+=================================================================== */
+function applyTheme(){
+  document.getElementById('phone').setAttribute('data-theme', state.settings.theme||'dark');
+}
+function applyLanguage(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph')));
+  });
+}
+function applyFitScreen(){
+  const phone = document.getElementById('phone');
+  phone.classList.toggle('fit-screen', !!state.settings.fitScreen);
+  document.body.classList.toggle('has-fit-screen', !!state.settings.fitScreen);
+}
+function applyWallpaper(){
+  const home = document.getElementById('screen-home');
+  if(state.settings.wallpaper){
+    home.style.backgroundImage = 'url('+state.settings.wallpaper+')';
+    home.classList.add('has-wallpaper');
+  } else {
+    home.style.backgroundImage = '';
+    home.classList.remove('has-wallpaper');
+  }
+}
+
+/* ===================================================================
+   HOME SCREEN
+=================================================================== */
+function renderHome(){
+  const ch = getCurrentChar();
+  const ownerAvatar = document.getElementById('ownerAvatar');
+  const ownerName = document.getElementById('ownerName');
+  const ownerHint = document.getElementById('ownerHint');
+
+  if(state.currentOwner==='idol'){
+    if(ch && ch.idolAvatar){ ownerAvatar.style = avatarStyle(ch.idolAvatar); ownerAvatar.textContent=''; }
+    else { ownerAvatar.style=''; ownerAvatar.textContent = ch? avatarInitial(ch.idolName) : '?'; }
+    ownerName.textContent = ch ? (ch.idolName || t('owner.idol')) : t('owner.idol');
+    ownerHint.textContent = t('hint.tapToSwitch');
+  } else {
+    if(ch && ch.userAvatar){ ownerAvatar.style = avatarStyle(ch.userAvatar); ownerAvatar.textContent=''; }
+    else { ownerAvatar.style=''; ownerAvatar.textContent = ch? avatarInitial(ch.userName) : '?'; }
+    ownerName.textContent = ch ? (ch.userName || t('owner.user')) : t('owner.user');
+    ownerHint.textContent = t('hint.tapToSwitch');
+  }
+
+  const grid = document.getElementById('appGrid');
+  const defs = state.currentOwner==='idol' ? APP_DEFS_IDOL : APP_DEFS_USER;
+  grid.innerHTML = defs.map(d=>{
+    const iconKey = d.key==='instagram_user' ? 'instagram' : d.key;
+    const label = appDisplayName(d.key, d.name);
+    return '<div class="app-icon-wrap" data-screen="'+d.screen+'" data-appkey="'+d.key+'">'
+      + iconMarkup(iconKey)
+      + '<div class="app-icon-label">'+escapeHtml(label)+'</div>'
+      + '</div>';
+  }).join('');
+
+  grid.querySelectorAll('.app-icon-wrap').forEach(wrap=>{
+    wrap.addEventListener('click', ()=>{
+      const screen = wrap.getAttribute('data-screen');
+      const appkey = wrap.getAttribute('data-appkey');
+      openApp(appkey, screen);
+    });
+  });
+}
+
+function openApp(appkey, screen){
+  if(appkey==='settings'){ goTo('screen-settings'); renderSettingsHome(); return; }
+  const ch = getCurrentChar();
+  if(!ch){
+    showToast(t('toast.charMissing'));
+    goTo('screen-settings'); renderSettingsHome();
+    return;
+  }
+  ensurePhoneData(ch);
+  goTo(screen);
+  if(appkey==='bubble') renderBubble();
+  else if(appkey==='instagram') renderInstagram();
+  else if(appkey==='x') renderX();
+  else if(appkey==='paypal') renderPaypal();
+  else if(appkey==='maps') renderMaps();
+  else if(appkey==='notes') renderNotes();
+  else if(appkey==='chat') renderUserChat();
+  else if(appkey==='instagram_user') renderUserInstagram();
+}
+
+document.getElementById('ownerSwitch').addEventListener('click', ()=>{
+  state.currentOwner = state.currentOwner==='idol' ? 'user' : 'idol';
+  saveState();
+  renderHome();
+});
+
+document.body.addEventListener('click', (e)=>{
+  const backBtn = e.target.closest('[data-action="back"]');
+  if(backBtn){ goBack(); }
+});
+
+/* ===================================================================
+   API LAYER — OpenAI-compatible (URL + Key, /models, /chat/completions)
+=================================================================== */
+function normalizeBaseUrl(url){
+  return (url||'').trim().replace(/\/+$/,'');
+}
+
+async function fetchModelList(){
+  const base = normalizeBaseUrl(state.settings.apiUrl);
+  if(!base){ showToast(t('toast.apiMissing')); return; }
+  showToast(t('toast.fetchingModels'));
+  try{
+    const res = await fetch(base+'/models', {
+      method:'GET',
+      headers:{ 'Authorization':'Bearer '+(state.settings.apiKey||'') }
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    let list = [];
+    if(Array.isArray(data.data)) list = data.data.map(m=>m.id).filter(Boolean);
+    else if(Array.isArray(data.models)) list = data.models.map(m=>m.id||m.name).filter(Boolean);
+    else if(Array.isArray(data)) list = data.map(m=>m.id||m.name||m).filter(Boolean);
+    if(!list.length) throw new Error('empty');
+    state.settings.modelList = list;
+    if(!state.settings.model) state.settings.model = list[0];
+    saveState();
+    showToast(t('toast.modelsFetched'));
+  }catch(err){
+    console.warn('fetchModelList failed', err);
+    showToast(t('toast.modelsFailed'));
+  }
+  renderSettingsApi();
+}
+
+/* Strip ```json fences etc, then parse. Returns null on failure. */
+function safeParseJSON(text){
+  if(!text) return null;
+  let s = text.trim();
+  s = s.replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+  const firstBrace = s.search(/[\[{]/);
+  if(firstBrace>0) s = s.slice(firstBrace);
+  try{ return JSON.parse(s); }catch(e){}
+  // try trimming trailing garbage after last closing bracket
+  const lastBrace = Math.max(s.lastIndexOf('}'), s.lastIndexOf(']'));
+  if(lastBrace>-1){
+    try{ return JSON.parse(s.slice(0,lastBrace+1)); }catch(e){}
+  }
+  return null;
+}
+
+/* Core completion call. Returns raw text content or throws. */
+async function callAPI(systemPrompt, userPrompt){
+  const base = normalizeBaseUrl(state.settings.apiUrl);
+  if(!base || !state.settings.model){
+    throw new Error('NO_API_CONFIG');
+  }
+  const controller = new AbortController();
+  const timeoutId = setTimeout(()=>controller.abort(), 90000);
+  let res;
+  try{
+    res = await fetch(base+'/chat/completions', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+(state.settings.apiKey||'')
+      },
+      body: JSON.stringify({
+        model: state.settings.model,
+        temperature: 0.95,
+        max_tokens: 4000,
+        messages:[
+          {role:'system', content: systemPrompt},
+          {role:'user', content: userPrompt}
+        ]
+      }),
+      signal: controller.signal
+    });
+  }catch(err){
+    if(err && err.name==='AbortError') throw new Error('Request timed out');
+    throw new Error('Network error (check URL / CORS / connection): '+(err && err.message ? err.message : err));
+  }finally{
+    clearTimeout(timeoutId);
+  }
+  if(!res.ok){
+    let bodyText = '';
+    try{ bodyText = (await res.text()).slice(0,200); }catch(e){}
+    throw new Error('HTTP '+res.status+(bodyText? ' — '+bodyText : ''));
+  }
+  const data = await res.json();
+  const msg = data && data.choices && data.choices[0] && data.choices[0].message;
+  const content = (msg && msg.content) || (data && data.choices && data.choices[0] && data.choices[0].text);
+  if(!content) throw new Error('Empty response from API');
+  return content;
+}
+
+/* Generate structured JSON content. Returns parsed object on success, null on any failure. Never throws. */
+async function generateJSON(systemPrompt, userPrompt){
+  const full = systemPrompt + '\n\n严格只输出合法 JSON，不要输出任何解释文字、不要使用 Markdown 代码块标记。';
+  try {
+    const raw = await callAPI(full, userPrompt);
+    const parsed = safeParseJSON(raw);
+    return parsed; // null if unparseable, object if ok
+  } catch(e) {
+    console.warn('generateJSON failed:', e);
+    return null;
+  }
+}
+
+function buildBaseSystemPrompt(ch, extra){
+  const relation = ch.secretRelationship
+    ? '用户是idol的地下恋人：双方关系亲密、私密，需要对外界保密，公开内容中idol不会暴露恋情，但私下互动可以体现亲密感与默契。'
+    : '用户是idol的普通粉丝身份，互动应保持idol与粉丝之间的距离感和礼貌得体。';
+  const wb = worldBookCombinedText(ch);
+  return [
+    '你是一个手机模拟应用的内容生成引擎，为虚构角色生成手机里各软件的内容。',
+    '【idol 人设】姓名：'+(ch.idolName||'未命名')+'；简介：'+(ch.idolBio||'无'),
+    '【用户人设】姓名：'+(ch.userName||'未命名')+'；简介：'+(ch.userBio||'无'),
+    '【关系设定】'+relation,
+    wb ? ('【世界书 / 生成要求】\n'+wb) : '【世界书】无特殊设定。',
+    typeof recentUserChatContext==='function' ? recentUserChatContext(ch, 10) : '',
+    '【语言要求】除非是无法翻译的专有名词、品牌名或英文缩写，全部内容必须使用简体中文输出。',
+    '【内容要求】内容真实自然、有生活气息，避免空洞和重复，不要使用表情符号(emoji)。',
+    extra || ''
+  ].join('\n');
+}
+
+/* ===================================================================
+   BUBBLE APP — idol broadcasts to fans, fans reply
+=================================================================== */
+function renderBubble(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch);
+  const feed = document.getElementById('bubbleFeed');
+  if(!pd.bubble.rounds.length){
+    feed.innerHTML = '<div class="empty-state">'+t('empty.bubble')+'</div>';
+    return;
+  }
+  feed.innerHTML = pd.bubble.rounds.map(roundHtml).join('');
+  feed.querySelectorAll('.expand-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const roundId = btn.getAttribute('data-round');
+      const round = pd.bubble.rounds.find(r=>r.id===roundId);
+      round.expanded = !round.expanded;
+      renderBubble();
+    });
+  });
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function roundHtml(round){
+  let html = '<div class="bubble-round">';
+  if(round.photo){
+    html += '<div class="bubble-row sent"><div class="bubble-photo">'+escapeHtml(round.text)+'</div></div>';
+  } else {
+    html += '<div class="bubble-row sent"><div class="bubble sent">'+escapeHtml(round.text)+'</div></div>';
+  }
+  const repliesCount = (round.replies||[]).length;
+  if(repliesCount){
+    html += '<button class="expand-toggle" data-round="'+round.id+'">'+(round.expanded? t('expand.hide') : t('expand.show'))+'</button>';
+    if(round.expanded){
+      html += '<div class="fan-replies">';
+      round.replies.forEach(r=>{
+        html += '<div class="fan-reply-item"><div class="fan-name">'+escapeHtml(r.name)+'</div><div class="bubble-row recv"><div class="bubble recv">'+escapeHtml(r.text)+'</div></div></div>';
+      });
+      html += '</div>';
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
+async function bubbleGenerateFanReplies(ch, idolText){
+  const sys = buildBaseSystemPrompt(ch, '现在请为idol刚刚发出的一条消息，生成来自不同粉丝的回复。');
+  const usr = 'idol刚刚发送的内容是：「'+idolText+'」\n请生成恰好8条来自不同粉丝的回复评论，粉丝姓名（网名/ID）各不相同且口语化。\n输出 JSON 格式：{"replies":[{"name":"粉丝昵称","text":"回复内容"}, ... 共8条]}';
+  const data = await generateJSON(sys, usr);
+  if(data && Array.isArray(data.replies)) return data.replies.slice(0,8);
+  throw new Error('Could not parse a valid reply list from the API response');
+}
+
+async function refreshBubble(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  const pd = ensurePhoneData(ch);
+  showGenerating();
+  try{
+    const sys = buildBaseSystemPrompt(ch, '请生成idol过去在 Bubble（粉丝互动泡泡软件）里发布过的历史消息记录。');
+    const usr = '请生成 3 到 4 条idol过去发送给粉丝的消息（可以是文字感想，也可以是配文照片）。\n输出 JSON：{"messages":[{"photo":false,"text":"消息内容"}, ...]}\n如果某条是配文照片，"photo"设为true，"text"则填写这张照片的文字描述（因为这是纯文字模拟，照片用文字描述代替）。\n每条消息生成后，紧接着各生成8条来自不同粉丝、昵称各异、口语化自然的回复评论，放在对应的"replies"字段里：{"messages":[{"photo":false,"text":"...","replies":[{"name":"...","text":"..."},...共8条]}, ...]}';
+    const data = await generateJSON(sys, usr);
+    if(data && Array.isArray(data.messages) && data.messages.length){
+      const newRounds = data.messages.map(m=>({
+        id:uid('r'),
+        photo: !!m.photo,
+        text: m.text||'',
+        replies: Array.isArray(m.replies) ? m.replies.slice(0,8) : [],
+        expanded:false
+      }));
+      pd.bubble.rounds = pd.bubble.rounds.concat(newRounds);
+      saveState();
+      renderBubble();
+    } else {
+      throw new Error('Could not parse the message list from the API response');
+    }
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+    renderBubble();
+  }finally{
+    hideGenerating();
+  }
+}
+
+async function sendBubbleMessage(text, isPhoto){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  const pd = ensurePhoneData(ch);
+  const round = {id:uid('r'), photo:!!isPhoto, text:text, replies:[], expanded:true};
+  pd.bubble.rounds.push(round);
+  saveState();
+  renderBubble();
+  // Auto-reply removed: click the trigger icon to generate fan replies
+}
+
+document.getElementById('bubbleRefreshBtn').addEventListener('click', refreshBubble);
+document.getElementById('bubbleTriggerBtn').addEventListener('click', async ()=>{
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  const pd = ensurePhoneData(ch);
+  if(!pd.bubble.rounds.length){ showToast(t('empty.bubble')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  const round = pd.bubble.rounds[pd.bubble.rounds.length-1];
+  showPhoneGenerating();
+  try{
+    const replies = await bubbleGenerateFanReplies(ch, round.text);
+    round.replies = replies;
+    round.expanded = true;
+    saveState();
+    renderBubble();
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+  }finally{
+    hidePhoneGenerating();
+  }
+});
+document.getElementById('bubbleSendBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('bubbleInput');
+  const val = input.value.trim();
+  if(!val) return;
+  input.value = '';
+  sendBubbleMessage(val, false);
+});
+document.getElementById('bubbleInput').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){ document.getElementById('bubbleSendBtn').click(); }
+});
+/* Generic text-input modal. callback(text) only fires if confirmed with non-empty text. */
+function showPromptModal(title, placeholder, callback){
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML =
+    '<div class="prompt-card-title">'+escapeHtml(title)+'</div>'
+    + '<textarea id="promptCardInput" placeholder="'+escapeHtml(placeholder||'')+'"></textarea>'
+    + '<div class="prompt-card-actions">'
+    + '<button class="pc-cancel" data-v="__cancel">'+escapeHtml(t('btn.cancel'))+'</button>'
+    + '<button class="pc-ok" data-v="__ok">'+escapeHtml(t('btn.send'))+'</button>'
+    + '</div>';
+  overlay.classList.add('open');
+  const input = document.getElementById('promptCardInput');
+  input.focus();
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v = btn.getAttribute('data-v');
+    const val = input.value.trim();
+    close();
+    if(v==='__ok' && val) callback(val);
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+document.getElementById('bubblePhotoBtn').addEventListener('click', ()=>{
+  showPromptModal(t('btn.sendPhoto'), t('ph.photoDesc'), (desc)=>{
+    sendBubbleMessage(desc, true);
+  });
+});
+
+/* ===================================================================
+   INSTAGRAM — shared helpers across idol main / idol alt / user
+=================================================================== */
+function resolveIgPd(scope){
+  const ch = getCurrentChar();
+  if(!ch) return null;
+  const pd = ensurePhoneData(ch);
+  if(scope==='idol') return pd.instagram;
+  if(scope==='idolAlt') return pd.instagramAlt;
+  if(scope==='user') return pd.userInstagram;
+  return null;
+}
+
+function igStatsHtml(p){
+  const likes = p.likes!=null ? p.likes : randInt(800,90000);
+  const commentCount = p.commentCount!=null ? p.commentCount : ((p.comments||[]).length || randInt(10,500));
+  const shareCount = p.shareCount!=null ? p.shareCount : randInt(5,200);
+  return '<div class="ig-stats">'
+    + '<span class="ig-stat">'+ICONS.heart+formatCount(likes)+'</span>'
+    + '<span class="ig-stat">'+ICONS.commentIcon+formatCount(commentCount)+'</span>'
+    + '<span class="ig-stat">'+ICONS.share+formatCount(shareCount)+'</span>'
+    + '</div>';
+}
+
+function igPostHtml(ch, p, overrideName){
+  const displayName = overrideName || ch.idolName || 'idol';
+  let html = '<div class="ig-post">';
+  html += '<div class="ig-post-head"><div class="ig-avatar" style="'+avatarStyle(ch.idolAvatar)+'"></div><div><div class="ig-post-name">'+escapeHtml(displayName)+'</div><div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
+  if(p.hasImage){ html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+'</div>'; }
+  html += '<div class="ig-caption">'+escapeHtml(p.caption||'')+'</div>';
+  html += igStatsHtml(p);
+  (p.comments||[]).forEach(c=>{
+    html += '<div class="ig-comment"><b>'+escapeHtml(c.name)+'</b>'+escapeHtml(c.text)+'</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function userFeedPostHtml(p){
+  let html = '<div class="ig-post">';
+  html += '<div class="ig-post-head"><div class="ig-avatar"></div><div><div class="ig-post-name">'+escapeHtml(p.author||'')+'</div><div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
+  if(p.hasImage){ html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+'</div>'; }
+  html += '<div class="ig-caption">'+escapeHtml(p.caption||'')+'</div>';
+  html += igStatsHtml(p);
+  (p.comments||[]).forEach(c=>{
+    html += '<div class="ig-comment"><b>'+escapeHtml(c.name)+'</b>'+escapeHtml(c.text)+'</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function bindIgBodyEvents(scope){
+  const body = scope==='idol' ? document.getElementById('igBody')
+    : scope==='idolAlt' ? document.getElementById('igAltBody')
+    : document.getElementById('userIgBody');
+  body.querySelectorAll('[data-topic-idx]').forEach(el=>{
+    const kind = el.getAttribute('data-kind')||'trending';
+    el.addEventListener('click', ()=>openTopicDetail(scope, kind, parseInt(el.getAttribute('data-topic-idx'),10)));
+  });
+  body.querySelectorAll('[data-dm-idx]').forEach(el=>{
+    el.addEventListener('click', ()=>openDmConversation(scope, parseInt(el.getAttribute('data-dm-idx'),10)));
+  });
+}
+
+/* ===================================================================
+   INSTAGRAM (idol main) — posts / search / trending / dm
+=================================================================== */
+let igActiveTab = 'posts';
+
+function renderInstagram(){
+  const ch = getCurrentChar();
+  ensurePhoneData(ch);
+  document.querySelectorAll('#igTabs .ig-tab').forEach(b=>b.classList.toggle('active', b.getAttribute('data-tab')===igActiveTab));
+  renderIgBody();
+}
+
+function renderIgBody(){
+  const ch = getCurrentChar();
+  const pd = resolveIgPd('idol');
+  const body = document.getElementById('igBody');
+  let html = '';
+  if(igActiveTab==='posts'){
+    html = !pd.posts.length
+      ? '<div class="ig-pane active"><div class="empty-state">'+t('empty.ig')+'</div></div>'
+      : '<div class="ig-pane active">' + pd.posts.map(p=>igPostHtml(ch,p)).join('') + '</div>';
+  } else if(igActiveTab==='search'){
+    html = '<div class="ig-pane active">';
+    if(!pd.searchHistory.length){ html += '<div class="empty-state">'+t('empty.ig')+'</div>'; }
+    else {
+      html += pd.searchHistory.map((s,i)=>'<div class="trend-item" data-topic-idx="'+i+'" data-kind="search"><div class="trend-rank">'+(i+1)+'</div><div><div class="trend-title">'+escapeHtml(s.title)+'</div><div class="trend-sub">'+escapeHtml(s.heat||'')+'</div></div></div>').join('');
+    }
+    html += '</div>';
+  } else if(igActiveTab==='trending'){
+    html = '<div class="ig-pane active">';
+    if(!pd.trending.length){ html += '<div class="empty-state">'+t('empty.ig')+'</div>'; }
+    else {
+      html += pd.trending.map((tr,i)=>'<div class="trend-item" data-topic-idx="'+i+'" data-kind="trending"><div class="trend-rank">'+(i+1)+'</div><div><div class="trend-title">'+escapeHtml(tr.title)+'</div><div class="trend-sub">'+escapeHtml(tr.heat||'')+'</div></div></div>').join('');
+    }
+    html += '</div>';
+  } else if(igActiveTab==='dm'){
+    html = '<div class="ig-pane active">';
+    if(!pd.dms.length){ html += '<div class="empty-state">'+t('empty.dm')+'</div>'; }
+    else {
+      html += pd.dms.map((d,i)=>{
+        const last = d.messages[d.messages.length-1];
+        return '<div class="dm-list-item" data-dm-idx="'+i+'">'
+          + '<div class="ig-avatar"></div>'
+          + '<div class="dm-list-text"><div class="dm-list-name">'+escapeHtml(d.name)+'<span class="dm-list-tag">'+escapeHtml(d.tag||'')+'</span></div>'
+          + '<div class="dm-list-preview">'+escapeHtml(last? last.text : '')+'</div></div></div>';
+      }).join('');
+    }
+    html += '</div>';
+  }
+  body.innerHTML = html;
+  bindIgBodyEvents('idol');
+}
+
+document.getElementById('igTabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.ig-tab');
+  if(!btn) return;
+  igActiveTab = btn.getAttribute('data-tab');
+  renderInstagram();
+});
+
+document.getElementById('igAltTrigger').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  ensurePhoneData(ch);
+  goTo('screen-instagram-alt');
+  renderInstagramAlt();
+});
+
+/* ---- generation: idol main ---- */
+async function generateIgPosts(ch){
+  const sys = buildBaseSystemPrompt(ch, '请生成idol在 Instagram 上发布的帖子。');
+  const usr = '生成 5 篇idol发布的 Instagram 帖子，部分帖子配图、部分不配图。每篇帖子配 2 到 4 条粉丝评论，并附点赞数、评论总数、转发数（评论总数应大于等于实际展示的评论条数）。\n输出 JSON：{"posts":[{"hasImage":true,"imageDesc":"图片内容的文字描述（若hasImage为false则留空字符串）","caption":"配文","time":"如 3小时前","likes":12000,"commentCount":340,"shareCount":58,"comments":[{"name":"评论者昵称","text":"评论内容"}]}, ... 共5篇]}';
+  const data = await generateJSON(sys, usr);
+  return (data && Array.isArray(data.posts)) ? data.posts.slice(0,5) : null;
+}
+
+async function generateSearchTopics(ch){
+  const sys = buildBaseSystemPrompt(ch, '请生成idol最近在 Instagram 里的搜索记录。');
+  const usr = '生成 10 条idol最近在该软件里的搜索记录（搜索词要符合idol的身份、心理状态与日常关注点），每条附简短说明（如搜索原因或类别，可留空）。\n输出 JSON：{"items":[{"title":"搜索词","heat":"简短说明，可为空字符串"}, ... 共10条]}';
+  const data = await generateJSON(sys, usr);
+  return (data && Array.isArray(data.items)) ? data.items.slice(0,10) : null;
+}
+
+async function generateTrendingTopics(ch, isUser){
+  const who = isUser ? '请生成用户视角下全网的热搜话题。' : '请生成idol视角下全网的热搜话题。';
+  const sys = buildBaseSystemPrompt(ch, who);
+  const usr = '生成 10 条热搜话题（部分与idol相关，部分是泛娱乐或社会话题），每条附简短热度说明。\n输出 JSON：{"items":[{"title":"话题","heat":"如 12.3万讨论"}, ... 共10条]}';
+  const data = await generateJSON(sys, usr);
+  return (data && Array.isArray(data.items)) ? data.items.slice(0,10) : null;
+}
+
+async function generateDms(ch, mode){
+  const who = mode==='user'
+    ? '请生成该用户收到的私信列表（发来私信的人可能是朋友、idol的粉丝、看似无关的网友、甚至怀疑用户身份的人等）。idol不会出现在这里，因为idol与用户的对话在专门的 Chat 软件里进行。'
+    : mode==='idolAlt'
+    ? '请生成idol在其隐蔽的Instagram小号上收到的私信列表。这个小号没有人知道是idol本人，发信人多是idol自己关注的少数密友、同行或匿名小号，语气更私人、更不设防。'
+    : '请生成idol收到的私信列表，发信人类型多样：粉丝、黑粉、私生饭/狗仔、神秘人、合作方等。idol通常不会回复粉丝和黑粉的私信。';
+  const sys = buildBaseSystemPrompt(ch, who);
+  const usr = '生成 10 条私信对话，每条包含发信人昵称、关系标签（用2到4个字概括）、以及1到3条该发信人发来的初始消息（仅对方发的消息，idol一般不主动回复，除非发信人身份特殊）。\n输出 JSON：{"dms":[{"name":"昵称","tag":"标签","messages":[{"from":"them","text":"消息内容"}, ...]}, ... 共10条]}';
+  const data = await generateJSON(sys, usr);
+  return (data && Array.isArray(data.dms)) ? data.dms.slice(0,10) : null;
+}
+
+/* ---- idol main refresh ---- */
+async function igRefreshPosts(ch, pd){ const data = await generateIgPosts(ch); if(data){ pd.posts = data.map(p=>Object.assign({},p,{id:uid('p')})); saveState(); } }
+async function igRefreshSearch(ch, pd){ const data = await generateSearchTopics(ch); if(data){ pd.searchHistory = data; pd.searchCache = {}; saveState(); } }
+async function igRefreshTrending(ch, pd){ const data = await generateTrendingTopics(ch, false); if(data){ pd.trending = data; pd.topicCache = {}; saveState(); } }
+async function igRefreshDm(ch, pd){ const data = await generateDms(ch, 'idol'); if(data){ pd.dms = data; saveState(); } }
+
+function safeRenderInstagram(scope){
+  try{
+    if(scope==='idol') renderInstagram();
+    else if(scope==='idolAlt') renderInstagramAlt();
+    else if(scope==='user') renderUserInstagram();
+  }catch(e){ console.warn('render err', e); }
+}
+
+async function refreshInstagramSection(section){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  const pd = resolveIgPd('idol');
+  showGenerating();
+  const errors = [];
+  const tasks = section==='all' ? ['posts','search','trending','dm'] : [section];
+  // Run all tasks first, render only once everything is done
+  for(const task of tasks){
+    try{
+      if(task==='posts') await igRefreshPosts(ch, pd);
+      else if(task==='search') await igRefreshSearch(ch, pd);
+      else if(task==='trending') await igRefreshTrending(ch, pd);
+      else if(task==='dm') await igRefreshDm(ch, pd);
+    }catch(e){ console.warn(e); errors.push(task); }
+  }
+  safeRenderInstagram('idol');
+  hideGenerating();
+  if(errors.length) showToast(t('toast.genFailed')+': '+errors.join('、'));
+}
+
+function showIgRefreshMenu(scope){
+  let opts;
+  if(scope==='user'){
+    opts = [{value:'feed', label:t('btn.refreshPosts')}, {value:'trending', label:t('btn.refreshTrending')}, {value:'dm', label:t('btn.refreshDm')}, {value:'all', label:t('btn.refreshAll')}];
+  } else if(scope==='idolAlt'){
+    opts = [{value:'posts', label:t('btn.refreshPosts')}, {value:'search', label:t('btn.refreshSearch')}, {value:'dm', label:t('btn.refreshDm')}, {value:'all', label:t('btn.refreshAll')}];
+  } else {
+    opts = [{value:'posts', label:t('btn.refreshPosts')}, {value:'search', label:t('btn.refreshSearch')}, {value:'trending', label:t('btn.refreshTrending')}, {value:'dm', label:t('btn.refreshDm')}, {value:'all', label:t('btn.refreshAll')}];
+  }
+  showActionSheet(null, opts, (val)=>{
+    if(scope==='user') refreshUserInstagramSection(val);
+    else if(scope==='idolAlt') refreshInstagramAltSection(val);
+    else refreshInstagramSection(val);
+  });
+}
+
+document.getElementById('igRefreshBtn').addEventListener('click', ()=>showIgRefreshMenu('idol'));
+
+/* ===================================================================
+   INSTAGRAM ALT — idol's hidden secret account
+=================================================================== */
+let igAltActiveTab = 'posts';
+
+function renderInstagramAlt(){
+  document.querySelectorAll('#igAltTabs .ig-tab').forEach(b=>b.classList.toggle('active', b.getAttribute('data-tab')===igAltActiveTab));
+  renderIgAltBody();
+}
+
+function renderIgAltBody(){
+  const ch = getCurrentChar();
+  const pd = resolveIgPd('idolAlt');
+  const body = document.getElementById('igAltBody');
+  let html = '';
+  if(igAltActiveTab==='posts'){
+    const altName = ch.idolAltName && ch.idolAltName.trim() ? ch.idolAltName.trim() : (ch.idolName ? ch.idolName+'_alt' : 'secret_acc');
+    html = !pd.posts.length
+      ? '<div class="ig-pane active"><div class="empty-state">'+t('empty.ig')+'</div></div>'
+      : '<div class="ig-pane active">' + pd.posts.map(p=>igPostHtml(ch,p,altName)).join('') + '</div>';
+  } else if(igAltActiveTab==='search'){
+    html = '<div class="ig-pane active">';
+    if(!pd.searchHistory.length){ html += '<div class="empty-state">'+t('empty.ig')+'</div>'; }
+    else {
+      html += pd.searchHistory.map((s,i)=>{
+        const title = typeof s === 'string' ? s : (s.title||s);
+        const heat = typeof s === 'object' ? (s.heat||'') : '';
+        return '<div class="trend-item" data-topic-idx="'+i+'" data-kind="search" style="cursor:pointer;">'
+          + '<div class="trend-rank">'+(i+1)+'</div>'
+          + '<div><div class="trend-title">'+escapeHtml(title)+'</div>'
+          + (heat ? '<div class="trend-sub">'+escapeHtml(heat)+'</div>' : '')
+          + '</div></div>';
+      }).join('');
+    }
+    html += '</div>';
+  } else if(igAltActiveTab==='dm'){
+    html = '<div class="ig-pane active">';
+    if(!pd.dms.length){ html += '<div class="empty-state">'+t('empty.dm')+'</div>'; }
+    else {
+      html += pd.dms.map((d,i)=>{
+        const last = d.messages[d.messages.length-1];
+        return '<div class="dm-list-item" data-dm-idx="'+i+'">'
+          + '<div class="ig-avatar"></div>'
+          + '<div class="dm-list-text"><div class="dm-list-name">'+escapeHtml(d.name)+'<span class="dm-list-tag">'+escapeHtml(d.tag||'')+'</span></div>'
+          + '<div class="dm-list-preview">'+escapeHtml(last? last.text : '')+'</div></div></div>';
+      }).join('');
+    }
+    html += '</div>';
+  }
+  body.innerHTML = html;
+  bindIgBodyEvents('idolAlt');
+}
+
+document.getElementById('igAltTabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.ig-tab');
+  if(!btn) return;
+  igAltActiveTab = btn.getAttribute('data-tab');
+  renderInstagramAlt();
+});
+
+async function generateAltSearchHistory(ch){
+  const sys = buildBaseSystemPrompt(ch, '请生成idol在隐蔽小号上的私人搜索记录，这些搜索更私人、更不加掩饰，反映idol不愿公开的真实关注点和情绪。');
+  const usr = '生成 8 到 10 条搜索词，每条附简短说明（如搜索原因或类别，可留空）。\n输出 JSON：{"items":[{"title":"搜索词","heat":"简短说明，可为空字符串"}, ... 共8到10条]}';
+  const data = await generateJSON(sys, usr);
+  return (data && Array.isArray(data.items)) ? data.items : null;
+}
+
+/* ---- idol alt refresh ---- */
+async function igAltRefreshPosts(ch, pd){
+  const sys = buildBaseSystemPrompt(ch, '请生成idol在隐蔽小号上发布的帖子，语气和内容比公开账号更私人、更不设防，是idol未经包装的真实一面。');
+  const usr = '生成 5 篇帖子，部分配图、部分不配图，每篇配 1 到 3 条评论（评论者多为idol信任的密友圈），并附点赞数、评论总数、转发数。\n输出 JSON：{"posts":[{"hasImage":true,"imageDesc":"图片描述","caption":"配文","time":"如 2小时前","likes":80,"commentCount":12,"shareCount":2,"comments":[{"name":"昵称","text":"评论"}]}, ... 共5篇]}';
+  const data = await generateJSON(sys, usr);
+  if(data && Array.isArray(data.posts)){ pd.posts = data.posts.map(p=>Object.assign({},p,{id:uid('p')})); saveState(); }
+}
+async function igAltRefreshSearch(ch, pd){ const data = await generateAltSearchHistory(ch); if(data){ pd.searchHistory = data; saveState(); } }
+async function igAltRefreshDm(ch, pd){ const data = await generateDms(ch, 'idolAlt'); if(data){ pd.dms = data; saveState(); } }
+
+async function refreshInstagramAltSection(section){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  const pd = resolveIgPd('idolAlt');
+  showGenerating();
+  const errors = [];
+  const tasks = section==='all' ? ['posts','search','dm'] : [section];
+  for(const task of tasks){
+    try{
+      if(task==='posts') await igAltRefreshPosts(ch, pd);
+      else if(task==='search') await igAltRefreshSearch(ch, pd);
+      else if(task==='dm') await igAltRefreshDm(ch, pd);
+    }catch(e){ console.warn(e); errors.push(task); }
+  }
+  safeRenderInstagram('idolAlt');
+  hideGenerating();
+  if(errors.length) showToast(t('toast.genFailed')+': '+errors.join('、'));
+}
+
+document.getElementById('igAltRefreshBtn').addEventListener('click', ()=>showIgRefreshMenu('idolAlt'));
+
+/* ===================================================================
+   TOPIC DETAIL (shared idol / idol-alt / user) — trending or search kind
+=================================================================== */
+let currentTopicCtx = null; // {scope, kind, idx}
+
+async function openTopicDetail(scope, kind, idx){
+  const ch = getCurrentChar();
+  const pd = resolveIgPd(scope);
+  const list = kind==='search' ? pd.searchHistory : pd.trending;
+  // Ensure searchCache and topicCache exist
+  if(!pd.searchCache) pd.searchCache = {};
+  if(!pd.topicCache) pd.topicCache = {};
+  const cache = kind==='search' ? pd.searchCache : pd.topicCache;
+  const rawTopic = list[idx];
+  if(!rawTopic) return;
+  // Handle both string items and {title, heat} objects
+  const topic = typeof rawTopic === 'string' ? {title: rawTopic} : rawTopic;
+  currentTopicCtx = {scope, kind, idx};
+  goTo('screen-ig-topic');
+  document.getElementById('igTopicTitle').textContent = topic.title;
+  const body = document.getElementById('igTopicBody');
+  const cacheKey = topic.title;
+  if(cache[cacheKey]){
+    renderTopicBody(cache[cacheKey]);
+    return;
+  }
+  body.innerHTML = '<div class="loading-row">'+t('toast.generating')+'</div>';
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); body.innerHTML=''; return; }
+  showGenerating();
+  try{
+    const sys = buildBaseSystemPrompt(ch, '请为指定的话题生成对应的文章内容与网友评论。');
+    const usr = (kind==='search' ? '搜索词' : '热搜话题')+'：「'+topic.title+'」\n请生成与这个词条相关的正文内容，约400字左右，可以是新闻报道、爆料、自媒体解读或网友长文等贴合内容性质的形式。再生成3到5条网友评论。\n输出 JSON：{"article":"约400字正文","comments":[{"name":"昵称","text":"评论"}]}';
+    const data = await generateJSON(sys, usr);
+    if(data && data.article){
+      cache[cacheKey] = data;
+      saveState();
+      renderTopicBody(data);
+    } else {
+      throw new Error('Could not parse article content from the API response');
+    }
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+    body.innerHTML = '';
+  }finally{
+    hideGenerating();
+  }
+}
+
+function renderTopicBody(data){
+  const body = document.getElementById('igTopicBody');
+  let html = '<div class="detail-text">'+escapeHtml(data.article||'')+'</div>';
+  if(Array.isArray(data.comments) && data.comments.length){
+    html += '<div class="detail-comments"><div class="section-label">'+t('label.comments')+'</div>';
+    data.comments.forEach(c=>{
+      html += '<div class="ig-comment"><b>'+escapeHtml(c.name)+'</b>'+escapeHtml(c.text)+'</div>';
+    });
+    html += '</div>';
+  }
+  body.innerHTML = html;
+}
+
+/* ===================================================================
+   DM CONVERSATION (shared idol / idol-alt / user)
+=================================================================== */
+let currentDmCtx = null; // {scope, idx}
+
+function openDmConversation(scope, idx){
+  const ch = getCurrentChar();
+  const pd = resolveIgPd(scope);
+  const dm = pd.dms[idx];
+  if(!dm) return;
+  currentDmCtx = {scope, idx};
+  goTo('screen-ig-dm');
+  document.getElementById('igDmTitle').textContent = dm.name;
+  renderDmFeed();
+}
+
+function renderDmFeed(){
+  const {scope, idx} = currentDmCtx;
+  const pd = resolveIgPd(scope);
+  const dm = pd.dms[idx];
+  const feed = document.getElementById('igDmFeed');
+  feed.innerHTML = dm.messages.map(m=>{
+    const mine = m.from==='me';
+    return '<div class="bubble-row '+(mine?'sent':'recv')+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
+  }).join('');
+  feed.scrollTop = feed.scrollHeight;
+}
+
+async function sendDmReply(text){
+  const ch = getCurrentChar();
+  const {scope, idx} = currentDmCtx;
+  const pd = resolveIgPd(scope);
+  const dm = pd.dms[idx];
+  dm.messages.push({from:'me', text});
+  saveState();
+  renderDmFeed();
+  // Auto-reply removed: click the trigger icon to generate a reply
+}
+
+document.getElementById('igDmSendBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('igDmInput');
+  const val = input.value.trim();
+  if(!val) return;
+  input.value='';
+  sendDmReply(val);
+});
+document.getElementById('igDmInput').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') document.getElementById('igDmSendBtn').click();
+});
+document.getElementById('igDmTriggerBtn').addEventListener('click', async ()=>{
+  if(!currentDmCtx) return;
+  const ch = getCurrentChar();
+  const {scope, idx} = currentDmCtx;
+  const pd = resolveIgPd(scope);
+  const dm = pd.dms[idx];
+  if(!dm) return;
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  showPhoneGenerating();
+  try{
+    const speaker = scope==='user' ? (ch.userName||'用户') : (ch.idolName||'idol');
+    const sys = buildBaseSystemPrompt(ch, '现在请扮演私信对方「'+dm.name+'」（标签：'+(dm.tag||'')+'），针对对话历史，主动发送一条符合其身份与关系的消息。');
+    const history = dm.messages.map(m=>(m.from==='me'? speaker : dm.name)+'：'+m.text).join('\n');
+    const usr = '私信历史：\n'+history+'\n\n请只生成「'+dm.name+'」接下来发的这一条消息。\n输出 JSON：{"text":"消息内容"}';
+    const data = await generateJSON(sys, usr);
+    if(data && data.text){
+      dm.messages.push({from:'them', text:data.text});
+      saveState();
+      renderDmFeed();
+    } else { throw new Error('parse failed'); }
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+  }finally{
+    hidePhoneGenerating();
+  }
+});
+
+
+/* ===================================================================
+   X LIVE — immersive live-stream room with flying danmaku
+=================================================================== */
+let danmakuTimer = null;
+let danmakuPanelOpen = false;
+
+function renderX(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).live;
+  stopDanmaku();
+  const stage = document.getElementById('xSceneDesc');
+  const viewersEl = document.getElementById('xViewers');
+  document.getElementById('xDanmakuPanel').classList.remove('open');
+  danmakuPanelOpen = false;
+  if(!pd.scene){
+    stage.textContent = t('empty.x');
+    viewersEl.textContent = '';
+    return;
+  }
+  stage.textContent = pd.scene;
+  viewersEl.textContent = (pd.viewers||0).toLocaleString()+' watching';
+  renderDanmakuPanelList();
+  startDanmaku(pd.danmaku||[]);
+}
+
+function startDanmaku(list){
+  stopDanmaku();
+  if(!list || !list.length) return;
+  const layer = document.getElementById('xDanmakuLayer');
+  let i = 0;
+  danmakuTimer = setInterval(()=>{
+    const item = list[i % list.length];
+    i++;
+    const el = document.createElement('div');
+    el.className = 'x-danmaku-item';
+    el.textContent = item.name+'： '+item.text;
+    el.style.top = randInt(8, 70)+'%';
+    const dur = randInt(7,11);
+    el.style.animationDuration = dur+'s';
+    layer.appendChild(el);
+    setTimeout(()=>{ el.remove(); }, dur*1000+200);
+  }, 900);
+}
+function stopDanmaku(){
+  if(danmakuTimer){ clearInterval(danmakuTimer); danmakuTimer=null; }
+  document.getElementById('xDanmakuLayer').innerHTML = '';
+}
+
+function renderDanmakuPanelList(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).live;
+  const panel = document.getElementById('xDanmakuList');
+  panel.innerHTML = (pd.danmaku||[]).map(d=>'<div class="x-danmaku-line"><b>'+escapeHtml(d.name)+'</b>'+escapeHtml(d.text)+'</div>').join('');
+}
+
+document.getElementById('xDanmakuToggle').addEventListener('click', ()=>{
+  danmakuPanelOpen = !danmakuPanelOpen;
+  document.getElementById('xDanmakuPanel').classList.toggle('open', danmakuPanelOpen);
+});
+document.getElementById('xDanmakuClose').addEventListener('click', ()=>{
+  danmakuPanelOpen = false;
+  document.getElementById('xDanmakuPanel').classList.remove('open');
+});
+
+async function refreshX(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  const stage = document.getElementById('xSceneDesc');
+  stage.textContent = t('toast.generating');
+  stopDanmaku();
+  showGenerating();
+  try{
+    const sys = buildBaseSystemPrompt(ch, '请生成idol正在进行的一场直播的沉浸式现场描写，以及观众发送的弹幕。');
+    const usr = '请用第三人称、现场感强烈的笔触描写idol此刻直播间里正在发生的画面与状态（约120到180字，描述idol的动作、表情、说的话、直播间氛围），再生成一个当前在线观看人数（整数），再生成20条观众发送的弹幕（昵称+简短内容，口语化、多样化，包含夸赞、提问、玩笑、刷屏等）。\n输出 JSON：{"scene":"现场描写文字","viewers":12345,"danmaku":[{"name":"昵称","text":"弹幕内容"}, ... 共20条]}';
+    const data = await generateJSON(sys, usr);
+    if(data && data.scene){
+      const pd = ensurePhoneData(ch).live;
+      pd.scene = data.scene;
+      pd.viewers = data.viewers || randInt(2000,80000);
+      pd.danmaku = Array.isArray(data.danmaku) ? data.danmaku.slice(0,20) : [];
+      saveState();
+      renderX();
+    } else { throw new Error('parse failed'); }
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+    stage.textContent = t('empty.x');
+  }finally{
+    hideGenerating();
+  }
+}
+
+document.getElementById('xRefreshBtn').addEventListener('click', refreshX);
+
+/* ===================================================================
+   PAYPAL
+=================================================================== */
+function renderPaypal(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).paypal;
+  const body = document.getElementById('paypalBody');
+  const holder = (ch.idolName||'').toUpperCase();
+  if(!pd.transactions.length && !pd.cardNumber){
+    body.innerHTML =
+      '<div class="pp-card"><div class="pp-card-top">PAYPAL BALANCE</div>'
+      + '<div class="pp-card-number">•••• •••• •••• ••••</div>'
+      + '<div class="pp-card-balance-label">BALANCE</div>'
+      + '<div class="pp-card-balance">—</div>'
+      + (holder? '<div class="pp-card-holder">'+escapeHtml(holder)+'</div>' : '')
+      + '</div>'
+      + '<div class="empty-state">'+t('empty.paypal')+'</div>';
+    return;
+  }
+  let html = '<div class="pp-card"><div class="pp-card-top">PAYPAL BALANCE</div>'
+    + '<div class="pp-card-number">'+escapeHtml(pd.cardNumber||'')+'</div>'
+    + '<div class="pp-card-balance-label">BALANCE</div>'
+    + '<div class="pp-card-balance">$'+Number(pd.balance||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</div>'
+    + (holder? '<div class="pp-card-holder">'+escapeHtml(holder)+'</div>' : '')
+    + '</div>';
+  html += '<div class="pp-tx-list"><div class="section-label">'+t('label.transactions')+'</div>';
+  pd.transactions.forEach(tx=>{
+    const neg = tx.amount < 0;
+    html += '<div class="pp-tx-item"><div class="pp-tx-icon">'+ICONS.paypal+'</div>'
+      + '<div class="pp-tx-mid"><div class="pp-tx-name">'+escapeHtml(tx.name)+'</div><div class="pp-tx-date">'+escapeHtml(tx.date)+'</div></div>'
+      + '<div class="pp-tx-amt'+(neg?' neg':'')+'">'+(neg?'-':'+')+'$'+Math.abs(tx.amount).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'</div></div>';
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function maskedCardNumber(){
+  const n = ()=>randInt(0,9);
+  return '•••• •••• •••• '+n()+n()+n()+n();
+}
+
+async function refreshPaypal(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  showGenerating();
+  try{
+    const sys = buildBaseSystemPrompt(ch, '请生成idol的 PayPal 账户交易记录，体现idol的职业收入与日常消费习惯。');
+    const usr = '生成 8 到 10 条交易记录，包含收入（如商演收入、品牌合作、版税等正数金额）与支出（如购物、订阅、转账等负数金额需在amount里填负数）。\n输出 JSON：{"balance":数字（当前账户余额）,"transactions":[{"name":"交易对象或说明","date":"如 6月20日","amount":数字（正数为收入，负数为支出）}, ... 共8到10条]}';
+    const data = await generateJSON(sys, usr);
+    if(data && Array.isArray(data.transactions)){
+      const pd = ensurePhoneData(ch).paypal;
+      pd.transactions = data.transactions;
+      pd.balance = data.balance!=null ? data.balance : pd.transactions.reduce((s,x)=>s+x.amount,0);
+      if(!pd.cardNumber) pd.cardNumber = maskedCardNumber();
+      saveState();
+      renderPaypal();
+    } else { throw new Error('parse failed'); }
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+    renderPaypal();
+  }finally{
+    hideGenerating();
+  }
+}
+
+document.getElementById('paypalRefreshBtn').addEventListener('click', refreshPaypal);
+
+/* ===================================================================
+   MAPS — idol's daily itinerary
+=================================================================== */
+function abstractMapSvg(){
+  return '<svg viewBox="0 0 400 150" preserveAspectRatio="none">'
+    + '<line x1="0" y1="40" x2="400" y2="40" style="stroke:var(--border);stroke-width:1"/>'
+    + '<line x1="0" y1="90" x2="400" y2="75" style="stroke:var(--border);stroke-width:1"/>'
+    + '<line x1="60" y1="0" x2="80" y2="150" style="stroke:var(--border);stroke-width:1"/>'
+    + '<line x1="260" y1="0" x2="240" y2="150" style="stroke:var(--border);stroke-width:1"/>'
+    + '<path d="M10 120 Q120 60 200 95 T390 50" fill="none" style="stroke:var(--text-2);stroke-width:1.6" stroke-dasharray="4 5"/>'
+    + '</svg>';
+}
+
+function renderMaps(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).maps;
+  const body = document.getElementById('mapsBody');
+  let html = '<div class="maps-abstract">'+abstractMapSvg()+'</div>';
+  if(!pd.stops.length){
+    html += '<div class="empty-state">'+t('empty.maps')+'</div>';
+    body.innerHTML = html;
+    return;
+  }
+  html += '<div class="maps-title">'+t('label.todayItinerary')+'</div>';
+  html += '<div class="maps-timeline">';
+  pd.stops.forEach((s,i)=>{
+    html += '<div class="maps-stop"><div class="maps-stop-rail"><div class="maps-stop-dot"></div>'+(i<pd.stops.length-1?'<div class="maps-stop-line"></div>':'')+'</div>'
+      + '<div class="maps-stop-body"><div class="maps-stop-time">'+escapeHtml(s.time)+'</div><div class="maps-stop-place">'+escapeHtml(s.place)+'</div><div class="maps-stop-desc">'+escapeHtml(s.desc)+'</div></div></div>';
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+async function refreshMaps(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  showGenerating();
+  try{
+    const sys = buildBaseSystemPrompt(ch, '请生成idol一整天的行程轨迹，符合idol的身份与日常安排。');
+    const usr = '生成idol今天从早到晚的完整行程，至少8个地点（如住处、工作室、片场、健身房、餐厅、活动现场、机场等，要贴合idol身份），每个地点包含时间、地点名称、简短活动描述。\n输出 JSON：{"stops":[{"time":"如 08:30","place":"地点名称","desc":"简短活动描述"}, ... 至少8条，按时间顺序]}';
+    const data = await generateJSON(sys, usr);
+    if(data && Array.isArray(data.stops) && data.stops.length){
+      pd_set(ch, data.stops);
+    } else { throw new Error('parse failed'); }
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+    renderMaps();
+  }finally{
+    hideGenerating();
+  }
+}
+function pd_set(ch, stops){
+  const pd = ensurePhoneData(ch).maps;
+  pd.stops = stops;
+  saveState();
+  renderMaps();
+}
+
+document.getElementById('mapsRefreshBtn').addEventListener('click', refreshMaps);
+
+/* ===================================================================
+   NOTES — Apple Notes style
+=================================================================== */
+function renderNotes(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).notes;
+  const body = document.getElementById('notesBody');
+  if(!pd.items.length){
+    body.innerHTML = '<div class="empty-state">'+t('empty.notes')+'</div>';
+    return;
+  }
+  body.innerHTML = pd.items.map((n,i)=>
+    '<div class="note-item" data-note-idx="'+i+'"><div class="note-title">'+escapeHtml(n.title)+'</div>'
+    + '<div class="note-preview">'+escapeHtml((n.body||'').slice(0,40))+'</div>'
+    + '<div class="note-date">'+escapeHtml(n.date||'')+'</div></div>'
+  ).join('');
+  body.querySelectorAll('[data-note-idx]').forEach(el=>{
+    el.addEventListener('click', ()=>openNoteDetail(parseInt(el.getAttribute('data-note-idx'),10)));
+  });
+}
+
+function openNoteDetail(idx){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).notes;
+  const note = pd.items[idx];
+  if(!note) return;
+  goTo('screen-note-detail');
+  document.getElementById('noteDetailBody').innerHTML =
+    '<div class="note-title" style="font-size:19px;margin-bottom:4px;">'+escapeHtml(note.title)+'</div>'
+    + '<div class="note-date" style="margin-bottom:14px;">'+escapeHtml(note.date||'')+'</div>'
+    + '<div class="detail-text">'+escapeHtml(note.body||'')+'</div>';
+}
+
+async function refreshNotes(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  showGenerating();
+  try{
+    const sys = buildBaseSystemPrompt(ch, '请生成idol手机备忘录里记录的内容，真实反映idol的私人思绪、工作安排与生活细节。');
+    const usr = '生成 5 到 6 条备忘录，类型可以是行程清单、歌词灵感、购物清单、私人心情记录、给自己的提醒等，贴合idol身份与世界书设定。每条包含标题、日期、正文全文（正文长度不限，按内容自然长度书写）。\n输出 JSON：{"notes":[{"title":"标题","date":"如 6月18日","body":"正文全文"}, ... 共5到6条]}';
+    const data = await generateJSON(sys, usr);
+    if(data && Array.isArray(data.notes) && data.notes.length){
+      const pd = ensurePhoneData(ch).notes;
+      pd.items = data.notes;
+      saveState();
+      renderNotes();
+    } else { throw new Error('parse failed'); }
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+    renderNotes();
+  }finally{
+    hideGenerating();
+  }
+}
+
+document.getElementById('notesRefreshBtn').addEventListener('click', refreshNotes);
+
+/* ===================================================================
+   USER CHAT — direct 1:1 chat between user and idol
+   This conversation's recent history is fed into idol-phone generation
+   as context, so the two stay consistent with each other.
+=================================================================== */
+function renderUserChat(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).userChat;
+  if(!pd.idolNickname) pd.idolNickname = '';
+  const titleEl = document.getElementById('userChatTitle');
+  // Display nickname or fallback to idol name
+  titleEl.textContent = pd.idolNickname || ch.idolName || 'Chat';
+  // Tap title to edit nickname
+  titleEl.onclick = ()=>{
+    showPromptModal(
+      '修改备注名',
+      pd.idolNickname || ch.idolName || 'Chat',
+      (val)=>{
+        pd.idolNickname = val.trim();
+        saveState();
+        titleEl.textContent = pd.idolNickname || ch.idolName || 'Chat';
+      }
+    );
+    // pre-fill the textarea with current value
+    setTimeout(()=>{
+      const ta = document.getElementById('promptCardInput');
+      if(ta){ ta.value = pd.idolNickname || ''; ta.select(); }
+    }, 30);
+  };
+  renderUserChatFeed();
+}
+
+function renderUserChatFeed(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).userChat;
+  const feed = document.getElementById('userChatFeed');
+  if(!pd.messages.length){
+    feed.innerHTML = '<div class="empty-state">'+t('empty.dm')+'</div>';
+    return;
+  }
+  feed.innerHTML = pd.messages.map(m=>{
+    const mine = m.from==='me';
+    return '<div class="bubble-row '+(mine?'sent':'recv')+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
+  }).join('');
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function recentUserChatContext(ch, limit){
+  const pd = ensurePhoneData(ch).userChat;
+  const msgs = pd.messages.slice(-1*(limit||10));
+  if(!msgs.length) return '';
+  const lines = msgs.map(m=>(m.from==='me' ? (ch.userName||'用户') : (ch.idolName||'idol'))+'：'+m.text).join('\n');
+  return '\n【用户与idol最近的私下聊天记录，生成内容时请参考并保持一致】\n'+lines;
+}
+
+function addUserChatMessage(text){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).userChat;
+  pd.messages.push({from:'me', text});
+  saveState();
+  renderUserChatFeed();
+}
+
+async function triggerIdolChatReply(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  const pd = ensurePhoneData(ch).userChat;
+  if(!pd.messages.length) return;
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  showPhoneGenerating();
+  try{
+    const sys = buildBaseSystemPrompt(ch, '现在请扮演idol本人，回复用户刚刚发来的私下消息。这是两人之间最私密的聊天频道。');
+    const history = pd.messages.map(m=>(m.from==='me'? (ch.userName||'用户') : (ch.idolName||'idol'))+'：'+m.text).join('\n');
+    const usr = '聊天记录：\n'+history+'\n\n请只生成idol接下来回复的这一条消息，语气、用词要符合idol人设与两人的关系设定。\n输出 JSON：{"text":"回复内容"}';
+    const data = await generateJSON(sys, usr);
+    if(data && data.text){
+      pd.messages.push({from:'them', text:data.text});
+      saveState();
+      renderUserChatFeed();
+    } else { throw new Error('Could not parse a reply from the API response'); }
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+  }finally{
+    hidePhoneGenerating();
+  }
+}
+
+document.getElementById('userChatSendBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('userChatInput');
+  const val = input.value.trim();
+  if(!val) return;
+  input.value='';
+  addUserChatMessage(val);
+});
+document.getElementById('userChatInput').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') document.getElementById('userChatSendBtn').click();
+});
+document.getElementById('userChatTriggerBtn').addEventListener('click', triggerIdolChatReply);
+
+/* ===================================================================
+   USER INSTAGRAM — feed of others' posts / trending / dm received
+=================================================================== */
+let userIgActiveTab = 'feed';
+
+function renderUserInstagram(){
+  const ch = getCurrentChar();
+  ensurePhoneData(ch);
+  document.querySelectorAll('#userIgTabs .ig-tab').forEach(b=>b.classList.toggle('active', b.getAttribute('data-tab')===userIgActiveTab));
+  renderUserIgBody();
+}
+
+function renderUserIgBody(){
+  const pd = resolveIgPd('user');
+  const body = document.getElementById('userIgBody');
+  let html = '';
+  if(userIgActiveTab==='feed'){
+    html = !pd.feed.length
+      ? '<div class="ig-pane active"><div class="empty-state">'+t('empty.ig')+'</div></div>'
+      : '<div class="ig-pane active">' + pd.feed.map(p=>userFeedPostHtml(p)).join('') + '</div>';
+  } else if(userIgActiveTab==='explore'){
+    html = '<div class="ig-pane active"><div class="section-label">'+t('label.trending')+'</div>';
+    if(!pd.trending.length){ html += '<div class="empty-state">'+t('empty.ig')+'</div>'; }
+    else {
+      html += pd.trending.map((tr,i)=>'<div class="trend-item" data-topic-idx="'+i+'" data-kind="trending"><div class="trend-rank">'+(i+1)+'</div><div><div class="trend-title">'+escapeHtml(tr.title)+'</div><div class="trend-sub">'+escapeHtml(tr.heat||'')+'</div></div></div>').join('');
+    }
+    html += '</div>';
+  } else if(userIgActiveTab==='dm'){
+    html = '<div class="ig-pane active">';
+    if(!pd.dms.length){ html += '<div class="empty-state">'+t('empty.dm')+'</div>'; }
+    else {
+      html += pd.dms.map((d,i)=>{
+        const last = d.messages[d.messages.length-1];
+        return '<div class="dm-list-item" data-dm-idx="'+i+'">'
+          + '<div class="ig-avatar"></div>'
+          + '<div class="dm-list-text"><div class="dm-list-name">'+escapeHtml(d.name)+'<span class="dm-list-tag">'+escapeHtml(d.tag||'')+'</span></div>'
+          + '<div class="dm-list-preview">'+escapeHtml(last? last.text : '')+'</div></div></div>';
+      }).join('');
+    }
+    html += '</div>';
+  }
+  body.innerHTML = html;
+  bindIgBodyEvents('user');
+}
+
+document.getElementById('userIgTabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.ig-tab');
+  if(!btn) return;
+  userIgActiveTab = btn.getAttribute('data-tab');
+  renderUserInstagram();
+});
+
+async function generateUserFeed(ch){
+  const sys = buildBaseSystemPrompt(ch, '请生成用户Instagram动态页里看到的、其他网友发布的帖子（可能包含关于idol的讨论、粉丝日常、八卦、无关的生活分享等）。');
+  const usr = '生成 8 条来自不同网友的帖子，部分配图、部分不配图。每篇配 1 到 3 条评论，并附点赞数、评论总数、转发数。\n输出 JSON：{"feed":[{"author":"发帖人昵称","hasImage":true,"imageDesc":"图片描述（无图则留空）","caption":"配文","time":"如 2小时前","likes":320,"commentCount":48,"shareCount":9,"comments":[{"name":"昵称","text":"评论"}]}, ... 共8条]}';
+  const data = await generateJSON(sys, usr);
+  return (data && Array.isArray(data.feed)) ? data.feed.slice(0,8) : null;
+}
+
+/* ---- user IG refresh ---- */
+async function userIgRefreshFeed(ch, pd){ const data = await generateUserFeed(ch); if(data){ pd.feed = data; saveState(); } }
+async function userIgRefreshTrending(ch, pd){ const data = await generateTrendingTopics(ch, true); if(data){ pd.trending = data; pd.topicCache = {}; saveState(); } }
+async function userIgRefreshDm(ch, pd){ const data = await generateDms(ch, 'user'); if(data){ pd.dms = data; saveState(); } }
+
+async function refreshUserInstagramSection(section){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  const pd = resolveIgPd('user');
+  showGenerating();
+  const errors = [];
+  const tasks = section==='all' ? ['feed','trending','dm'] : [section];
+  for(const task of tasks){
+    try{
+      if(task==='feed') await userIgRefreshFeed(ch, pd);
+      else if(task==='trending') await userIgRefreshTrending(ch, pd);
+      else if(task==='dm') await userIgRefreshDm(ch, pd);
+    }catch(e){ console.warn(e); errors.push(task); }
+  }
+  safeRenderInstagram('user');
+  hideGenerating();
+  if(errors.length) showToast(t('toast.genFailed')+': '+errors.join('、'));
+}
+
+document.getElementById('userIgRefreshBtn').addEventListener('click', ()=>showIgRefreshMenu('user'));
+
+/* ===================================================================
+   SETTINGS — home list (API / Characters / Language / Theme / Icons)
+=================================================================== */
+function renderSettingsHome(){
+  const body = document.getElementById('settingsBody');
+  const ch = getCurrentChar();
+  body.innerHTML =
+    '<div class="settings-group">'
+      + '<div class="settings-row" data-go="screen-settings-api"><div class="settings-row-label">'+t('settings.row.api')+'</div><div class="settings-row-value">'+(state.settings.model? escapeHtml(state.settings.model) : '')+' <span class="settings-chevron">›</span></div></div>'
+      + '<div class="settings-row" data-go="screen-settings-characters"><div class="settings-row-label">'+t('settings.row.characters')+'</div><div class="settings-row-value">'+(ch? escapeHtml(ch.idolName||'') : '')+' <span class="settings-chevron">›</span></div></div>'
+      + '<div class="settings-row single" data-go="screen-settings-worldbook"><div class="settings-row-label">'+t('settings.row.worldbook')+'</div><div class="settings-row-value">'+(ch? ensureWorldBookEntries(ch).length : 0)+' <span class="settings-chevron">›</span></div></div>'
+    + '</div>'
+    + '<div class="settings-group">'
+      + '<div class="settings-row single"><div class="settings-row-label">'+t('settings.row.language')+'</div>'
+        + '<div class="seg-control" id="langSeg" style="width:140px;">'
+          + '<div class="seg-btn" data-lang="zh">'+t('settings.lang.zh')+'</div>'
+          + '<div class="seg-btn" data-lang="en">'+t('settings.lang.en')+'</div>'
+        + '</div></div>'
+    + '</div>'
+    + '<div class="settings-group">'
+      + '<div class="settings-row single"><div class="settings-row-label">'+t('settings.row.theme')+'</div>'
+        + '<div class="seg-control" id="themeSeg" style="width:140px;">'
+          + '<div class="seg-btn" data-theme="dark">'+t('settings.theme.dark')+'</div>'
+          + '<div class="seg-btn" data-theme="light">'+t('settings.theme.light')+'</div>'
+        + '</div></div>'
+    + '</div>'
+    + '<div class="settings-group">'
+      + '<div class="settings-row single"><div class="settings-row-label">'+t('settings.row.fitscreen')+'</div>'
+        + '<div class="seg-control" id="fitSeg" style="width:160px;">'
+          + '<div class="seg-btn" data-fit="0">'+t('settings.fitscreen.fixed')+'</div>'
+          + '<div class="seg-btn" data-fit="1">'+t('settings.fitscreen.fit')+'</div>'
+        + '</div></div>'
+    + '</div>'
+    + '<div class="settings-group">'
+      + '<div class="settings-row" data-go="screen-settings-wallpaper"><div class="settings-row-label">'+t('settings.row.wallpaper')+'</div><div class="settings-row-value"><span class="settings-chevron">›</span></div></div>'
+      + '<div class="settings-row single" data-go="screen-settings-icons"><div class="settings-row-label">'+t('settings.row.icons')+'</div><div class="settings-row-value"><span class="settings-chevron">›</span></div></div>'
+    + '</div>';
+
+  body.querySelectorAll('[data-go]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const target = el.getAttribute('data-go');
+      goTo(target);
+      if(target==='screen-settings-api') renderSettingsApi();
+      if(target==='screen-settings-characters') renderSettingsCharacters();
+      if(target==='screen-settings-icons') renderSettingsIcons();
+      if(target==='screen-settings-worldbook') renderSettingsWorldbook();
+      if(target==='screen-settings-wallpaper') renderSettingsWallpaper();
+    });
+  });
+  body.querySelectorAll('#langSeg .seg-btn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-lang')===state.settings.language);
+    b.addEventListener('click', ()=>{
+      state.settings.language = b.getAttribute('data-lang');
+      saveState();
+      applyLanguage();
+      renderHome();
+      renderSettingsHome();
+    });
+  });
+  body.querySelectorAll('#themeSeg .seg-btn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-theme')===state.settings.theme);
+    b.addEventListener('click', ()=>{
+      state.settings.theme = b.getAttribute('data-theme');
+      saveState();
+      applyTheme();
+      renderSettingsHome();
+    });
+  });
+  body.querySelectorAll('#fitSeg .seg-btn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-fit')===(state.settings.fitScreen?'1':'0'));
+    b.addEventListener('click', ()=>{
+      state.settings.fitScreen = b.getAttribute('data-fit')==='1';
+      saveState();
+      applyFitScreen();
+      renderSettingsHome();
+    });
+  });
+}
+
+/* ===================================================================
+   SETTINGS > API
+=================================================================== */
+function renderSettingsApi(){
+  const body = document.getElementById('settingsApiBody');
+  const s = state.settings;
+  let html = '';
+  html += '<div class="field-label">'+t('settings.apiUrlLabel')+'</div>';
+  html += '<input class="field-input" id="apiUrlInput" placeholder="'+t('ph.apiUrl')+'" value="'+escapeHtml(s.apiUrl)+'">';
+  html += '<div class="field-label">'+t('settings.apiKeyLabel')+'</div>';
+  html += '<input class="field-input" id="apiKeyInput" type="password" placeholder="'+t('ph.apiKey')+'" value="'+escapeHtml(s.apiKey)+'">';
+  html += '<button class="btn-block secondary" id="fetchModelsBtn">'+t('btn.fetchModels')+'</button>';
+  html += '<div class="field-label">'+t('settings.modelLabel')+'</div>';
+  if(s.modelList && s.modelList.length){
+    html += '<div class="model-list">' + s.modelList.map(m=>
+      '<div class="model-item'+(m===s.model?' selected':'')+'" data-model="'+escapeHtml(m)+'">'+escapeHtml(m)+'</div>'
+    ).join('') + '</div>';
+  } else {
+    html += '<div class="field-hint">'+t('settings.modelListEmpty')+'</div>';
+  }
+  html += '<button class="btn-block" id="saveApiBtn">'+t('btn.connectTest')+'</button>';
+  body.innerHTML = html;
+
+  document.getElementById('fetchModelsBtn').addEventListener('click', ()=>{
+    s.apiUrl = document.getElementById('apiUrlInput').value.trim();
+    s.apiKey = document.getElementById('apiKeyInput').value.trim();
+    saveState();
+    fetchModelList();
+  });
+  document.getElementById('saveApiBtn').addEventListener('click', ()=>{
+    s.apiUrl = document.getElementById('apiUrlInput').value.trim();
+    s.apiKey = document.getElementById('apiKeyInput').value.trim();
+    saveState();
+    showToast(t('toast.saved'));
+    renderSettingsHome();
+  });
+  body.querySelectorAll('[data-model]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      s.model = el.getAttribute('data-model');
+      saveState();
+      renderSettingsApi();
+    });
+  });
+}
+
+/* ===================================================================
+   SETTINGS > CHARACTERS
+=================================================================== */
+function renderSettingsCharacters(){
+  const body = document.getElementById('settingsCharactersBody');
+  let html = '';
+  if(!state.characters.length){
+    html += '<div class="empty-state">'+t('settings.noCharacters')+'</div>';
+  } else {
+    state.characters.forEach(c=>{
+      const active = c.id===state.currentCharacterId;
+      html += '<div class="char-card'+(active?' active':'')+'" data-char-id="'+c.id+'">'
+        + '<div class="char-card-avatars">'
+          + '<div class="ig-avatar" style="'+avatarStyle(c.idolAvatar)+'"></div>'
+          + '<div class="ig-avatar" style="'+avatarStyle(c.userAvatar)+'"></div>'
+        + '</div>'
+        + '<div class="char-card-mid"><div class="char-card-title">'+escapeHtml(c.idolName||'—')+' &amp; '+escapeHtml(c.userName||'—')+'</div>'
+        + '<div class="char-card-sub">'+(c.secretRelationship? t('settings.relationLabel') : '')+'</div></div>'
+        + '<button class="char-card-edit" data-edit-id="'+c.id+'">'+t('btn.edit')+'</button>'
+        + '</div>';
+    });
+  }
+  html += '<button class="btn-block" id="newCharBtn">'+t('btn.newCharacter')+'</button>';
+  body.innerHTML = html;
+
+  body.querySelectorAll('.char-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-edit-id]')) return;
+      state.currentCharacterId = card.getAttribute('data-char-id');
+      saveState();
+      renderSettingsCharacters();
+      renderHome();
+      showToast(t('toast.saved'));
+    });
+  });
+  body.querySelectorAll('[data-edit-id]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openCharacterEdit(btn.getAttribute('data-edit-id'));
+    });
+  });
+  document.getElementById('newCharBtn').addEventListener('click', ()=>openCharacterEdit(null));
+}
+
+/* ===================================================================
+   SETTINGS > CHARACTER EDIT (create or edit)
+=================================================================== */
+let editingCharId = null; // null = creating new
+let editingCharDraft = null;
+
+function openCharacterEdit(charId){
+  editingCharId = charId;
+  const existing = charId ? state.characters.find(c=>c.id===charId) : null;
+  editingCharDraft = existing ? JSON.parse(JSON.stringify(existing)) : newCharacterTemplate();
+  document.getElementById('charEditTitle').textContent = existing ? t('settings.editCharacter') : t('settings.newCharacter');
+  goTo('screen-settings-character-edit');
+  renderCharacterEditForm();
+}
+
+function renderCharacterEditForm(){
+  const d = editingCharDraft;
+  const body = document.getElementById('charEditBody');
+  body.innerHTML =
+    '<div class="field-label">'+t('settings.idolSection')+'</div>'
+    + '<div class="avatar-row">'
+      + '<div class="avatar-upload" id="idolAvatarUpload" style="'+avatarStyle(d.idolAvatar)+'">'+(d.idolAvatar?'':t('btn.uploadImage'))+'</div>'
+      + '<input type="text" class="field-input" id="idolNameInput" placeholder="'+t('ph.idolName')+'" value="'+escapeHtml(d.idolName)+'" style="flex:1;">'
+    + '</div>'
+    + '<textarea class="field-textarea" id="idolBioInput" placeholder="'+t('ph.idolBio')+'">'+escapeHtml(d.idolBio)+'</textarea>'
+    + '<input type="text" class="field-input" id="idolAltNameInput" placeholder="'+t('ph.idolAltName')+'" value="'+escapeHtml(d.idolAltName||'')+'" style="margin-top:6px;">'
+
+    + '<div class="field-label">'+t('settings.userSection')+'</div>'
+    + '<div class="avatar-row">'
+      + '<div class="avatar-upload" id="userAvatarUpload" style="'+avatarStyle(d.userAvatar)+'">'+(d.userAvatar?'':t('btn.uploadImage'))+'</div>'
+      + '<input type="text" class="field-input" id="userNameInput" placeholder="'+t('ph.userName')+'" value="'+escapeHtml(d.userName)+'" style="flex:1;">'
+    + '</div>'
+    + '<textarea class="field-textarea" id="userBioInput" placeholder="'+t('ph.userBio')+'">'+escapeHtml(d.userBio)+'</textarea>'
+
+    + '<div class="field-label">&nbsp;</div>'
+    + '<div class="field-row-check" id="relationCheckRow"><div class="checkbox'+(d.secretRelationship?' checked':'')+'" id="relationCheckbox"></div><div>'+t('settings.relationLabel')+'</div></div>'
+    + '<div class="field-hint">'+t('settings.relationHint')+'</div>';
+
+  document.getElementById('idolNameInput').addEventListener('input', e=>{ d.idolName = e.target.value; });
+  document.getElementById('idolBioInput').addEventListener('input', e=>{ d.idolBio = e.target.value; });
+  document.getElementById('idolAltNameInput').addEventListener('input', e=>{ d.idolAltName = e.target.value; });
+  document.getElementById('userNameInput').addEventListener('input', e=>{ d.userName = e.target.value; });
+  document.getElementById('userBioInput').addEventListener('input', e=>{ d.userBio = e.target.value; });
+
+  document.getElementById('relationCheckRow').addEventListener('click', ()=>{
+    d.secretRelationship = !d.secretRelationship;
+    document.getElementById('relationCheckbox').classList.toggle('checked', d.secretRelationship);
+  });
+
+  bindAvatarUpload('idolAvatarUpload', (dataUrl)=>{ d.idolAvatar = dataUrl; renderCharacterEditForm(); });
+  bindAvatarUpload('userAvatarUpload', (dataUrl)=>{ d.userAvatar = dataUrl; renderCharacterEditForm(); });
+}
+
+function bindAvatarUpload(elId, onLoaded){
+  const el = document.getElementById(elId);
+  el.addEventListener('click', ()=>{
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async ()=>{
+      if(!input.files || !input.files[0]) return;
+      try{
+        const dataUrl = await fileToResizedDataUrl(input.files[0], 240);
+        onLoaded(dataUrl);
+      }catch(err){
+        console.warn(err);
+        showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+      }
+    };
+    input.click();
+  });
+}
+
+function saveCharacterDraft(){
+  const d = editingCharDraft;
+  if(!d.idolName.trim() && !d.userName.trim()){
+    showToast(t('toast.needName'));
+    return;
+  }
+  const existingIdx = state.characters.findIndex(c=>c.id===d.id);
+  if(existingIdx>-1) state.characters[existingIdx] = d;
+  else state.characters.push(d);
+  if(!state.currentCharacterId) state.currentCharacterId = d.id;
+  saveState();
+  showToast(t('toast.charSaved'));
+  goBack();
+  renderSettingsCharacters();
+  renderHome();
+}
+
+document.getElementById('charSaveBtn').addEventListener('click', saveCharacterDraft);
+
+/* ===================================================================
+   SETTINGS > APP ICONS — rename + custom icon image per app
+=================================================================== */
+const ICON_CUSTOMIZABLE = [
+  {key:'bubble', name:'Bubble'},
+  {key:'instagram', name:'Instagram'},
+  {key:'x', name:'X'},
+  {key:'paypal', name:'PayPal'},
+  {key:'maps', name:'Maps'},
+  {key:'notes', name:'Notes'},
+  {key:'chat', name:'Chat'},
+  {key:'settings', name:'Settings'},
+];
+
+function renderSettingsIcons(){
+  const body = document.getElementById('settingsIconsBody');
+  let html = '<div class="field-hint" style="margin-bottom:14px;">'+t('settings.iconHint')+'</div>';
+  ICON_CUSTOMIZABLE.forEach(def=>{
+    const custom = state.settings.customIcons[def.key];
+    const label = (custom && custom.name) ? custom.name : def.name;
+    html += '<div class="icon-row" data-icon-key="'+def.key+'">'
+      + iconMarkup(def.key)
+      + '<div class="icon-row-name">'+escapeHtml(label)+'</div>'
+      + '<button class="icon-row-edit" data-icon-edit="'+def.key+'">'+t('btn.edit')+'</button>'
+      + '</div>';
+  });
+  body.innerHTML = html;
+  body.querySelectorAll('[data-icon-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>openIconEditor(btn.getAttribute('data-icon-edit')));
+  });
+}
+
+function openIconEditor(appKey){
+  const def = ICON_CUSTOMIZABLE.find(d=>d.key===appKey);
+  const custom = state.settings.customIcons[appKey] || {};
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML =
+    '<div class="prompt-card-title">'+escapeHtml(def.name)+'</div>'
+    + '<div class="avatar-row" style="justify-content:center;margin-bottom:12px;">'
+      + '<div class="avatar-upload" id="iconEditorAvatar" style="'+avatarStyle(custom.icon)+'">'+(custom.icon?'':t('btn.uploadImage'))+'</div>'
+    + '</div>'
+    + '<input type="text" class="field-input" id="iconEditorName" placeholder="'+t('ph.iconName')+'" value="'+escapeHtml(custom.name||'')+'" style="margin-bottom:10px;">'
+    + '<div class="prompt-card-actions">'
+      + '<button class="pc-cancel" data-v="__reset">'+t('btn.reset')+'</button>'
+      + '<button class="pc-ok" data-v="__save">'+t('btn.applyIcon')+'</button>'
+    + '</div>';
+  overlay.classList.add('open');
+  let pendingIcon = custom.icon || '';
+  document.getElementById('iconEditorAvatar').addEventListener('click', ()=>{
+    const input = document.createElement('input');
+    input.type='file'; input.accept='image/*';
+    input.onchange = async ()=>{
+      if(!input.files || !input.files[0]) return;
+      pendingIcon = await fileToResizedDataUrl(input.files[0], 120);
+      document.getElementById('iconEditorAvatar').style = avatarStyle(pendingIcon);
+      document.getElementById('iconEditorAvatar').textContent = '';
+    };
+    input.click();
+  });
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v = btn.getAttribute('data-v');
+    if(v==='__save'){
+      const name = document.getElementById('iconEditorName').value.trim();
+      state.settings.customIcons[appKey] = {name:name, icon:pendingIcon};
+      saveState();
+      close();
+      showToast(t('toast.iconSaved'));
+      renderSettingsIcons();
+      renderHome();
+    } else if(v==='__reset'){
+      delete state.settings.customIcons[appKey];
+      saveState();
+      close();
+      showToast(t('toast.iconReset'));
+      renderSettingsIcons();
+      renderHome();
+    } else {
+      close();
+    }
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+/* ===================================================================
+   SETTINGS > WORLD BOOK — per-character list of addable entries
+=================================================================== */
+function renderSettingsWorldbook(){
+  const body = document.getElementById('settingsWorldbookBody');
+  const ch = getCurrentChar();
+  if(!ch){
+    body.innerHTML = '<div class="empty-state">'+t('toast.charMissing')+'</div>';
+    return;
+  }
+  const entries = ensureWorldBookEntries(ch);
+  let html = '<div class="field-hint" style="margin-bottom:14px;">'+t('settings.worldbookEntryHint')+'</div>';
+  if(!entries.length){
+    html += '<div class="empty-state">'+t('settings.worldbookEmpty')+'</div>';
+  } else {
+    entries.forEach((en,i)=>{
+      html += '<div class="note-item" data-wb-idx="'+i+'">'
+        + '<div class="note-title">'+escapeHtml(en.title||'')+'</div>'
+        + '<div class="note-preview">'+escapeHtml((en.content||'').slice(0,40))+'</div>'
+        + '</div>';
+    });
+  }
+  html += '<button class="btn-block" id="wbAddBtn">'+t('btn.addEntry')+'</button>';
+  body.innerHTML = html;
+
+  body.querySelectorAll('[data-wb-idx]').forEach(el=>{
+    el.addEventListener('click', ()=>openWorldbookEntry(parseInt(el.getAttribute('data-wb-idx'),10)));
+  });
+  document.getElementById('wbAddBtn').addEventListener('click', ()=>openWorldbookEntry(null));
+}
+
+let editingWbIdx = null;
+let editingWbDraft = null;
+
+function openWorldbookEntry(idx){
+  const ch = getCurrentChar();
+  const entries = ensureWorldBookEntries(ch);
+  editingWbIdx = idx;
+  if(idx===null){
+    editingWbDraft = {id:uid('wb'), title:t('settings.entryTitlePrefix')+' '+(entries.length+1), content:''};
+  } else {
+    editingWbDraft = JSON.parse(JSON.stringify(entries[idx]));
+  }
+  document.getElementById('wbEditTitle').textContent = editingWbDraft.title || t('settings.worldbook');
+  goTo('screen-settings-worldbook-edit');
+  renderWorldbookEntryForm();
+}
+
+function renderWorldbookEntryForm(){
+  const d = editingWbDraft;
+  const body = document.getElementById('wbEditBody');
+  body.innerHTML =
+    '<div class="field-label">'+t('settings.entryTitlePrefix')+'</div>'
+    + '<input type="text" class="field-input" id="wbTitleInput" value="'+escapeHtml(d.title)+'">'
+    + '<div class="field-label">&nbsp;</div>'
+    + '<textarea class="field-textarea" id="wbContentInput" style="min-height:300px;" placeholder="'+t('ph.worldBookEntry')+'">'+escapeHtml(d.content)+'</textarea>'
+    + (editingWbIdx!==null ? '<button class="btn-block danger" id="wbDeleteBtn">'+t('btn.deleteEntry')+'</button>' : '');
+
+  document.getElementById('wbTitleInput').addEventListener('input', e=>{
+    d.title = e.target.value;
+    document.getElementById('wbEditTitle').textContent = d.title || t('settings.worldbook');
+  });
+  document.getElementById('wbContentInput').addEventListener('input', e=>{ d.content = e.target.value; });
+
+  const delBtn = document.getElementById('wbDeleteBtn');
+  if(delBtn){
+    delBtn.addEventListener('click', ()=>{
+      const ch = getCurrentChar();
+      const entries = ensureWorldBookEntries(ch);
+      entries.splice(editingWbIdx,1);
+      saveState();
+      showToast(t('toast.entryDeleted'));
+      goBack();
+      renderSettingsWorldbook();
+    });
+  }
+}
+
+function saveWorldbookEntry(){
+  const ch = getCurrentChar();
+  if(!ch) return;
+  const entries = ensureWorldBookEntries(ch);
+  if(editingWbIdx===null) entries.push(editingWbDraft);
+  else entries[editingWbIdx] = editingWbDraft;
+  saveState();
+  showToast(t('toast.entrySaved'));
+  goBack();
+  renderSettingsWorldbook();
+}
+
+document.getElementById('wbSaveBtn').addEventListener('click', saveWorldbookEntry);
+
+/* ===================================================================
+   SETTINGS > WALLPAPER
+=================================================================== */
+function renderSettingsWallpaper(){
+  const body = document.getElementById('settingsWallpaperBody');
+  const wp = state.settings.wallpaper;
+  body.innerHTML =
+    '<div class="avatar-row" style="justify-content:center;margin-bottom:14px;">'
+      + '<div class="avatar-upload" id="wallpaperPreview" style="width:140px;height:140px;border-radius:22px;'+avatarStyle(wp)+'">'+(wp?'':t('btn.uploadImage'))+'</div>'
+    + '</div>'
+    + '<button class="btn-block secondary" id="wallpaperUploadBtn">'+t('btn.uploadWallpaper')+'</button>'
+    + '<button class="btn-block danger" id="wallpaperResetBtn">'+t('btn.resetWallpaper')+'</button>'
+    + '<div class="field-hint" style="margin-top:14px;">'+t('settings.wallpaperHint')+'</div>';
+
+  function pickFile(){
+    const input = document.createElement('input');
+    input.type='file'; input.accept='image/*';
+    input.onchange = async ()=>{
+      if(!input.files || !input.files[0]) return;
+      try{
+        const dataUrl = await fileToResizedDataUrl(input.files[0], 800);
+        state.settings.wallpaper = dataUrl;
+        saveState();
+        applyWallpaper();
+        showToast(t('toast.wallpaperSaved'));
+        renderSettingsWallpaper();
+      }catch(err){
+        console.warn(err);
+        showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+      }
+    };
+    input.click();
+  }
+  document.getElementById('wallpaperPreview').addEventListener('click', pickFile);
+  document.getElementById('wallpaperUploadBtn').addEventListener('click', pickFile);
+  document.getElementById('wallpaperResetBtn').addEventListener('click', ()=>{
+    state.settings.wallpaper = '';
+    saveState();
+    applyWallpaper();
+    showToast(t('toast.wallpaperReset'));
+    renderSettingsWallpaper();
+  });
+}
+
+/* ===================================================================
+   INIT
+=================================================================== */
+function tick(){
+  document.getElementById('sbTime').textContent = formatClock();
+}
+
+function init(){
+  applyTheme();
+  applyLanguage();
+  applyFitScreen();
+  applyWallpaper();
+  renderHome();
+  showScreenRaw('screen-home');
+  tick();
+  setInterval(tick, 15000);
+}
+
+init();
+</script>
+</body>
+</html>
