@@ -763,6 +763,97 @@ body.has-fit-screen{padding:0;}
 .prompt-card-actions .pc-cancel{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
 .prompt-card-actions .pc-ok{background:var(--accent);color:var(--accent-text);}
 
+/* ===== Inline selection mode (circles from left) ===== */
+/* When .sel-mode is active on a feed container, messages slide right to reveal circle */
+.sel-mode-bar{
+  display:none;
+  position:absolute;bottom:0;left:0;right:0;
+  z-index:50;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  padding:8px 12px;
+  flex-direction:column;
+  gap:6px;
+}
+.sel-mode-bar.open{display:flex;}
+.sel-mode-actions{display:flex;gap:8px;align-items:center;}
+.sel-mode-count{flex:1;font-size:13px;color:var(--text-2);}
+.sel-mode-edit{font-size:13.5px;font-weight:600;color:var(--text);padding:8px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
+.sel-mode-delete{font-size:13.5px;font-weight:600;color:var(--danger);padding:8px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
+.sel-mode-cancel{font-size:13.5px;font-weight:500;color:var(--text-2);padding:8px 10px;}
+
+/* bubble-row and dm-feed rows get a circle on left in sel-mode */
+.feed-selectable{position:relative;}
+.sel-circle{
+  width:22px;height:22px;border-radius:50%;
+  border:1.5px solid var(--border);
+  background:var(--surface);
+  flex:0 0 auto;
+  display:none; /* shown via .in-sel-mode */
+  align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:transform .12s ease;
+}
+.sel-circle.on{background:var(--accent);border-color:var(--accent);}
+.sel-circle.on:after{
+  content:"";display:block;
+  width:5px;height:9px;
+  border-right:2px solid var(--accent-text);
+  border-bottom:2px solid var(--accent-text);
+  transform:rotate(45deg) translate(-1px,-1px);
+}
+.in-sel-mode .sel-circle{display:flex;}
+.in-sel-mode .bubble-row{
+  transform:translateX(30px);
+  transition:transform .18s ease;
+}
+
+/* Keep old sel-overlay for posts/DM-list/search-history (not inline chat) */
+.sel-overlay{
+  position:absolute;inset:0;z-index:300;
+  background:rgba(0,0,0,0.38);
+  display:none;flex-direction:column;
+}
+.sel-overlay.open{display:flex;}
+.sel-topbar{
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  font-size:14px;font-weight:600;
+}
+.sel-cancel{color:var(--text-2);font-size:14px;padding:4px 8px;}
+.sel-act-row{display:flex;gap:8px;}
+.sel-edit-btn{color:var(--text);font-size:13.5px;padding:6px 12px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);}
+.sel-delete-btn{color:var(--danger);font-size:13.5px;padding:6px 12px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);}
+.sel-list{flex:1 1 auto;overflow-y:auto;background:var(--bg);}
+.sel-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 16px;
+  border-bottom:1px solid var(--border);
+  background:var(--bg);
+  user-select:none;
+}
+.sel-item.checked{background:var(--surface-2);}
+.sel-check{
+  width:22px;height:22px;border-radius:50%;
+  border:1.5px solid var(--border);
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface);
+}
+.sel-check.on{background:var(--accent);border-color:var(--accent);}
+.sel-check.on:after{
+  content:"";width:6px;height:10px;
+  border-right:2px solid var(--accent-text);
+  border-bottom:2px solid var(--accent-text);
+  transform:rotate(45deg) translateY(-1px);
+}
+.sel-content{flex:1 1 auto;min-width:0;}
+.sel-item-meta{font-size:11.5px;color:var(--text-3);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
 @media (max-width:420px){
   body{padding:0;}
   #phone{width:100vw;height:100vh;border-radius:0;border:none;}
@@ -770,10 +861,15 @@ body.has-fit-screen{padding:0;}
 
 /* ===== Refresh button spin when loading ===== */
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.refresh-btn.spinning{
+  position:relative;
+}
 .refresh-btn.spinning svg{
   animation:spin .8s linear infinite;
-  transform-origin:center center;
+  transform-origin:50% 50%;
+  transform-box:fill-box;
   display:block;
+  will-change:transform;
 }
 
 /* ===== In-phone generating indicator (for chat/DM reply) ===== */
@@ -868,6 +964,14 @@ body.has-fit-screen #gen-indicator{
         <button class="hdr-btn icon-btn refresh-btn" id="bubbleRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
       </div>
       <div class="bubble-feed" id="bubbleFeed"></div>
+      <div class="sel-mode-bar" id="bubbleSelBar">
+        <div class="sel-mode-actions">
+          <span class="sel-mode-count">已选 0 条</span>
+          <button class="sel-mode-edit" style="display:none;">编辑</button>
+          <button class="sel-mode-delete">删除</button>
+          <button class="sel-mode-cancel">取消</button>
+        </div>
+      </div>
       <div class="bubble-inputbar">
         <button class="photo-btn" id="bubblePhotoBtn" title="photo"></button>
         <input type="text" id="bubbleInput" class="thin-input" placeholder="Type a message...">
@@ -925,6 +1029,14 @@ body.has-fit-screen #gen-indicator{
         <span class="hdr-spacer"></span>
       </div>
       <div class="dm-feed" id="igDmFeed"></div>
+      <div class="sel-mode-bar" id="dmSelBar">
+        <div class="sel-mode-actions">
+          <span class="sel-mode-count">已选 0 条</span>
+          <button class="sel-mode-edit" style="display:none;">编辑</button>
+          <button class="sel-mode-delete">删除</button>
+          <button class="sel-mode-cancel">取消</button>
+        </div>
+      </div>
       <div class="bubble-inputbar" id="igDmInputBar">
         <input type="text" id="igDmInput" class="thin-input" placeholder="Type a message...">
         <button class="chat-trigger-btn" id="igDmTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
@@ -1005,6 +1117,14 @@ body.has-fit-screen #gen-indicator{
         <span class="hdr-spacer"></span>
       </div>
       <div class="dm-feed" id="userChatFeed"></div>
+      <div class="sel-mode-bar" id="chatSelBar">
+        <div class="sel-mode-actions">
+          <span class="sel-mode-count">已选 0 条</span>
+          <button class="sel-mode-edit" style="display:none;">编辑</button>
+          <button class="sel-mode-delete">删除</button>
+          <button class="sel-mode-cancel">取消</button>
+        </div>
+      </div>
       <div class="bubble-inputbar">
         <input type="text" id="userChatInput" class="thin-input" placeholder="Type a message...">
         <button class="chat-trigger-btn" id="userChatTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
@@ -1107,11 +1227,43 @@ body.has-fit-screen #gen-indicator{
       <div class="detail-body" id="settingsWallpaperBody"></div>
     </div>
 
+    <!-- ---------- SETTINGS: MEMORY ---------- -->
+    <div id="screen-settings-memory" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">Memory</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="settingsMemoryBody"></div>
+    </div>
+
+    <!-- ---------- SETTINGS: MEMORY ENTRY EDIT ---------- -->
+    <div id="screen-settings-memory-edit" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="memEditTitle">Memory</div>
+        <button class="hdr-btn refresh-btn" id="memSaveBtn">保存</button>
+      </div>
+      <div class="detail-body" id="memEditBody"></div>
+    </div>
+
     <div class="sheet-overlay" id="sheetOverlay">
       <div class="action-sheet" id="actionSheet"></div>
     </div>
     <div class="prompt-overlay" id="promptOverlay">
       <div class="prompt-card" id="promptCard"></div>
+    </div>
+    <!-- Selection overlay for posts/DM-list/search-history multi-select -->
+    <div class="sel-overlay" id="selOverlay">
+      <div class="sel-topbar">
+        <button class="sel-cancel" id="selCancelBtn">取消</button>
+        <span id="selCountLabel">已选 0 条</span>
+        <div class="sel-act-row">
+          <button class="sel-edit-btn" id="selEditBtn">编辑</button>
+          <button class="sel-delete-btn" id="selDeleteBtn">删除</button>
+        </div>
+      </div>
+      <div class="sel-list" id="selList"></div>
     </div>
     <div id="phone-gen-indicator">Generating...</div>
 
@@ -1149,6 +1301,7 @@ const I18N = {
     'btn.refreshTrending':'刷新热搜','btn.refreshDm':'刷新私信','btn.sendPhoto':'发送图片描述',
     'btn.addEntry':'+ 添加条目','btn.deleteEntry':'删除该条目',
     'btn.uploadWallpaper':'上传壁纸','btn.resetWallpaper':'恢复默认壁纸',
+    'btn.deleteChar':'删除该角色及存档',
     'ph.photoDesc':'描述这张照片的内容…',
     'ph.idolName':'例如：林夏',
     'ph.idolAltName':'小号的用户名（选填，如 @night_wander）',
@@ -1206,6 +1359,11 @@ const I18N = {
     'toast.wallpaperReset':'已恢复默认壁纸',
     'toast.entrySaved':'世界书条目已保存',
     'toast.entryDeleted':'条目已删除',
+    'toast.charDeleted':'角色已删除',
+    'toast.msgDeleted':'消息已删除',
+    'toast.postDeleted':'帖子已删除',
+    'toast.historyDeleted':'记录已删除',
+    'toast.msgEdited':'消息已编辑',
     'empty.bubble':'点击右上角 Refresh 加载内容',
     'empty.ig':'点击右上角 Refresh 加载内容',
     'empty.dm':'暂无私信',
@@ -1235,6 +1393,7 @@ const I18N = {
     'btn.refreshTrending':'Refresh trending','btn.refreshDm':'Refresh DM','btn.sendPhoto':'Send photo description',
     'btn.addEntry':'+ Add entry','btn.deleteEntry':'Delete this entry',
     'btn.uploadWallpaper':'Upload wallpaper','btn.resetWallpaper':'Reset to default wallpaper',
+    'btn.deleteChar':'Delete character & save data',
     'ph.photoDesc':'Describe what this photo shows…',
     'ph.idolName':'e.g. Lin Xia',
     'ph.idolAltName':'Secret account username (optional, e.g. @night_wander)',
@@ -1292,6 +1451,11 @@ const I18N = {
     'toast.wallpaperReset':'Wallpaper reset to default',
     'toast.entrySaved':'World book entry saved',
     'toast.entryDeleted':'Entry deleted',
+    'toast.charDeleted':'Character deleted',
+    'toast.msgDeleted':'Message(s) deleted',
+    'toast.postDeleted':'Post(s) deleted',
+    'toast.historyDeleted':'Record(s) deleted',
+    'toast.msgEdited':'Message edited',
     'empty.bubble':'Tap Refresh in the top right to load content',
     'empty.ig':'Tap Refresh in the top right to load content',
     'empty.dm':'No messages',
@@ -1387,10 +1551,11 @@ function newCharacterTemplate(){
   return {
     id:'c'+Date.now()+Math.floor(Math.random()*1000),
     idolName:'', idolBio:'', idolAvatar:'',
-    idolAltName:'', // secret account username
+    idolAltName:'',
     userName:'', userBio:'', userAvatar:'',
     secretRelationship:false,
     worldBookEntries:[],
+    memoryEntries:[],
     phoneData:null
   };
 }
@@ -1838,13 +2003,67 @@ function buildBaseSystemPrompt(ch, extra){
     ? '用户是idol的地下恋人：双方关系亲密、私密，需要对外界保密，公开内容中idol不会暴露恋情，但私下互动可以体现亲密感与默契。'
     : '用户是idol的普通粉丝身份，互动应保持idol与粉丝之间的距离感和礼貌得体。';
   const wb = worldBookCombinedText(ch);
+
+  // === 记忆互通：整合所有已生成内容作为上下文 ===
+  const memoryParts = [];
+
+  // 聊天记录（私信）
+  const chatCtx = recentUserChatContext(ch, 10);
+  if(chatCtx) memoryParts.push(chatCtx);
+
+  // Bubble 发言记录
+  try{
+    const pd = ensurePhoneData(ch);
+    if(pd.bubble && pd.bubble.rounds && pd.bubble.rounds.length){
+      const recentBubble = pd.bubble.rounds.slice(-5);
+      const bubbleLines = recentBubble.map(r=>{
+        let line = 'idol（Bubble）：'+r.text;
+        if(r.replies && r.replies.length){
+          const sampleReplies = r.replies.slice(0,2).map(rep=>rep.name+'：'+rep.text).join('；');
+          line += '  [粉丝回复示例：'+sampleReplies+']';
+        }
+        return line;
+      }).join('\n');
+      if(bubbleLines) memoryParts.push('\n【idol最近在Bubble上发布的内容（请保持风格与话题一致）】\n'+bubbleLines);
+    }
+  }catch(e){}
+
+  // Instagram 帖子摘要
+  try{
+    const pd = ensurePhoneData(ch);
+    if(pd.instagram && pd.instagram.posts && pd.instagram.posts.length){
+      const recentPosts = pd.instagram.posts.slice(-3);
+      const postLines = recentPosts.map(p=>'idol（Instagram）：'+p.caption).join('\n');
+      if(postLines) memoryParts.push('\n【idol最近的Instagram帖子（请保持风格一致）】\n'+postLines);
+    }
+  }catch(e){}
+
+  // Notes 备忘录摘要
+  try{
+    const pd = ensurePhoneData(ch);
+    if(pd.notes && pd.notes.items && pd.notes.items.length){
+      const recentNotes = pd.notes.items.slice(-2);
+      const noteLines = recentNotes.map(n=>n.title+'：'+(n.body||'').slice(0,60)).join('\n');
+      if(noteLines) memoryParts.push('\n【idol的备忘录摘要（作为idol状态参考）】\n'+noteLines);
+    }
+  }catch(e){}
+
+  // 角色记忆条目
+  try{
+    const entries = ch.memoryEntries || [];
+    if(entries.length){
+      const memLines = entries.map(e=>(e.title?'['+e.title+'] ':'')+e.content).filter(Boolean).join('\n');
+      if(memLines) memoryParts.push('\n【角色记忆（重要事件与背景，生成内容时请参考并保持一致）】\n'+memLines);
+    }
+  }catch(e){}
+
   return [
     '你是一个手机模拟应用的内容生成引擎，为虚构角色生成手机里各软件的内容。',
     '【idol 人设】姓名：'+(ch.idolName||'未命名')+'；简介：'+(ch.idolBio||'无'),
     '【用户人设】姓名：'+(ch.userName||'未命名')+'；简介：'+(ch.userBio||'无'),
     '【关系设定】'+relation,
     wb ? ('【世界书 / 生成要求】\n'+wb) : '【世界书】无特殊设定。',
-    typeof recentUserChatContext==='function' ? recentUserChatContext(ch, 10) : '',
+    memoryParts.join(''),
     '【语言要求】除非是无法翻译的专有名词、品牌名或英文缩写，全部内容必须使用简体中文输出。',
     '【内容要求】内容真实自然、有生活气息，避免空洞和重复，不要使用表情符号(emoji)。',
     extra || ''
@@ -1854,48 +2073,6 @@ function buildBaseSystemPrompt(ch, extra){
 /* ===================================================================
    BUBBLE APP — idol broadcasts to fans, fans reply
 =================================================================== */
-function renderBubble(){
-  const ch = getCurrentChar();
-  const pd = ensurePhoneData(ch);
-  const feed = document.getElementById('bubbleFeed');
-  if(!pd.bubble.rounds.length){
-    feed.innerHTML = '<div class="empty-state">'+t('empty.bubble')+'</div>';
-    return;
-  }
-  feed.innerHTML = pd.bubble.rounds.map(roundHtml).join('');
-  feed.querySelectorAll('.expand-toggle').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const roundId = btn.getAttribute('data-round');
-      const round = pd.bubble.rounds.find(r=>r.id===roundId);
-      round.expanded = !round.expanded;
-      renderBubble();
-    });
-  });
-  feed.scrollTop = feed.scrollHeight;
-}
-
-function roundHtml(round){
-  let html = '<div class="bubble-round">';
-  if(round.photo){
-    html += '<div class="bubble-row sent"><div class="bubble-photo">'+escapeHtml(round.text)+'</div></div>';
-  } else {
-    html += '<div class="bubble-row sent"><div class="bubble sent">'+escapeHtml(round.text)+'</div></div>';
-  }
-  const repliesCount = (round.replies||[]).length;
-  if(repliesCount){
-    html += '<button class="expand-toggle" data-round="'+round.id+'">'+(round.expanded? t('expand.hide') : t('expand.show'))+'</button>';
-    if(round.expanded){
-      html += '<div class="fan-replies">';
-      round.replies.forEach(r=>{
-        html += '<div class="fan-reply-item"><div class="fan-name">'+escapeHtml(r.name)+'</div><div class="bubble-row recv"><div class="bubble recv">'+escapeHtml(r.text)+'</div></div></div>';
-      });
-      html += '</div>';
-    }
-  }
-  html += '</div>';
-  return html;
-}
-
 async function bubbleGenerateFanReplies(ch, idolText){
   const sys = buildBaseSystemPrompt(ch, '现在请为idol刚刚发出的一条消息，生成来自不同粉丝的回复。');
   const usr = 'idol刚刚发送的内容是：「'+idolText+'」\n请生成恰好8条来自不同粉丝的回复评论，粉丝姓名（网名/ID）各不相同且口语化。\n输出 JSON 格式：{"replies":[{"name":"粉丝昵称","text":"回复内容"}, ... 共8条]}';
@@ -1922,9 +2099,41 @@ async function refreshBubble(){
         replies: Array.isArray(m.replies) ? m.replies.slice(0,8) : [],
         expanded:false
       }));
+      // Keep existing rounds, stream new ones in
+      const existingCount = pd.bubble.rounds.length;
       pd.bubble.rounds = pd.bubble.rounds.concat(newRounds);
       saveState();
+      // Render existing first
       renderBubble();
+      // Then stream in new rounds one by one by re-appending their HTML
+      const feed = document.getElementById('bubbleFeed');
+      // Remove empty-state if present
+      const es = feed.querySelector('.empty-state');
+      if(es) es.remove();
+      // Temporarily remove new rounds from DOM so we can stream them
+      const allRendered = Array.from(feed.querySelectorAll('.bubble-round'));
+      // Remove newly rendered rounds (they were added by renderBubble)
+      allRendered.slice(existingCount).forEach(el=>el.remove());
+      // Stream them back in one by one
+      let i=0;
+      function streamNextRound(){
+        if(i>=newRounds.length) return;
+        const round = newRounds[i++];
+        const div = document.createElement('div');
+        div.innerHTML = roundHtml(round);
+        const el = div.firstChild;
+        feed.appendChild(el);
+        // bind expand toggle for this round
+        el.querySelectorAll('.expand-toggle').forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const r = pd.bubble.rounds.find(x=>x.id===btn.getAttribute('data-round'));
+            if(r){ r.expanded=!r.expanded; renderBubble(); }
+          });
+        });
+        feed.scrollTop = feed.scrollHeight;
+        setTimeout(streamNextRound, 900);
+      }
+      streamNextRound();
     } else {
       throw new Error('Could not parse the message list from the API response');
     }
@@ -2127,6 +2336,34 @@ function renderIgBody(){
   }
   body.innerHTML = html;
   bindIgBodyEvents('idol');
+
+  // Long-press on posts (posts tab)
+  if(igActiveTab==='posts'){
+    setTimeout(()=>renderIgBodyWithLongPress('idol'), 30);
+  }
+  // Long-press on search history
+  if(igActiveTab==='search'){
+    setTimeout(()=>attachLongPress(body, '.trend-item', 600, ()=>openSearchHistoryWithDelete('idol')), 30);
+  }
+  // Long-press on DM list to delete conversations
+  if(igActiveTab==='dm'){
+    setTimeout(()=>{
+      const pd = resolveIgPd('idol');
+      attachLongPress(body, '.dm-list-item', 600, (el)=>{
+        const items = pd.dms.map((d,i)=>({id:String(i), label:d.name, sublabel:(d.messages[d.messages.length-1]||{}).text||''}));
+        openSelOverlay({type:'dmList', scope:'idol'},
+          items,
+          (ids)=>{
+            const toRemove = new Set(ids.map(Number));
+            pd.dms = pd.dms.filter((_,i)=>!toRemove.has(i));
+            saveState(); renderInstagram(); showToast(t('toast.msgDeleted'));
+          }
+        );
+        const idx = parseInt(el.getAttribute('data-dm-idx'),10);
+        if(!isNaN(idx)) { _selChecked.add(String(idx)); renderSelOverlay(); }
+      });
+    }, 30);
+  }
 }
 
 document.getElementById('igTabs').addEventListener('click', (e)=>{
@@ -2285,6 +2522,34 @@ function renderIgAltBody(){
   }
   body.innerHTML = html;
   bindIgBodyEvents('idolAlt');
+
+  // Long-press on posts
+  if(igAltActiveTab==='posts'){
+    setTimeout(()=>renderIgBodyWithLongPress('idolAlt'), 30);
+  }
+  // Long-press on search history
+  if(igAltActiveTab==='search'){
+    setTimeout(()=>attachLongPress(body, '.trend-item', 600, ()=>openSearchHistoryWithDelete('idolAlt')), 30);
+  }
+  // Long-press on DM list
+  if(igAltActiveTab==='dm'){
+    setTimeout(()=>{
+      const pd = resolveIgPd('idolAlt');
+      attachLongPress(body, '.dm-list-item', 600, (el)=>{
+        const items = pd.dms.map((d,i)=>({id:String(i), label:d.name, sublabel:(d.messages[d.messages.length-1]||{}).text||''}));
+        openSelOverlay({type:'dmList', scope:'idolAlt'},
+          items,
+          (ids)=>{
+            const toRemove = new Set(ids.map(Number));
+            pd.dms = pd.dms.filter((_,i)=>!toRemove.has(i));
+            saveState(); renderInstagramAlt(); showToast(t('toast.msgDeleted'));
+          }
+        );
+        const idx = parseInt(el.getAttribute('data-dm-idx'),10);
+        if(!isNaN(idx)){ _selChecked.add(String(idx)); _renderSelOverlay(); }
+      });
+    }, 30);
+  }
 }
 
 document.getElementById('igAltTabs').addEventListener('click', (e)=>{
@@ -2411,24 +2676,12 @@ function openDmConversation(scope, idx){
   renderDmFeed();
 }
 
-function renderDmFeed(){
-  const {scope, idx} = currentDmCtx;
-  const pd = resolveIgPd(scope);
-  const dm = pd.dms[idx];
-  const feed = document.getElementById('igDmFeed');
-  feed.innerHTML = dm.messages.map(m=>{
-    const mine = m.from==='me';
-    return '<div class="bubble-row '+(mine?'sent':'recv')+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
-  }).join('');
-  feed.scrollTop = feed.scrollHeight;
-}
-
 async function sendDmReply(text){
   const ch = getCurrentChar();
   const {scope, idx} = currentDmCtx;
   const pd = resolveIgPd(scope);
   const dm = pd.dms[idx];
-  dm.messages.push({from:'me', text});
+  dm.messages.push({from:'me', text, id:uid('dm')});
   saveState();
   renderDmFeed();
   // Auto-reply removed: click the trigger icon to generate a reply
@@ -2455,12 +2708,26 @@ document.getElementById('igDmTriggerBtn').addEventListener('click', async ()=>{
   showPhoneGenerating();
   try{
     const speaker = scope==='user' ? (ch.userName||'用户') : (ch.idolName||'idol');
-    const sys = buildBaseSystemPrompt(ch, '现在请扮演私信对方「'+dm.name+'」（标签：'+(dm.tag||'')+'），针对对话历史，主动发送一条符合其身份与关系的消息。');
+    const sys = buildBaseSystemPrompt(ch, '现在请扮演私信对方「'+dm.name+'」（标签：'+(dm.tag||'')+'），针对对话历史，用符合其身份的语气自然地发送回复消息，条数由对话内容决定，自然即可。');
     const history = dm.messages.map(m=>(m.from==='me'? speaker : dm.name)+'：'+m.text).join('\n');
-    const usr = '私信历史：\n'+history+'\n\n请只生成「'+dm.name+'」接下来发的这一条消息。\n输出 JSON：{"text":"消息内容"}';
+    const usr = '私信历史：\n'+history+'\n\n请生成「'+dm.name+'」接下来发的消息，条数自然即可。\n输出 JSON：{"messages":["消息1","消息2",...]}';
     const data = await generateJSON(sys, usr);
-    if(data && data.text){
-      dm.messages.push({from:'them', text:data.text});
+    if(data && Array.isArray(data.messages) && data.messages.length){
+      const newMsgs = data.messages.filter(t=>t&&t.trim()).map(t=>({from:'them',text:t.trim(),id:uid('dm')}));
+      newMsgs.forEach(m=>dm.messages.push(m));
+      saveState();
+      // Stream
+      const feed = document.getElementById('igDmFeed');
+      const existingMsgs = dm.messages.slice(0, dm.messages.length - newMsgs.length);
+      feed.innerHTML = existingMsgs.map(m=>{
+        const mine=m.from==='me';
+        return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
+      }).join('');
+      streamMessages(feed, newMsgs, 650);
+    } else if(data && data.text){
+      // fallback single message
+      const m = {from:'them',text:data.text,id:uid('dm')};
+      dm.messages.push(m);
       saveState();
       renderDmFeed();
     } else { throw new Error('parse failed'); }
@@ -2790,21 +3057,6 @@ function renderUserChat(){
   renderUserChatFeed();
 }
 
-function renderUserChatFeed(){
-  const ch = getCurrentChar();
-  const pd = ensurePhoneData(ch).userChat;
-  const feed = document.getElementById('userChatFeed');
-  if(!pd.messages.length){
-    feed.innerHTML = '<div class="empty-state">'+t('empty.dm')+'</div>';
-    return;
-  }
-  feed.innerHTML = pd.messages.map(m=>{
-    const mine = m.from==='me';
-    return '<div class="bubble-row '+(mine?'sent':'recv')+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
-  }).join('');
-  feed.scrollTop = feed.scrollHeight;
-}
-
 function recentUserChatContext(ch, limit){
   const pd = ensurePhoneData(ch).userChat;
   const msgs = pd.messages.slice(-1*(limit||10));
@@ -2816,7 +3068,7 @@ function recentUserChatContext(ch, limit){
 function addUserChatMessage(text){
   const ch = getCurrentChar();
   const pd = ensurePhoneData(ch).userChat;
-  pd.messages.push({from:'me', text});
+  pd.messages.push({from:'me', text, id:uid('m')});
   saveState();
   renderUserChatFeed();
 }
@@ -2829,14 +3081,34 @@ async function triggerIdolChatReply(){
   if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
   showPhoneGenerating();
   try{
-    const sys = buildBaseSystemPrompt(ch, '现在请扮演idol本人，回复用户刚刚发来的私下消息。这是两人之间最私密的聊天频道。');
+    const sys = buildBaseSystemPrompt(ch,
+      '现在请扮演idol本人，回复用户刚刚发来的私下消息。这是两人之间最私密的聊天频道。\n'
+      +'【回复要求】根据idol人设与当前对话内容，真实地模拟idol的聊天风格：\n'
+      +'- 回复条数完全由对话节奏和idol人设决定，像真实聊天一样自然（可以是一句也可以是十几句）\n'
+      +'- 可以有短促的感叹（如"哈哈"、"啊"、"嗯"）作为独立消息\n'
+      +'- 可以分多次说完一件事，像真实聊天一样断句\n'
+      +'- 语气、用词、聊天节奏必须完全符合idol人设与两人的关系设定\n'
+      +'- 消息之间要有逻辑连贯性，不要重复同一意思'
+    );
     const history = pd.messages.map(m=>(m.from==='me'? (ch.userName||'用户') : (ch.idolName||'idol'))+'：'+m.text).join('\n');
-    const usr = '聊天记录：\n'+history+'\n\n请只生成idol接下来回复的这一条消息，语气、用词要符合idol人设与两人的关系设定。\n输出 JSON：{"text":"回复内容"}';
+    const usr = '聊天记录：\n'+history+'\n\n请生成idol接下来要发送的消息，条数完全由人设和对话内容决定，自然即可。\n输出 JSON：{"messages":["消息1","消息2",...]}';
     const data = await generateJSON(sys, usr);
-    if(data && data.text){
-      pd.messages.push({from:'them', text:data.text});
+    if(data && Array.isArray(data.messages) && data.messages.length){
+      const newMsgs = data.messages
+        .filter(text=>text && text.trim())
+        .map(text=>({from:'them', text:text.trim(), id:uid('m')}));
+      newMsgs.forEach(m=>pd.messages.push(m));
       saveState();
-      renderUserChatFeed();
+      // Stream: show messages one by one
+      const feed = document.getElementById('userChatFeed');
+      // Re-render existing messages first (without new ones), then stream new
+      const allMsgs = pd.messages;
+      const existingMsgs = allMsgs.slice(0, allMsgs.length - newMsgs.length);
+      feed.innerHTML = existingMsgs.map(m=>{
+        const mine = m.from==='me';
+        return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
+      }).join('') || '<div class="empty-state">'+t('empty.dm')+'</div>';
+      streamMessages(feed, newMsgs, 700);
     } else { throw new Error('Could not parse a reply from the API response'); }
   }catch(err){
     console.warn(err);
@@ -2901,6 +3173,30 @@ function renderUserIgBody(){
   }
   body.innerHTML = html;
   bindIgBodyEvents('user');
+
+  // Long-press on user feed posts
+  if(userIgActiveTab==='feed'){
+    setTimeout(()=>renderIgBodyWithLongPress('user'), 30);
+  }
+  // Long-press on DM list to delete conversations
+  if(userIgActiveTab==='dm'){
+    setTimeout(()=>{
+      const pd = resolveIgPd('user');
+      attachLongPress(body, '.dm-list-item', 600, (el)=>{
+        const items = pd.dms.map((d,i)=>({id:String(i), label:d.name, sublabel:(d.messages[d.messages.length-1]||{}).text||''}));
+        openSelOverlay({type:'dmList', scope:'user'},
+          items,
+          (ids)=>{
+            const toRemove = new Set(ids.map(Number));
+            pd.dms = pd.dms.filter((_,i)=>!toRemove.has(i));
+            saveState(); renderUserInstagram(); showToast(t('toast.msgDeleted'));
+          }
+        );
+        const idx = parseInt(el.getAttribute('data-dm-idx'),10);
+        if(!isNaN(idx)){ _selChecked.add(String(idx)); _renderSelOverlay(); }
+      });
+    }, 30);
+  }
 }
 
 document.getElementById('userIgTabs').addEventListener('click', (e)=>{
@@ -2954,7 +3250,8 @@ function renderSettingsHome(){
     '<div class="settings-group">'
       + '<div class="settings-row" data-go="screen-settings-api"><div class="settings-row-label">'+t('settings.row.api')+'</div><div class="settings-row-value">'+(state.settings.model? escapeHtml(state.settings.model) : '')+' <span class="settings-chevron">›</span></div></div>'
       + '<div class="settings-row" data-go="screen-settings-characters"><div class="settings-row-label">'+t('settings.row.characters')+'</div><div class="settings-row-value">'+(ch? escapeHtml(ch.idolName||'') : '')+' <span class="settings-chevron">›</span></div></div>'
-      + '<div class="settings-row single" data-go="screen-settings-worldbook"><div class="settings-row-label">'+t('settings.row.worldbook')+'</div><div class="settings-row-value">'+(ch? ensureWorldBookEntries(ch).length : 0)+' <span class="settings-chevron">›</span></div></div>'
+      + '<div class="settings-row" data-go="screen-settings-worldbook"><div class="settings-row-label">'+t('settings.row.worldbook')+'</div><div class="settings-row-value">'+(ch? ensureWorldBookEntries(ch).length : 0)+' <span class="settings-chevron">›</span></div></div>'
+      + '<div class="settings-row single" data-go="screen-settings-memory"><div class="settings-row-label">Memory</div><div class="settings-row-value">'+(ch? (ch.memoryEntries||[]).length : 0)+' <span class="settings-chevron">›</span></div></div>'
     + '</div>'
     + '<div class="settings-group">'
       + '<div class="settings-row single"><div class="settings-row-label">'+t('settings.row.language')+'</div>'
@@ -2991,6 +3288,7 @@ function renderSettingsHome(){
       if(target==='screen-settings-icons') renderSettingsIcons();
       if(target==='screen-settings-worldbook') renderSettingsWorldbook();
       if(target==='screen-settings-wallpaper') renderSettingsWallpaper();
+      if(target==='screen-settings-memory') renderSettingsMemory();
     });
   });
   body.querySelectorAll('#langSeg .seg-btn').forEach(b=>{
@@ -3148,7 +3446,8 @@ function renderCharacterEditForm(){
 
     + '<div class="field-label">&nbsp;</div>'
     + '<div class="field-row-check" id="relationCheckRow"><div class="checkbox'+(d.secretRelationship?' checked':'')+'" id="relationCheckbox"></div><div>'+t('settings.relationLabel')+'</div></div>'
-    + '<div class="field-hint">'+t('settings.relationHint')+'</div>';
+    + '<div class="field-hint">'+t('settings.relationHint')+'</div>'
+    + (editingCharId ? '<div class="field-label">&nbsp;</div><button class="btn-block danger" id="deleteCharBtn">'+t('btn.deleteChar')+'</button>' : '');
 
   document.getElementById('idolNameInput').addEventListener('input', e=>{ d.idolName = e.target.value; });
   document.getElementById('idolBioInput').addEventListener('input', e=>{ d.idolBio = e.target.value; });
@@ -3163,6 +3462,11 @@ function renderCharacterEditForm(){
 
   bindAvatarUpload('idolAvatarUpload', (dataUrl)=>{ d.idolAvatar = dataUrl; renderCharacterEditForm(); });
   bindAvatarUpload('userAvatarUpload', (dataUrl)=>{ d.userAvatar = dataUrl; renderCharacterEditForm(); });
+
+  const delCharBtn = document.getElementById('deleteCharBtn');
+  if(delCharBtn){
+    delCharBtn.addEventListener('click', ()=>deleteCharacter(editingCharId));
+  }
 }
 
 function bindAvatarUpload(elId, onLoaded){
@@ -3428,6 +3732,522 @@ function renderSettingsWallpaper(){
 }
 
 /* ===================================================================
+   SELECTION SYSTEM
+   - Chat/Bubble/DM: inline mode (circles slide in from left, bar at bottom)
+   - Posts/Search/DM-list: overlay mode with separate Edit / Delete buttons
+=================================================================== */
+
+/* ---- Overlay mode (for posts, search history, DM list) ---- */
+let _selCtx = null;
+let _selItems = [];
+let _selChecked = new Set();
+
+function openSelOverlay(ctx, items, onDelete, onEdit){
+  _selCtx = ctx;
+  _selItems = items;
+  _selChecked = new Set();
+  _selCtx._onDelete = onDelete;
+  _selCtx._onEdit = onEdit || null;
+  _renderSelOverlay();
+  document.getElementById('selOverlay').classList.add('open');
+}
+
+function _renderSelOverlay(){
+  const list = document.getElementById('selList');
+  const label = document.getElementById('selCountLabel');
+  const editBtn = document.getElementById('selEditBtn');
+  label.textContent = '已选 '+_selChecked.size+' 条';
+  // Edit only available when exactly 1 selected and edit handler exists
+  editBtn.style.display = (_selCtx._onEdit && _selChecked.size===1) ? '' : 'none';
+
+  list.innerHTML = _selItems.map(item=>{
+    const checked = _selChecked.has(item.id);
+    return '<div class="sel-item'+(checked?' checked':'')+'" data-sel-id="'+escapeHtml(item.id)+'">'
+      + '<div class="sel-check'+(checked?' on':'')+'"></div>'
+      + '<div class="sel-content">'
+        + '<div style="font-size:13.5px;word-break:break-word;">'+escapeHtml(item.label)+'</div>'
+        + (item.sublabel ? '<div class="sel-item-meta">'+escapeHtml(item.sublabel)+'</div>' : '')
+      + '</div></div>';
+  }).join('');
+
+  list.querySelectorAll('.sel-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const id = el.getAttribute('data-sel-id');
+      if(_selChecked.has(id)) _selChecked.delete(id); else _selChecked.add(id);
+      _renderSelOverlay();
+    });
+  });
+}
+
+function closeSelOverlay(){
+  document.getElementById('selOverlay').classList.remove('open');
+  _selCtx=null; _selItems=[]; _selChecked=new Set();
+}
+
+document.getElementById('selCancelBtn').addEventListener('click', closeSelOverlay);
+document.getElementById('selEditBtn').addEventListener('click', ()=>{
+  if(_selChecked.size!==1 || !_selCtx._onEdit) return;
+  const id=[..._selChecked][0];
+  const item=_selItems.find(x=>x.id===id);
+  closeSelOverlay();
+  _selCtx._onEdit(id, item);
+});
+document.getElementById('selDeleteBtn').addEventListener('click', ()=>{
+  if(_selChecked.size===0){ showToast('请先选择条目'); return; }
+  _selCtx._onDelete([..._selChecked]);
+  closeSelOverlay();
+});
+
+/* ---- Inline mode (for chat messages, bubble rounds, DM messages) ---- */
+/* Each feed gets its own inline selection state */
+function createInlineSel(feedId, barId){
+  // feedId: element that holds .bubble-row items with data-msg-id
+  // barId: the .sel-mode-bar element below the feed
+  let checked = new Set();
+  let active = false;
+  let _onDelete = null;
+  let _onEdit = null;
+  let _getItems = null; // fn returning [{id, text}]
+
+  function enter(firstId, getItems, onDelete, onEdit){
+    active = true; checked = new Set([firstId]);
+    _getItems = getItems; _onDelete = onDelete; _onEdit = onEdit;
+    render();
+    document.getElementById(barId).classList.add('open');
+  }
+  function exit(){
+    active = false; checked = new Set();
+    document.getElementById(barId).classList.remove('open');
+    const feed = document.getElementById(feedId);
+    feed.classList.remove('in-sel-mode');
+    feed.querySelectorAll('.sel-circle').forEach(c=>c.remove());
+    feed.querySelectorAll('[data-msg-id]').forEach(row=>{
+      row.style.transform=''; row.style.transition='';
+    });
+  }
+  function render(){
+    const feed = document.getElementById(feedId);
+    feed.classList.add('in-sel-mode');
+    // Ensure every .bubble-row has a circle
+    feed.querySelectorAll('[data-msg-id]').forEach(row=>{
+      const id = row.getAttribute('data-msg-id');
+      let circle = row.querySelector('.sel-circle');
+      if(!circle){
+        circle = document.createElement('div');
+        circle.className = 'sel-circle';
+        circle.addEventListener('click', e=>{ e.stopPropagation(); toggle(id); });
+        row.insertBefore(circle, row.firstChild);
+      }
+      circle.classList.toggle('on', checked.has(id));
+      row.style.transform = 'translateX(30px)';
+      row.style.transition = 'transform .15s ease';
+    });
+    // Update bar
+    const bar = document.getElementById(barId);
+    bar.querySelector('.sel-mode-count').textContent = '已选 '+checked.size+' 条';
+    const editBtn = bar.querySelector('.sel-mode-edit');
+    if(editBtn) editBtn.style.display = (_onEdit && checked.size===1) ? '' : 'none';
+  }
+  function toggle(id){
+    if(checked.has(id)) checked.delete(id); else checked.add(id);
+    render();
+  }
+  return {
+    isActive(){ return active; },
+    enter, exit, render,
+    getChecked(){ return [...checked]; },
+    getOnDelete(){ return _onDelete; },
+    getOnEdit(){ return _onEdit; }
+  };
+}
+
+/* Helper: attach long-press to a container's elements */
+function attachLongPress(container, selector, delay, callback){
+  let timer = null;
+  container.addEventListener('pointerdown', e=>{
+    const el = e.target.closest(selector);
+    if(!el) return;
+    timer = setTimeout(()=>{ timer=null; callback(el); }, delay||600);
+  }, {passive:true});
+  ['pointerup','pointercancel','pointermove'].forEach(ev=>
+    container.addEventListener(ev, ()=>{ if(timer){ clearTimeout(timer); timer=null; } }, {passive:true})
+  );
+}
+
+/* ===================================================================
+   BUBBLE — inline selection
+=================================================================== */
+let _bubbleSel = null;
+
+function renderBubble(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch);
+  const feed = document.getElementById('bubbleFeed');
+
+  if(!pd.bubble.rounds.length){
+    feed.innerHTML = '<div class="empty-state">'+t('empty.bubble')+'</div>';
+    return;
+  }
+
+  // Ensure all rounds have id
+  pd.bubble.rounds.forEach(r=>{ if(!r.id) r.id=uid('r'); });
+
+  feed.innerHTML = pd.bubble.rounds.map(round=>roundHtml(round)).join('');
+  feed.querySelectorAll('.expand-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const roundId = btn.getAttribute('data-round');
+      const round = pd.bubble.rounds.find(r=>r.id===roundId);
+      if(round){ round.expanded = !round.expanded; renderBubble(); }
+    });
+  });
+
+  // Long press to enter inline selection
+  if(!_bubbleSel) _bubbleSel = createInlineSel('bubbleFeed', 'bubbleSelBar');
+  attachLongPress(feed, '[data-msg-id]', 600, (el)=>{
+    const id = el.getAttribute('data-msg-id');
+    _bubbleSel.enter(id,
+      ()=>pd.bubble.rounds.map(r=>({id:r.id, text:r.text})),
+      (ids)=>{ pd.bubble.rounds=pd.bubble.rounds.filter(r=>!ids.includes(r.id)); saveState(); _bubbleSel.exit(); renderBubble(); showToast(t('toast.msgDeleted')); },
+      (id)=>{ const r=pd.bubble.rounds.find(x=>x.id===id); if(!r) return; showPromptModal('编辑消息',r.text,(v)=>{ r.text=v; saveState(); _bubbleSel.exit(); renderBubble(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=r.text; },30); }
+    );
+  });
+
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function roundHtml(round){
+  let html = '<div class="bubble-row sent" data-msg-id="'+round.id+'">';
+  if(round.photo){
+    html += '<div class="bubble-photo">'+escapeHtml(round.text)+'</div>';
+  } else {
+    html += '<div class="bubble sent">'+escapeHtml(round.text)+'</div>';
+  }
+  html += '</div>';
+  const repliesCount = (round.replies||[]).length;
+  if(repliesCount){
+    html += '<button class="expand-toggle" data-round="'+round.id+'">'+(round.expanded? t('expand.hide') : t('expand.show'))+'</button>';
+    if(round.expanded){
+      html += '<div class="fan-replies">';
+      round.replies.forEach(r=>{
+        html += '<div class="fan-reply-item"><div class="fan-name">'+escapeHtml(r.name)+'</div><div class="bubble-row recv"><div class="bubble recv">'+escapeHtml(r.text)+'</div></div></div>';
+      });
+      html += '</div>';
+    }
+  }
+  return '<div class="bubble-round">'+html+'</div>';
+}
+
+// Bubble inline selection bar wire-up (done once after DOM ready via init)
+function initBubbleSelBar(){
+  const bar = document.getElementById('bubbleSelBar');
+  if(!bar) return;
+  bar.querySelector('.sel-mode-cancel').addEventListener('click', ()=>{ if(_bubbleSel) _bubbleSel.exit(); });
+  bar.querySelector('.sel-mode-edit').addEventListener('click', ()=>{
+    if(!_bubbleSel) return;
+    const ids=_bubbleSel.getChecked();
+    if(ids.length!==1) return;
+    _bubbleSel.getOnEdit()(ids[0]);
+    _bubbleSel.exit();
+  });
+  bar.querySelector('.sel-mode-delete').addEventListener('click', ()=>{
+    if(!_bubbleSel) return;
+    const ids=_bubbleSel.getChecked();
+    if(!ids.length){ showToast('请先选择'); return; }
+    _bubbleSel.getOnDelete()(ids);
+  });
+}
+
+/* ===================================================================
+   USER CHAT — inline selection + streamed message delivery
+=================================================================== */
+let _chatSel = null;
+
+function renderUserChatFeed(){
+  const ch = getCurrentChar();
+  const pd = ensurePhoneData(ch).userChat;
+  const feed = document.getElementById('userChatFeed');
+  if(!pd.messages.length){
+    feed.innerHTML = '<div class="empty-state">'+t('empty.dm')+'</div>';
+    return;
+  }
+  pd.messages.forEach(m=>{ if(!m.id) m.id=uid('m'); });
+  feed.innerHTML = pd.messages.map(m=>{
+    const mine = m.from==='me';
+    return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
+  }).join('');
+
+  if(!_chatSel) _chatSel = createInlineSel('userChatFeed', 'chatSelBar');
+  attachLongPress(feed, '[data-msg-id]', 600, (el)=>{
+    const id = el.getAttribute('data-msg-id');
+    _chatSel.enter(id,
+      ()=>pd.messages.map(m=>({id:m.id, text:m.text})),
+      (ids)=>{ pd.messages=pd.messages.filter(m=>!ids.includes(m.id)); saveState(); _chatSel.exit(); renderUserChatFeed(); showToast(t('toast.msgDeleted')); },
+      (id)=>{ const msg=pd.messages.find(m=>m.id===id); if(!msg) return; showPromptModal('编辑消息',msg.text,(v)=>{ msg.text=v; saveState(); _chatSel.exit(); renderUserChatFeed(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg.text; },30); }
+    );
+  });
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function initChatSelBar(){
+  const bar = document.getElementById('chatSelBar');
+  if(!bar) return;
+  bar.querySelector('.sel-mode-cancel').addEventListener('click', ()=>{ if(_chatSel) _chatSel.exit(); });
+  bar.querySelector('.sel-mode-edit').addEventListener('click', ()=>{
+    if(!_chatSel) return;
+    const ids=_chatSel.getChecked();
+    if(ids.length!==1) return;
+    _chatSel.getOnEdit()(ids[0]);
+    _chatSel.exit();
+  });
+  bar.querySelector('.sel-mode-delete').addEventListener('click', ()=>{
+    if(!_chatSel) return;
+    const ids=_chatSel.getChecked();
+    if(!ids.length){ showToast('请先选择'); return; }
+    _chatSel.getOnDelete()(ids);
+  });
+}
+
+/* Streamed delivery: append messages one by one with delay */
+function streamMessages(feed, messages, delay){
+  let i=0;
+  function next(){
+    if(i>=messages.length) return;
+    const m = messages[i++];
+    const mine = m.from==='me';
+    const row = document.createElement('div');
+    row.className = 'bubble-row '+(mine?'sent':'recv');
+    row.setAttribute('data-msg-id', m.id);
+    row.innerHTML = '<div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div>';
+    // Remove empty-state if present
+    const es = feed.querySelector('.empty-state');
+    if(es) es.remove();
+    feed.appendChild(row);
+    feed.scrollTop = feed.scrollHeight;
+    setTimeout(next, delay||600);
+  }
+  next();
+}
+
+/* ===================================================================
+   DM FEED — inline selection + streamed delivery
+=================================================================== */
+let _dmSel = null;
+
+function renderDmFeed(){
+  const {scope, idx} = currentDmCtx;
+  const pd = resolveIgPd(scope);
+  const dm = pd.dms[idx];
+  const feed = document.getElementById('igDmFeed');
+  dm.messages.forEach(m=>{ if(!m.id) m.id=uid('dm'); });
+  feed.innerHTML = dm.messages.map(m=>{
+    const mine = m.from==='me';
+    return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
+  }).join('');
+
+  if(!_dmSel) _dmSel = createInlineSel('igDmFeed', 'dmSelBar');
+  attachLongPress(feed, '[data-msg-id]', 600, (el)=>{
+    const id = el.getAttribute('data-msg-id');
+    _dmSel.enter(id,
+      ()=>dm.messages.map(m=>({id:m.id, text:m.text})),
+      (ids)=>{ dm.messages=dm.messages.filter(m=>!ids.includes(m.id)); saveState(); _dmSel.exit(); renderDmFeed(); showToast(t('toast.msgDeleted')); },
+      (id)=>{ const msg=dm.messages.find(m=>m.id===id); if(!msg) return; showPromptModal('编辑消息',msg.text,(v)=>{ msg.text=v; saveState(); _dmSel.exit(); renderDmFeed(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg.text; },30); }
+    );
+  });
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function initDmSelBar(){
+  const bar = document.getElementById('dmSelBar');
+  if(!bar) return;
+  bar.querySelector('.sel-mode-cancel').addEventListener('click', ()=>{ if(_dmSel) _dmSel.exit(); });
+  bar.querySelector('.sel-mode-edit').addEventListener('click', ()=>{
+    if(!_dmSel) return;
+    const ids=_dmSel.getChecked();
+    if(ids.length!==1) return;
+    _dmSel.getOnEdit()(ids[0]);
+    _dmSel.exit();
+  });
+  bar.querySelector('.sel-mode-delete').addEventListener('click', ()=>{
+    if(!_dmSel) return;
+    const ids=_dmSel.getChecked();
+    if(!ids.length){ showToast('请先选择'); return; }
+    _dmSel.getOnDelete()(ids);
+  });
+}
+
+/* ===================================================================
+   INSTAGRAM POSTS — overlay long-press to delete posts
+=================================================================== */
+function renderIgBodyWithLongPress(scope){
+  const bodyId = scope==='idol' ? 'igBody' : scope==='idolAlt' ? 'igAltBody' : 'userIgBody';
+  const body = document.getElementById(bodyId);
+  const pane = body.querySelector('.ig-pane.active');
+  if(!pane) return;
+  const posts = pane.querySelectorAll('.ig-post');
+  if(!posts.length) return;
+  const pd = resolveIgPd(scope);
+  attachLongPress(pane, '.ig-post', 600, (el)=>{
+    const postList = pd.posts || pd.feed || [];
+    const items = postList.map((p,i)=>({id:p.id||String(i), label:(p.caption||p.imageDesc||'').slice(0,80), sublabel:p.time||''}));
+    const idx = Array.from(posts).indexOf(el);
+    openSelOverlay({type:'igPost', scope},
+      items,
+      (ids)=>{
+        if(pd.posts) pd.posts = pd.posts.filter((p,i)=>!ids.includes(p.id||String(i)));
+        else if(pd.feed) pd.feed = pd.feed.filter((p,i)=>!ids.includes(p.id||String(i)));
+        saveState();
+        if(scope==='idol') renderInstagram();
+        else if(scope==='idolAlt') renderInstagramAlt();
+        else renderUserInstagram();
+        showToast(t('toast.postDeleted'));
+      }
+    );
+    if(idx>=0 && items[idx]){ _selChecked.add(items[idx].id); _renderSelOverlay(); }
+  });
+}
+
+/* ===================================================================
+   SEARCH HISTORY — overlay long-press to delete
+=================================================================== */
+function openSearchHistoryWithDelete(scope){
+  const pd = resolveIgPd(scope);
+  const list = pd.searchHistory;
+  if(!list || !list.length) return;
+  const items = list.map((s,i)=>{
+    const title = typeof s==='string' ? s : (s.title||s);
+    return {id:String(i), label:title, sublabel:''};
+  });
+  openSelOverlay({type:'searchHistory', scope},
+    items,
+    (ids)=>{
+      const toRemove = new Set(ids.map(Number));
+      pd.searchHistory = pd.searchHistory.filter((_,i)=>!toRemove.has(i));
+      saveState();
+      if(scope==='idol') renderInstagram();
+      else if(scope==='idolAlt') renderInstagramAlt();
+      showToast(t('toast.historyDeleted'));
+    }
+  );
+}
+
+/* ===================================================================
+   CHARACTER DELETE
+=================================================================== */
+function deleteCharacter(charId){
+  const ch = state.characters.find(c=>c.id===charId);
+  if(!ch) return;
+  showActionSheet(
+    ch.idolName ? '删除「'+ch.idolName+'」？' : '删除此角色？',
+    [{value:'confirm', label:'确认删除（不可恢复）'}],
+    (val)=>{
+      if(val!=='confirm') return;
+      state.characters = state.characters.filter(c=>c.id!==charId);
+      if(state.currentCharacterId===charId){
+        state.currentCharacterId = state.characters.length ? state.characters[0].id : null;
+      }
+      saveState();
+      showToast(t('toast.charDeleted'));
+      goBack();
+      renderSettingsCharacters();
+      renderHome();
+    }
+  );
+}
+
+/* ===================================================================
+   MEMORY MODULE — per-character memory entries
+=================================================================== */
+function ensureMemoryEntries(ch){
+  if(!Array.isArray(ch.memoryEntries)) ch.memoryEntries = [];
+  return ch.memoryEntries;
+}
+
+function renderSettingsMemory(){
+  const body = document.getElementById('settingsMemoryBody');
+  const ch = getCurrentChar();
+  if(!ch){ body.innerHTML='<div class="empty-state">'+t('toast.charMissing')+'</div>'; return; }
+  const entries = ensureMemoryEntries(ch);
+  let html = '<div class="field-hint" style="margin-bottom:14px;">角色记忆 — 记录每次生成内容带来的重要事件，会自动注入上下文。</div>';
+  if(!entries.length){
+    html += '<div class="empty-state">还没有记忆条目，点击下方按钮添加。</div>';
+  } else {
+    entries.forEach((en,i)=>{
+      html += '<div class="note-item" data-mem-idx="'+i+'">'
+        + '<div class="note-title">'+escapeHtml(en.title||'')+'</div>'
+        + '<div class="note-preview">'+escapeHtml((en.content||'').slice(0,50))+'</div>'
+        + '</div>';
+    });
+  }
+  html += '<button class="btn-block" id="memAddBtn">+ 添加记忆</button>';
+  body.innerHTML = html;
+  body.querySelectorAll('[data-mem-idx]').forEach(el=>{
+    el.addEventListener('click', ()=>openMemoryEntry(parseInt(el.getAttribute('data-mem-idx'),10)));
+  });
+  document.getElementById('memAddBtn').addEventListener('click', ()=>openMemoryEntry(null));
+}
+
+let _editingMemIdx = null;
+let _editingMemDraft = null;
+
+function openMemoryEntry(idx){
+  const ch = getCurrentChar();
+  const entries = ensureMemoryEntries(ch);
+  _editingMemIdx = idx;
+  if(idx===null){
+    _editingMemDraft = {id:uid('mem'), title:'记忆 '+(entries.length+1), content:''};
+  } else {
+    _editingMemDraft = JSON.parse(JSON.stringify(entries[idx]));
+  }
+  document.getElementById('memEditTitle').textContent = _editingMemDraft.title || 'Memory';
+  goTo('screen-settings-memory-edit');
+  renderMemoryEntryForm();
+}
+
+function renderMemoryEntryForm(){
+  const d = _editingMemDraft;
+  const body = document.getElementById('memEditBody');
+  body.innerHTML =
+    '<div class="field-label">标题</div>'
+    + '<input type="text" class="field-input" id="memTitleInput" value="'+escapeHtml(d.title)+'">'
+    + '<div class="field-label">&nbsp;</div>'
+    + '<textarea class="field-textarea" id="memContentInput" style="min-height:240px;" placeholder="记录这条记忆的内容…">'+escapeHtml(d.content)+'</textarea>'
+    + (_editingMemIdx!==null ? '<button class="btn-block danger" id="memDeleteBtn">删除这条记忆</button>' : '');
+
+  document.getElementById('memTitleInput').addEventListener('input', e=>{
+    d.title = e.target.value;
+    document.getElementById('memEditTitle').textContent = d.title || 'Memory';
+  });
+  document.getElementById('memContentInput').addEventListener('input', e=>{ d.content = e.target.value; });
+
+  const delBtn = document.getElementById('memDeleteBtn');
+  if(delBtn){
+    delBtn.addEventListener('click', ()=>{
+      const ch = getCurrentChar();
+      const entries = ensureMemoryEntries(ch);
+      entries.splice(_editingMemIdx,1);
+      saveState();
+      showToast('记忆已删除');
+      goBack();
+      renderSettingsMemory();
+    });
+  }
+}
+
+function saveMemoryEntry(){
+  const ch = getCurrentChar();
+  if(!ch) return;
+  const entries = ensureMemoryEntries(ch);
+  if(_editingMemIdx===null) entries.push(_editingMemDraft);
+  else entries[_editingMemIdx] = _editingMemDraft;
+  saveState();
+  showToast('记忆已保存');
+  goBack();
+  renderSettingsMemory();
+}
+
+document.getElementById('memSaveBtn').addEventListener('click', saveMemoryEntry);
+
+/* ===================================================================
    INIT
 =================================================================== */
 function tick(){
@@ -3443,6 +4263,9 @@ function init(){
   showScreenRaw('screen-home');
   tick();
   setInterval(tick, 15000);
+  initBubbleSelBar();
+  initChatSelBar();
+  initDmSelBar();
 }
 
 init();
