@@ -226,12 +226,12 @@ input, textarea{ outline:none; }
   display:flex;flex-direction:column;gap:4px;
 }
 .bubble-round{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-.bubble-row{display:flex;}
+.bubble-row{display:flex;gap:7px;}
 .bubble-row.sent{justify-content:flex-end;}
 .bubble-row.recv{justify-content:flex-start;}
 .bubble{
-  max-width:74%;
-  padding:8px 13px;
+  max-width:72%;
+  padding:7px 11px;
   border-radius:18px;
   font-size:14px;
   line-height:1.44;
@@ -371,7 +371,7 @@ input, textarea{ outline:none; }
 .ig-stats{display:flex;gap:14px;margin-bottom:7px;}
 .ig-stat{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-2);}
 .ig-stat svg{width:14px;height:14px;stroke:var(--text-2);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
-.ig-comment{font-size:12px;margin-bottom:4px;line-height:1.4;}
+.ig-comment{font-size:12px;margin-bottom:8px;line-height:1.5;}
 .ig-comment b{font-weight:600;margin-right:5px;}
 
 .ig-alt-trigger{
@@ -413,13 +413,18 @@ body.has-fit-screen{padding:0;}
 
 .dm-list-item{
   display:flex;align-items:center;gap:11px;
-  padding:11px 0;border-bottom:1px solid var(--border);
+  padding:11px 0 11px 14px;border-bottom:1px solid var(--border);
+  position:relative;
 }
 .dm-list-name{font-size:13.5px;font-weight:600;}
 .dm-list-tag{font-size:10.5px;color:var(--text-3);margin-left:6px;font-weight:500;}
 .dm-list-preview{font-size:12.5px;color:var(--text-3);margin-top:2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;}
-.dm-list-text{flex:1 1 auto;min-width:0;}
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;}
+.dm-list-text{flex:1 1 auto;min-width:0;padding-right:54px;}
+.dm-list-time{
+  position:absolute;right:14px;top:13px;
+  font-size:11.5px;color:var(--text-3);white-space:nowrap;
+}
 
 .detail-body{flex:1 1 auto;overflow-y:auto;padding:16px;}
 .detail-text{font-size:14px;line-height:1.85;white-space:pre-wrap;}
@@ -785,6 +790,7 @@ body.has-fit-screen{padding:0;}
 .sel-mode-actions{display:flex;gap:8px;align-items:center;}
 .sel-mode-count{flex:1;font-size:13px;color:var(--text-2);}
 .sel-mode-edit{font-size:13px;font-weight:600;color:var(--text);padding:7px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
+.sel-mode-recall{font-size:13px;font-weight:600;color:#ff9f0a;padding:7px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
 .sel-mode-delete{font-size:13px;font-weight:600;color:#ff3b30;padding:7px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
 .sel-mode-cancel{font-size:13px;font-weight:500;color:var(--text-2);padding:7px 10px;border-radius:10px;}
 
@@ -954,14 +960,20 @@ body.has-fit-screen{padding:0;}
 
 /* ===== Avatar display in chat ===== */
 .chat-avatar{
-  width:30px;height:30px;border-radius:50%;
+  width:var(--chat-avatar-size,32px);height:var(--chat-avatar-size,32px);
+  border-radius:50%;
   background:var(--surface-3);
   background-size:cover;background-position:center;
-  flex:0 0 auto;
+  flex:0 0 var(--chat-avatar-size,32px);
   display:flex;align-items:center;justify-content:center;
   font-size:11px;font-weight:600;color:var(--text-2);
   border:1px solid var(--border);
 }
+/* Square avatar shape option */
+#phone[data-avatar-shape="square"] .chat-avatar{
+  border-radius:8px;
+}
+/* Removed per-row gap overrides — bubble-row handles gap globally */
 
 /* ===== In-phone notification banner ===== */
 #msg-notification{
@@ -992,56 +1004,86 @@ body.has-fit-screen{padding:0;}
 .notif-text{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
 .notif-time{font-size:11px;color:var(--text-3);flex:0 0 auto;}
 
+/* ===== Chat background / wallpaper ===== */
+.dm-feed.has-chat-bg, #userChatFeed.has-chat-bg{
+  background-size:cover;
+  background-position:center;
+}
+.chat-bg-overlay{
+  position:absolute;inset:0;pointer-events:none;z-index:0;
+}
+#userChatFeed.has-chat-bg .bubble-row,
+#userChatFeed.has-chat-bg .chat-time-divider,
+#userChatFeed.has-chat-bg .recalled-msg{
+  position:relative;z-index:1;
+}
+
 /* ===== Chat timestamp divider ===== */
 .chat-time-divider{
   text-align:center;
   font-size:11px;color:var(--text-3);
   margin:10px 0 6px;
-  position:relative;
 }
 .chat-time-divider span{
-  background:var(--bg);
-  padding:0 10px;
-  position:relative;z-index:1;
-}
-.chat-time-divider:before{
-  content:'';position:absolute;top:50%;left:10%;right:10%;
-  height:1px;background:var(--border);
+  padding:0 4px;
 }
 
 /* ===== Transfer message bubble — WeChat style horizontal ===== */
 .transfer-bubble{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:16px;
   background:var(--surface-2);
   border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px 16px;
-  min-width:180px;
-  max-width:240px;
+  border-radius:16px;
+  padding:16px 20px;
+  min-width:210px;
+  max-width:260px;
 }
 .transfer-bubble-icon{
-  display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto;
+  display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto;
 }
-.transfer-bubble-icon svg{width:26px;height:26px;stroke:#8a8a8e;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
-.transfer-bubble-icon span{font-size:10px;color:#8a8a8e;letter-spacing:.03em;}
+.transfer-bubble-icon svg{width:32px;height:32px;stroke:#8a8a8e;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+.transfer-bubble-icon span{font-size:11px;color:#8a8a8e;letter-spacing:.03em;}
 .transfer-bubble-main{flex:1 1 auto;min-width:0;}
-.transfer-bubble-amount{font-size:20px;font-weight:700;color:#e8e8ea;letter-spacing:.02em;}
+.transfer-bubble-amount{font-size:24px;font-weight:700;color:#e8e8ea;letter-spacing:.02em;}
 #phone[data-theme="light"] .transfer-bubble-amount{color:#1a1a1b;}
-.transfer-bubble-note{font-size:12px;color:#8a8a8e;margin-top:2px;}
+.transfer-bubble-note{font-size:13px;color:#8a8a8e;margin-top:3px;}
 
-/* ===== Recalled message ===== */
+/* ===== Recalled message — same style as time divider ===== */
 .recalled-msg{
   text-align:center;
-  font-size:12px;
+  font-size:11px;
   color:var(--text-3);
-  padding:4px 0 8px;
-  font-style:italic;
+  padding:3px 0 6px;
+  font-style:normal;
+  letter-spacing:.01em;
 }
 
-/* ===== DM list last-message time ===== */
-.dm-list-time{font-size:11px;color:var(--text-3);white-space:nowrap;flex:0 0 auto;align-self:flex-start;margin-top:2px;}
+/* ===== Chat list (Instagram DM style) ===== */
+.chat-list-entry{
+  display:flex;align-items:center;gap:12px;
+  padding:8px 14px;border-bottom:1px solid var(--border);
+  cursor:pointer;
+  position:relative;
+}
+.chat-list-entry:active{background:var(--surface-2);}
+.chat-list-entry .ig-avatar{
+  width:44px;height:44px;flex:0 0 44px;
+  font-size:16px;border-radius:12px;
+}
+.chat-list-entry .dm-list-text{
+  flex:1 1 auto;min-width:0;padding-right:52px;
+}
+.chat-list-entry .dm-list-name{font-size:14px;font-weight:600;line-height:1.3;}
+.chat-list-entry .dm-list-preview{
+  font-size:12.5px;color:var(--text-3);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.chat-list-entry .dm-list-time{
+  position:absolute;right:14px;top:11px;
+  font-size:11.5px;color:var(--text-3);white-space:nowrap;
+}
 
 /* ===== Chat bubble scale ===== */
 .bubble-feed,.dm-feed{--bubble-scale:1;}
@@ -1095,79 +1137,56 @@ body.has-fit-screen{padding:0;}
   will-change:transform;
 }
 
-/* ===== In-phone generating indicator (for chat/DM reply) ===== */
-/* Animated dots via CSS */
-@keyframes dot1{0%,20%{opacity:0}40%,100%{opacity:1}}
-@keyframes dot2{0%,40%{opacity:0}60%,100%{opacity:1}}
-@keyframes dot3{0%,60%{opacity:0}80%,100%{opacity:1}}
-#phone-gen-indicator{
+/* ===== In-phone generating indicator + system toast — unified style ===== */
+@keyframes dot-pulse{0%,80%,100%{opacity:0.2}40%{opacity:1}}
+.phone-pill{
   display:none;
   position:absolute;
-  bottom:90px;
+  bottom:96px;
   left:50%;
-  transform:translateX(-50%);
-  z-index:9000;
-  background:rgba(40,40,42,0.90);
+  transform:translateX(-50%) translateY(6px);
+  z-index:9100;
+  background:rgba(36,36,38,0.93);
   color:#e8e8ea;
   font-size:13px;
-  letter-spacing:.03em;
-  padding:8px 18px;
-  border-radius:20px;
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
+  font-weight:500;
+  letter-spacing:.02em;
+  padding:9px 18px;
+  border-radius:14px;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
   border:1px solid rgba(255,255,255,0.10);
   white-space:nowrap;
   pointer-events:none;
-  animation:fadeSlideDown .18s ease;
-}
-#phone-gen-indicator .gen-dot{
-  display:inline-block;
-}
-#phone-gen-indicator .gen-dot:nth-child(1){animation:dot1 1.2s infinite;}
-#phone-gen-indicator .gen-dot:nth-child(2){animation:dot2 1.2s infinite;}
-#phone-gen-indicator .gen-dot:nth-child(3){animation:dot3 1.2s infinite;}
-@keyframes fadeSlideDown{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-#phone[data-theme="light"] #phone-gen-indicator{
-  background:rgba(240,240,242,0.92);
-  color:#1a1a1b;
-  border:1px solid rgba(0,0,0,0.10);
-}
-
-/* System toast (saved, error etc) — now also inside phone, top center */
-#phone-sys-toast{
-  display:none;
-  position:absolute;
-  top:60px;
-  left:50%;
-  transform:translateX(-50%) translateY(-8px);
-  z-index:9100;
-  background:rgba(40,40,42,0.90);
-  color:#e8e8ea;
-  font-size:13px;
-  letter-spacing:.03em;
-  padding:8px 18px;
-  border-radius:20px;
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,0.10);
-  white-space:normal;
-  word-break:break-word;
-  max-width:80%;
+  box-shadow:0 4px 20px rgba(0,0,0,0.30);
+  max-width:82%;
   text-align:center;
-  pointer-events:none;
-  opacity:0;
-  transition:opacity .2s, transform .2s;
+  word-break:break-word;
+  white-space:normal;
 }
-#phone-sys-toast.show{
+.phone-pill.visible{
   display:block;
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
+  animation:pill-in .18s cubic-bezier(.34,1.3,.64,1) forwards;
 }
-#phone[data-theme="light"] #phone-sys-toast{
-  background:rgba(240,240,242,0.92);
+@keyframes pill-in{from{opacity:0;transform:translateX(-50%) translateY(12px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+#phone[data-theme="light"] .phone-pill{
+  background:rgba(245,245,247,0.94);
   color:#1a1a1b;
-  border:1px solid rgba(0,0,0,0.10);
+  border:1px solid rgba(0,0,0,0.09);
+  box-shadow:0 4px 20px rgba(0,0,0,0.12);
 }
+.pill-dots{display:inline-flex;gap:3px;align-items:center;margin-left:4px;vertical-align:middle;}
+.pill-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:currentColor;opacity:.25;
+  animation:dot-pulse 1.4s ease-in-out infinite;
+}
+.pill-dot:nth-child(2){animation-delay:.2s;}
+.pill-dot:nth-child(3){animation-delay:.4s;}
+
+/* Legacy IDs — now both use .phone-pill */
+#phone-gen-indicator{display:none !important;}
+#phone-sys-toast{display:none !important;}
 
 #gen-indicator{
   display:none;
@@ -1237,10 +1256,10 @@ body.has-fit-screen #gen-indicator{
       <div class="bubble-feed" id="bubbleFeed"></div>
       <div class="sel-mode-bar" id="bubbleSelBar">
         <div class="sel-mode-actions">
-          <span class="sel-mode-count">已选 0 条</span>
-          <button class="sel-mode-edit" style="display:none;">编辑</button>
-          <button class="sel-mode-delete">删除</button>
-          <button class="sel-mode-cancel">取消</button>
+          <span class="sel-mode-count" data-i18n="sel.count0">已选 0 条</span>
+          <button class="sel-mode-edit" style="display:none;" data-i18n="sel.edit">编辑</button>
+          <button class="sel-mode-delete" data-i18n="btn.delete">删除</button>
+          <button class="sel-mode-cancel" data-i18n="btn.cancel">取消</button>
         </div>
       </div>
       <div class="bubble-inputbar">
@@ -1305,10 +1324,11 @@ body.has-fit-screen #gen-indicator{
       <div class="dm-feed" id="igDmFeed"></div>
       <div class="sel-mode-bar" id="dmSelBar">
         <div class="sel-mode-actions">
-          <span class="sel-mode-count">已选 0 条</span>
-          <button class="sel-mode-edit" style="display:none;">编辑</button>
-          <button class="sel-mode-delete">删除</button>
-          <button class="sel-mode-cancel">取消</button>
+          <span class="sel-mode-count" data-i18n="sel.count0">已选 0 条</span>
+          <button class="sel-mode-edit" style="display:none;" data-i18n="sel.edit">编辑</button>
+          <button class="sel-mode-recall" style="display:none;" data-i18n="sel.recall">撤回</button>
+          <button class="sel-mode-delete" data-i18n="btn.delete">删除</button>
+          <button class="sel-mode-cancel" data-i18n="btn.cancel">取消</button>
         </div>
       </div>
       <div class="bubble-inputbar" id="igDmInputBar">
@@ -1397,11 +1417,11 @@ body.has-fit-screen #gen-indicator{
       <div class="dm-feed" id="userChatFeed"></div>
       <div class="sel-mode-bar" id="chatSelBar">
         <div class="sel-mode-actions">
-          <span class="sel-mode-count">已选 0 条</span>
-          <button class="sel-mode-edit" style="display:none;">编辑</button>
-          <button class="sel-mode-recall" style="display:none;">撤回</button>
-          <button class="sel-mode-delete">删除</button>
-          <button class="sel-mode-cancel">取消</button>
+          <span class="sel-mode-count" data-i18n="sel.count0">已选 0 条</span>
+          <button class="sel-mode-edit" style="display:none;" data-i18n="sel.edit">编辑</button>
+          <button class="sel-mode-recall" style="display:none;" data-i18n="sel.recall">撤回</button>
+          <button class="sel-mode-delete" data-i18n="btn.delete">删除</button>
+          <button class="sel-mode-cancel" data-i18n="btn.cancel">取消</button>
         </div>
       </div>
       <div class="bubble-inputbar">
@@ -1545,8 +1565,10 @@ body.has-fit-screen #gen-indicator{
       </div>
       <div class="sel-list" id="selList"></div>
     </div>
-    <div id="phone-gen-indicator">Generating<span class="gen-dot">.</span><span class="gen-dot">.</span><span class="gen-dot">.</span></div>
-    <div id="phone-sys-toast"></div>
+      <!-- Unified generating + toast pill -->
+      <div class="phone-pill" id="phonePill"></div>
+      <div id="phone-gen-indicator" style="display:none;"></div>
+      <div id="phone-sys-toast" style="display:none;"></div>
     <!-- Notification banner -->
     <div id="msg-notification">
       <div class="notif-icon">
@@ -1571,12 +1593,6 @@ body.has-fit-screen #gen-indicator{
       <div class="dm-feed" id="offlineBody" style="padding:16px 14px;">
         <div class="empty-state" style="padding:80px 20px;">点击右上角菜单配置并生成线下内容</div>
       </div>
-      <div class="bubble-inputbar" id="offlineChatBar">
-        <button class="photo-btn" id="offlinePhotoBtn" title="图片"></button>
-        <input type="text" id="offlineChatInput" class="thin-input" placeholder="发送消息…">
-        <button class="chat-trigger-btn" id="offlineTriggerBtn" aria-label="生成回复"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
-        <button class="send-btn" id="offlineSendBtn" aria-label="发送"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
-      </div>
     </div>
 
     <!-- ---------- CHAT LIST SCREEN (user phone) ---------- -->
@@ -1592,21 +1608,21 @@ body.has-fit-screen #gen-indicator{
     <!-- ---------- OFFLINE SETTINGS OVERLAY ---------- -->
     <div id="offlineSettingsOverlay" style="display:none;position:absolute;inset:0;z-index:400;background:rgba(0,0,0,0.35);align-items:flex-end;justify-content:center;">
       <div id="offlineSettingsPanel" style="width:100%;background:var(--surface);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px)+16px);animation:sheetUp .18s ease;">
-        <div style="text-align:center;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text);">线下内容设置</div>
-        <div class="field-label">场景要求（可选）</div>
-        <textarea id="offlinePromptInput" class="field-textarea" style="min-height:90px;" placeholder="描述线下场景、氛围、特殊要求等…"></textarea>
+        <div style="text-align:center;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text);" data-i18n="offline.title">线下内容设置</div>
+        <div class="field-label" data-i18n="offline.label">场景要求（可选）</div>
+        <textarea id="offlinePromptInput" class="field-textarea" style="min-height:90px;" data-i18n-placeholder="offline.placeholder" placeholder="描述线下场景、氛围、特殊要求等…"></textarea>
         <div style="display:flex;gap:8px;margin-top:6px;align-items:center;justify-content:space-between;">
-          <span style="font-size:13px;color:var(--text-2);">保存为预设</span>
+          <span style="font-size:13px;color:var(--text-2);" data-i18n="offline.savePreset">保存为预设</span>
           <div id="offlinePresetToggle" class="ios-toggle" onclick="toggleOfflinePreset()"></div>
         </div>
         <div style="margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:space-between;">
-          <span style="font-size:13px;color:var(--text-2);">应用此要求</span>
+          <span style="font-size:13px;color:var(--text-2);" data-i18n="offline.applyPrompt">应用此要求</span>
           <div id="offlineApplyToggle" class="ios-toggle on" onclick="toggleOfflineApply()"></div>
         </div>
         <div id="offlinePresetsList" style="margin-top:10px;"></div>
         <div style="display:flex;gap:8px;margin-top:14px;">
-          <button class="btn-block secondary" style="flex:1;" onclick="closeOfflineSettings()">取消</button>
-          <button class="btn-block" style="flex:1;" onclick="generateOffline()">生成内容</button>
+          <button class="btn-block secondary" style="flex:1;" onclick="closeOfflineSettings()" data-i18n="btn.cancel">取消</button>
+          <button class="btn-block" style="flex:1;" onclick="generateOffline()" data-i18n="offline.generate">生成内容</button>
         </div>
       </div>
     </div>
@@ -1668,6 +1684,7 @@ const I18N = {
     'settings.row.icons':'软件图标',
     'settings.row.wallpaper':'手机壁纸',
     'settings.row.fitscreen':'屏幕尺寸',
+    'settings.row.phoneSize':'手机大小',
     'settings.lang.zh':'中文','settings.lang.en':'English',
     'settings.theme.dark':'深色','settings.theme.light':'浅色',
     'settings.fitscreen.fixed':'固定尺寸','settings.fitscreen.fit':'自适应设备',
@@ -1723,6 +1740,62 @@ const I18N = {
     'expand.show':'查看 8 条粉丝回复','expand.hide':'收起回复',
     'noresult.idolReplyNone':'（idol 未回复）',
     'chat.triggerHint':'点击左侧图标让 idol 回复',
+    'avatar.showMine':'显示我方头像',
+    'avatar.showTheir':'显示对方头像',
+    'avatar.shape':'头像形状',
+    'avatar.circle':'圆形',
+    'avatar.square':'方形（圆角）',
+    'avatar.size':'头像大小',
+    'recall.mine':'你撤回了一条消息',
+    'recall.other':'',
+    'recall.otherSuffix':'撤回了一条消息',
+    'sel.selectFirst':'请先选择',
+    'sel.count0':'已选 0 条',
+    'sel.countN':'已选 {n} 条',
+    'sel.edit':'编辑',
+    'sel.editMsg':'编辑消息',
+    'sel.recall':'撤回',
+    'menu.avatarSettings':'头像显示设置',
+    'menu.bubbleColor':'修改气泡颜色',
+    'menu.bubbleSize':'修改气泡大小',
+    'menu.chatWallpaper':'更换聊天背景',
+    'menu.deleteChatHistory':'删除聊天记录',
+    'menu.deleteContact':'删除联系人',
+    'menu.confirmDelete':'确认删除（不可恢复）',
+    'menu.pinDm':'保留此聊天记录',
+    'menu.unpinDm':'取消保留记录',
+    'menu.addContact':'添加到我的通讯录',
+    'menu.alreadyContact':'已在通讯录',
+    'toast.recalled':'消息已撤回',
+    'toast.contactDeleted':'联系人已删除',
+    'toast.contactAdded':'已添加 {name} 到通讯录',
+    'toast.memDeleted':'记忆已删除',
+    'toast.memSaved':'记忆已保存',
+    'offline.title':'线下内容设置',
+    'offline.label':'场景要求（可选）',
+    'offline.placeholder':'描述线下场景、氛围、特殊要求等…',
+    'offline.savePreset':'保存为预设',
+    'offline.applyPrompt':'应用此要求',
+    'offline.generate':'生成内容',
+    'memory.hint':'角色记忆 — 记录每次生成内容带来的重要事件，会自动注入上下文。',
+    'memory.empty':'还没有记忆条目，点击下方按钮添加。',
+    'memory.add':'+ 添加记忆',
+    'memory.defaultTitle':'记忆 {n}',
+    'memory.titleLabel':'标题',
+    'memory.contentPlaceholder':'记录这条记忆的内容…',
+    'memory.delete':'删除这条记忆',
+    'char.deleteTitle':'删除「{name}」？',
+    'char.deleteGeneric':'删除此角色？',
+    'empty.noChar':'请先在 Settings 创建角色',
+    'empty.chat':'暂无聊天记录',
+    'contact.default':'联系人',
+    'btn.done':'完成',
+    'color.mySide':'我方气泡',
+    'color.theirSide':'对方气泡',
+    'preview.myMsg':'我的消息',
+    'preview.theirMsg':'对方的回复',
+    'wallpaper.opacity':'透明度（深色=越黑）',
+    'wallpaper.blur':'模糊度',
   },
   en:{
     'hint.tapToSwitch':'Tap to switch phone',
@@ -1760,6 +1833,7 @@ const I18N = {
     'settings.row.icons':'App icons',
     'settings.row.wallpaper':'Wallpaper',
     'settings.row.fitscreen':'Screen size',
+    'settings.row.phoneSize':'Phone size',
     'settings.lang.zh':'中文','settings.lang.en':'English',
     'settings.theme.dark':'Dark','settings.theme.light':'Light',
     'settings.fitscreen.fixed':'Fixed','settings.fitscreen.fit':'Fit device',
@@ -1815,6 +1889,62 @@ const I18N = {
     'expand.show':'View 8 fan replies','expand.hide':'Hide replies',
     'noresult.idolReplyNone':'(idol has not replied)',
     'chat.triggerHint':'Tap the icon on the left to get a reply',
+    'avatar.showMine':'Show my avatar',
+    'avatar.showTheir':'Show their avatar',
+    'avatar.shape':'Avatar shape',
+    'avatar.circle':'Circle',
+    'avatar.square':'Square (rounded)',
+    'avatar.size':'Avatar size',
+    'recall.mine':'You recalled a message',
+    'recall.other':'',
+    'recall.otherSuffix':' recalled a message',
+    'sel.selectFirst':'Select at least one item',
+    'sel.count0':'0 selected',
+    'sel.countN':'{n} selected',
+    'sel.edit':'Edit',
+    'sel.editMsg':'Edit message',
+    'sel.recall':'Recall',
+    'menu.avatarSettings':'Avatar display settings',
+    'menu.bubbleColor':'Change bubble color',
+    'menu.bubbleSize':'Change bubble size',
+    'menu.chatWallpaper':'Chat background',
+    'menu.deleteChatHistory':'Delete chat history',
+    'menu.deleteContact':'Delete contact',
+    'menu.confirmDelete':'Confirm delete (irreversible)',
+    'menu.pinDm':'Keep chat record',
+    'menu.unpinDm':'Unpin chat record',
+    'menu.addContact':'Add to contacts',
+    'menu.alreadyContact':'Already in contacts',
+    'toast.recalled':'Message recalled',
+    'toast.contactDeleted':'Contact deleted',
+    'toast.contactAdded':'Added {name} to contacts',
+    'toast.memDeleted':'Memory deleted',
+    'toast.memSaved':'Memory saved',
+    'offline.title':'Offline Content Settings',
+    'offline.label':'Scene prompt (optional)',
+    'offline.placeholder':'Describe the setting, mood, special requirements…',
+    'offline.savePreset':'Save as preset',
+    'offline.applyPrompt':'Apply this prompt',
+    'offline.generate':'Generate',
+    'memory.hint':'Character memories — record key events from generated content. Injected automatically into context.',
+    'memory.empty':'No memories yet. Tap the button below to add one.',
+    'memory.add':'+ Add memory',
+    'memory.defaultTitle':'Memory {n}',
+    'memory.titleLabel':'Title',
+    'memory.contentPlaceholder':'Record the content of this memory…',
+    'memory.delete':'Delete this memory',
+    'char.deleteTitle':'Delete "{name}"?',
+    'char.deleteGeneric':'Delete this character?',
+    'empty.noChar':'Please create a character in Settings first',
+    'empty.chat':'No chats yet',
+    'contact.default':'Contact',
+    'btn.done':'Done',
+    'color.mySide':'My bubble',
+    'color.theirSide':'Their bubble',
+    'preview.myMsg':'My message',
+    'preview.theirMsg':'Their reply',
+    'wallpaper.opacity':'Opacity (dark = darker)',
+    'wallpaper.blur':'Blur',
   }
 };
 function t(key){
@@ -1842,6 +1972,8 @@ function defaultState(){
       phoneScale:100,
       chatShowSentAvatar:true,
       chatShowRecvAvatar:true,
+      avatarShape:'circle',
+      avatarSize:32,
       bubbleColors:{sent:'', recv:''},
       chatColors:{sent:'', recv:''},
       dmColors:{sent:'', recv:''}
@@ -1943,26 +2075,31 @@ function escapeHtml(str){
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-function showToast(msg, duration){
-  // Show inside phone as a pill toast at top
-  const phone = document.getElementById('phone-sys-toast');
-  if(phone){
-    phone.textContent = msg;
-    phone.classList.add('show');
-    clearTimeout(phone._t);
-    phone._t = setTimeout(()=>phone.classList.remove('show'), duration||2200);
-  }
-  // Also keep old external toast as fallback (hidden but for timing)
-  const el = document.getElementById('toast');
-  if(el){
-    el.textContent = msg;
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(()=>el.classList.remove('show'), duration||2200);
-  }
+/* === Unified phone pill (toast + generating indicator) === */
+let _pillToastTimer = null;
+let _pillGenCount = 0;
+let _pillGenLabel = '';
+
+function _getPill(){ return document.getElementById('phonePill'); }
+
+function _pillDotsHtml(){
+  return '<span class="pill-dots"><span class="pill-dot"></span><span class="pill-dot"></span><span class="pill-dot"></span></span>';
 }
+
+function showToast(msg, duration){
+  if(_pillGenCount > 0) return; // don't clobber generating message
+  const pill = _getPill();
+  if(!pill) return;
+  clearTimeout(_pillToastTimer);
+  pill.innerHTML = escapeHtml(msg);
+  pill.classList.add('visible');
+  _pillToastTimer = setTimeout(()=>{ if(_pillGenCount===0) pill.classList.remove('visible'); }, duration||2400);
+  // legacy fallback
+  const el = document.getElementById('toast');
+  if(el){ el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'), duration||2400); }
+}
+
 let _genCount = 0;
-let _genDotInterval = null;
 function _activeRefreshBtn(){
   const visible = document.querySelector('.screen.visible');
   if(!visible) return null;
@@ -1972,7 +2109,6 @@ function showGenerating(){
   _genCount++;
   const btn = _activeRefreshBtn();
   if(btn) btn.classList.add('spinning');
-  // fallback external indicator for screens with no refresh btn
   const el = document.getElementById('gen-indicator');
   if(el) el.style.display = 'block';
 }
@@ -1984,22 +2120,26 @@ function hideGenerating(){
   if(el) el.style.display = 'none';
 }
 
-/* Phone-internal pill indicator — used for Bubble/DM trigger reply button */
+/* Phone-internal generating pill */
 let _phoneGenCount = 0;
-let _phoneGenTimer = null;
-function showPhoneGenerating(){
+function showPhoneGenerating(label){
   _phoneGenCount++;
-  const el = document.getElementById('phone-gen-indicator');
-  if(!el) return;
-  el.style.display = 'block';
+  _pillGenCount++;
+  clearTimeout(_pillToastTimer);
+  const pill = _getPill();
+  if(!pill) return;
+  const txt = label || t('toast.generating');
+  // strip trailing '...' since we add animated dots
+  const clean = txt.replace(/\.{2,}$/, '').replace(/…$/, '');
+  pill.innerHTML = escapeHtml(clean) + _pillDotsHtml();
+  pill.classList.add('visible');
 }
 function hidePhoneGenerating(){
   _phoneGenCount = Math.max(0, _phoneGenCount-1);
+  _pillGenCount = Math.max(0, _pillGenCount-1);
   if(_phoneGenCount>0) return;
-  clearInterval(_phoneGenTimer);
-  _phoneGenTimer = null;
-  const el = document.getElementById('phone-gen-indicator');
-  if(el){ el.style.display='none'; }
+  const pill = _getPill();
+  if(pill) pill.classList.remove('visible');
 }
 
 /* Generic bottom action sheet. options: [{label, value}], callback(value) */
@@ -2098,6 +2238,12 @@ function goBack(){
   if(currentScreenId==='screen-x' && typeof stopDanmaku==='function') stopDanmaku();
   const prev = navStack.pop();
   showScreenRaw(prev || 'screen-home');
+  // Instantly refresh chat/DM list so order updates immediately
+  if((prev||'screen-home')==='screen-chat-list') renderChatList();
+  // Also re-render current IG screen if returning from DM feed
+  if((prev||'screen-home')==='screen-instagram') renderInstagram();
+  if((prev||'screen-home')==='screen-instagram-alt') renderInstagramAlt();
+  if((prev||'screen-home')==='screen-user-instagram') renderUserInstagram();
 }
 
 /* ===================================================================
@@ -2157,8 +2303,9 @@ function applyLanguage(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     el.textContent = t(el.getAttribute('data-i18n'));
   });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
-    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph')));
+  document.querySelectorAll('[data-i18n-ph],[data-i18n-placeholder]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-ph') || el.getAttribute('data-i18n-placeholder');
+    el.setAttribute('placeholder', t(key));
   });
 }
 function applyFitScreen(){
@@ -2181,14 +2328,15 @@ function applyPhoneScale(){
   const phone = document.getElementById('phone');
   if(state.settings.fitScreen){
     phone.style.transform = '';
+    phone.style.transformOrigin = '';
     return;
   }
   const s = scale/100;
   phone.style.transform = 'scale('+s+')';
-  phone.style.transformOrigin = 'top center';
-  // Adjust wrapper height so it doesn't overlap
+  phone.style.transformOrigin = 'center center';
+  // Keep app-root sized so page doesn't collapse / overflow
   const root = document.getElementById('app-root');
-  root.style.minHeight = (844*s+48)+'px';
+  root.style.height = (844*s+48)+'px';
 }
 
 /* ===================================================================
@@ -2711,22 +2859,29 @@ function renderIgBody(){
   if(igActiveTab==='search'){
     setTimeout(()=>attachLongPress(body, '.trend-item', 600, ()=>openSearchHistoryWithDelete('idol')), 30);
   }
-  // Long-press on DM list to delete conversations
+  // Long-press on DM list to delete conversations — inline selection style
   if(igActiveTab==='dm'){
     setTimeout(()=>{
       const pd = resolveIgPd('idol');
-      attachLongPress(body, '.dm-list-item', 600, (el)=>{
-        const items = pd.dms.map((d,i)=>({id:String(i), label:d.name, sublabel:(d.messages[d.messages.length-1]||{}).text||''}));
-        openSelOverlay({type:'dmList', scope:'idol'},
-          items,
+      const body = document.getElementById('igBody');
+      const pane = body.querySelector('.ig-pane.active');
+      if(!pane) return;
+      // Give each item a data-msg-id for inline sel
+      pane.querySelectorAll('.dm-list-item').forEach((el,i)=>{
+        el.setAttribute('data-msg-id', String(i));
+      });
+      const sel = getOrCreateIgSel('idol_dm');
+      attachLongPress(pane, '.dm-list-item', 600, (el)=>{
+        const id = el.getAttribute('data-msg-id');
+        sel.enter(id,
+          ()=>pd.dms.map((d,i)=>({id:String(i), label:d.name, sublabel:(d.messages[d.messages.length-1]||{}).text||''})),
           (ids)=>{
-            const toRemove = new Set(ids.map(Number));
-            pd.dms = pd.dms.filter((_,i)=>!toRemove.has(i));
-            saveState(); renderInstagram(); showToast(t('toast.msgDeleted'));
-          }
+            const toRemove=new Set(ids.map(Number));
+            pd.dms=pd.dms.filter((_,i)=>!toRemove.has(i));
+            saveState(); sel.exit(); renderInstagram(); showToast(t('toast.msgDeleted'));
+          },
+          null
         );
-        const idx = parseInt(el.getAttribute('data-dm-idx'),10);
-        if(!isNaN(idx)) { _selChecked.add(String(idx)); renderSelOverlay(); }
       });
     }, 30);
   }
@@ -3030,6 +3185,7 @@ function renderTopicBody(data){
    DM CONVERSATION (shared idol / idol-alt / user)
 =================================================================== */
 let currentDmCtx = null; // {scope, idx}
+let _currentContactIdx = null; // which contact chat is open in userChat screen
 
 function openDmConversation(scope, idx){
   const ch = getCurrentChar();
@@ -3399,30 +3555,28 @@ document.getElementById('notesRefreshBtn').addEventListener('click', refreshNote
 =================================================================== */
 function renderUserChat(){
   const ch = getCurrentChar();
-  const pd = ensurePhoneData(ch).userChat;
-  if(!pd.idolNickname) pd.idolNickname = '';
+  if(!ch) return;
+  _currentContactIdx = null;
   const titleEl = document.getElementById('userChatTitle');
-  // Display nickname or fallback to idol name
-  titleEl.textContent = pd.idolNickname || ch.idolName || 'Chat';
-  // Tap title to edit nickname
+  const pd = ensurePhoneData(ch);
+  titleEl.textContent = pd.userChat.idolNickname || ch.idolName || 'Chat';
   titleEl.onclick = ()=>{
-    showPromptModal(
-      '修改备注名',
-      pd.idolNickname || ch.idolName || 'Chat',
-      (val)=>{
-        pd.idolNickname = val.trim();
-        saveState();
-        titleEl.textContent = pd.idolNickname || ch.idolName || 'Chat';
-      }
-    );
-    // pre-fill the textarea with current value
-    setTimeout(()=>{
-      const ta = document.getElementById('promptCardInput');
-      if(ta){ ta.value = pd.idolNickname || ''; ta.select(); }
-    }, 30);
+    showPromptModal('修改备注名', titleEl.textContent, (v)=>{
+      pd.userChat.idolNickname = v;
+      titleEl.textContent = v;
+      saveState();
+    });
   };
+  // Restore normal send handlers
+  const input = document.getElementById('userChatInput');
+  const sendBtn = document.getElementById('userChatSendBtn');
+  const triggerBtn = document.getElementById('userChatTriggerBtn');
+  sendBtn.onclick = null;
+  input.onkeydown = null;
+  triggerBtn.onclick = null;
   renderUserChatFeed();
 }
+
 
 function recentUserChatContext(ch, limit){
   const pd = ensurePhoneData(ch).userChat;
@@ -3442,6 +3596,7 @@ function addUserChatMessage(text){
   pd.messages.push({from:'me', text, id:uid('m'), ts:Date.now()});
   saveState();
   renderUserChatFeed();
+  renderChatList();
 }
 
 async function triggerIdolChatReply(){
@@ -3501,6 +3656,8 @@ async function triggerIdolChatReply(){
 }
 
 document.getElementById('userChatSendBtn').addEventListener('click', ()=>{
+  // If in a contact chat, the onclick handler set by openContactChat takes care of it
+  if(_currentContactIdx !== null && _currentContactIdx !== undefined) return;
   const input = document.getElementById('userChatInput');
   const val = input.value.trim();
   if(!val) return;
@@ -3510,7 +3667,11 @@ document.getElementById('userChatSendBtn').addEventListener('click', ()=>{
 document.getElementById('userChatInput').addEventListener('keydown', (e)=>{
   if(e.key==='Enter') document.getElementById('userChatSendBtn').click();
 });
-document.getElementById('userChatTriggerBtn').addEventListener('click', triggerIdolChatReply);
+document.getElementById('userChatTriggerBtn').addEventListener('click', ()=>{
+  // If in a contact chat, the onclick handler set by openContactChat takes care of it
+  if(_currentContactIdx !== null && _currentContactIdx !== undefined) return;
+  triggerIdolChatReply();
+});
 
 /* ===================================================================
    USER INSTAGRAM — feed of others' posts / trending / dm received
@@ -3552,22 +3713,28 @@ function renderUserIgBody(){
   if(userIgActiveTab==='feed'){
     setTimeout(()=>renderIgBodyWithLongPress('user'), 30);
   }
-  // Long-press on DM list to delete conversations
+  // Long-press on DM list to delete conversations — inline selection style
   if(userIgActiveTab==='dm'){
     setTimeout(()=>{
       const pd = resolveIgPd('user');
-      attachLongPress(body, '.dm-list-item', 600, (el)=>{
-        const items = pd.dms.map((d,i)=>({id:String(i), label:d.name, sublabel:(d.messages[d.messages.length-1]||{}).text||''}));
-        openSelOverlay({type:'dmList', scope:'user'},
-          items,
+      const body = document.getElementById('userIgBody');
+      const pane = body.querySelector('.ig-pane.active');
+      if(!pane) return;
+      pane.querySelectorAll('.dm-list-item').forEach((el,i)=>{
+        el.setAttribute('data-msg-id', String(i));
+      });
+      const sel = getOrCreateIgSel('user_dm');
+      attachLongPress(pane, '.dm-list-item', 600, (el)=>{
+        const id = el.getAttribute('data-msg-id');
+        sel.enter(id,
+          ()=>pd.dms.map((d,i)=>({id:String(i), label:d.name, sublabel:(d.messages[d.messages.length-1]||{}).text||''})),
           (ids)=>{
-            const toRemove = new Set(ids.map(Number));
-            pd.dms = pd.dms.filter((_,i)=>!toRemove.has(i));
-            saveState(); renderUserInstagram(); showToast(t('toast.msgDeleted'));
-          }
+            const toRemove=new Set(ids.map(Number));
+            pd.dms=pd.dms.filter((_,i)=>!toRemove.has(i));
+            saveState(); sel.exit(); renderUserInstagram(); showToast(t('toast.msgDeleted'));
+          },
+          null
         );
-        const idx = parseInt(el.getAttribute('data-dm-idx'),10);
-        if(!isNaN(idx)){ _selChecked.add(String(idx)); _renderSelOverlay(); }
       });
     }, 30);
   }
@@ -3648,7 +3815,7 @@ function renderSettingsHome(){
           + '<div class="seg-btn" data-fit="1">'+t('settings.fitscreen.fit')+'</div>'
         + '</div></div>'
       + '<div class="settings-row single" style="flex-direction:column;align-items:flex-start;gap:10px;">'
-        + '<div class="settings-row-label">手机大小</div>'
+        + '<div class="settings-row-label">'+t('settings.row.phoneSize')+'</div>'
         + '<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;">'
           + '<input type="range" id="phoneSizeSlider" min="60" max="130" step="5" value="'+(state.settings.phoneScale||100)+'" style="-webkit-appearance:none;appearance:none;width:90%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;cursor:pointer;">'
           + '<span id="phoneSizeLabel" style="font-size:12px;color:var(--text-3);">'+(state.settings.phoneScale||100)+'%</span>'
@@ -4170,7 +4337,7 @@ function _renderSelOverlay(){
   const list = document.getElementById('selList');
   const label = document.getElementById('selCountLabel');
   const editBtn = document.getElementById('selEditBtn');
-  label.textContent = '已选 '+_selChecked.size+' 条';
+  label.textContent = t('sel.countN').replace('{n}', _selChecked.size);
   // Edit only available when exactly 1 selected and edit handler exists
   editBtn.style.display = (_selCtx._onEdit && _selChecked.size===1) ? '' : 'none';
 
@@ -4207,7 +4374,7 @@ document.getElementById('selEditBtn').addEventListener('click', ()=>{
   _selCtx._onEdit(id, item);
 });
 document.getElementById('selDeleteBtn').addEventListener('click', ()=>{
-  if(_selChecked.size===0){ showToast('请先选择条目'); return; }
+  if(_selChecked.size===0){ showToast(t('sel.selectFirst')); return; }
   _selCtx._onDelete([..._selChecked]);
   closeSelOverlay();
 });
@@ -4243,7 +4410,7 @@ function createInlineSel(feedId, barId){
   function render(){
     const feed = document.getElementById(feedId);
     feed.classList.add('in-sel-mode');
-    // Ensure every .bubble-row has a circle
+    // Ensure every selectable row has a circle
     feed.querySelectorAll('[data-msg-id]').forEach(row=>{
       const id = row.getAttribute('data-msg-id');
       let circle = row.querySelector('.sel-circle');
@@ -4254,19 +4421,24 @@ function createInlineSel(feedId, barId){
         row.insertBefore(circle, row.firstChild);
       }
       circle.classList.toggle('on', checked.has(id));
-      // Messages stay in place — circle is beside the message
       row.style.transform = '';
       row.style.transition = '';
     });
-    // Update bar
+    // Update bar count + buttons
     const bar = document.getElementById(barId);
-    bar.querySelector('.sel-mode-count').textContent = '已选 '+checked.size+' 条';
+    bar.querySelector('.sel-mode-count').textContent = t('sel.countN').replace('{n}', checked.size);
     const editBtn = bar.querySelector('.sel-mode-edit');
     if(editBtn) editBtn.style.display = (_onEdit && checked.size===1) ? '' : 'none';
+    // Always show recall button when bar is open — let the bar-level init handle filtering
+    // Emit a custom event so bar-level code can update recall visibility
+    bar.dispatchEvent(new CustomEvent('sel-changed', {detail:{checked:[...checked]}}));
   }
   function toggle(id){
     if(checked.has(id)) checked.delete(id); else checked.add(id);
     render();
+    // Update recall buttons for dm/chat bars
+    if(typeof updateDmSelBarButtons==='function') updateDmSelBarButtons();
+    if(typeof updateChatSelBarButtons==='function') updateChatSelBarButtons();
   }
   return {
     isActive(){ return active; },
@@ -4324,7 +4496,7 @@ function renderBubble(){
     _bubbleSel.enter(id,
       ()=>pd.bubble.rounds.map(r=>({id:r.id, text:r.text})),
       (ids)=>{ pd.bubble.rounds=pd.bubble.rounds.filter(r=>!ids.includes(r.id)); saveState(); _bubbleSel.exit(); renderBubble(); showToast(t('toast.msgDeleted')); },
-      (id)=>{ const r=pd.bubble.rounds.find(x=>x.id===id); if(!r) return; showPromptModal('编辑消息',r.text,(v)=>{ r.text=v; saveState(); _bubbleSel.exit(); renderBubble(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=r.text; },30); }
+      (id)=>{ const r=pd.bubble.rounds.find(x=>x.id===id); if(!r) return; showPromptModal(t('sel.editMsg'),r.text,(v)=>{ r.text=v; saveState(); _bubbleSel.exit(); renderBubble(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=r.text; },30); }
     );
   });
 
@@ -4368,7 +4540,7 @@ function initBubbleSelBar(){
   bar.querySelector('.sel-mode-delete').addEventListener('click', ()=>{
     if(!_bubbleSel) return;
     const ids=_bubbleSel.getChecked();
-    if(!ids.length){ showToast('请先选择'); return; }
+    if(!ids.length){ showToast(t('sel.selectFirst')); return; }
     _bubbleSel.getOnDelete()(ids);
   });
 }
@@ -4398,11 +4570,12 @@ function renderUserChatFeed(){
     _chatSel.enter(id,
       ()=>pd.messages.filter(m=>m.id&&!m.recalled).map(m=>({id:m.id, text:m.text, from:m.from})),
       (ids)=>{ pd.messages=pd.messages.filter(m=>!ids.includes(m.id)); saveState(); _chatSel.exit(); renderUserChatFeed(); showToast(t('toast.msgDeleted')); },
-      (id)=>{ const msg=pd.messages.find(m=>m.id===id); if(!msg) return; showPromptModal('编辑消息',msg.text,(v)=>{ msg.text=v; saveState(); _chatSel.exit(); renderUserChatFeed(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg.text; },30); }
+      (id)=>{ const msg=pd.messages.find(m=>m.id===id); if(!msg) return; showPromptModal(t('sel.editMsg'),msg.text,(v)=>{ msg.text=v; saveState(); _chatSel.exit(); renderUserChatFeed(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg.text; },30); }
     );
   });
   feed.scrollTop = feed.scrollHeight;
   applyBubbleScale();
+  applyChatWallpaper();
 }
 
 function initChatSelBar(){
@@ -4416,35 +4589,76 @@ function initChatSelBar(){
     _chatSel.getOnEdit()(ids[0]);
     _chatSel.exit();
   });
+  const recallBtn = bar.querySelector('.sel-mode-recall');
+  recallBtn.style.display = '';  // always visible
+  recallBtn.style.opacity = '0.35';
+  recallBtn.style.pointerEvents = 'none';
   bar.querySelector('.sel-mode-recall').addEventListener('click', ()=>{
     if(!_chatSel) return;
     const ids=_chatSel.getChecked();
-    if(!ids.length){ showToast('请先选择'); return; }
+    if(!ids.length){ showToast(t('sel.selectFirst')); return; }
     const ch = getCurrentChar();
-    const pd = ensurePhoneData(ch).userChat;
-    ids.forEach(id=>{
-      const msg = pd.messages.find(m=>m.id===id);
-      if(msg && !msg.recalled){
-        msg.recalledText = msg.text;
-        msg.recalled = true;
-        msg.text = '[撤回]';
-      }
-    });
-    saveState();
-    _chatSel.exit();
-    renderUserChatFeed();
-    showToast('消息已撤回');
+    // Check if in contact chat or idol chat
+    if(_currentContactIdx !== null && _currentContactIdx !== undefined){
+      const contacts = getUserContactChats(ch);
+      const c = contacts[_currentContactIdx];
+      if(!c) return;
+      ids.forEach(id=>{
+        const msg = c.messages.find(m=>m.id===id);
+        if(msg && !msg.recalled && msg.from==='me'){
+          msg.recalledText = msg.text;
+          msg.recalled = true;
+          msg.text = '[撤回]';
+        }
+      });
+      saveState();
+      _chatSel.exit();
+      const feed = document.getElementById('userChatFeed');
+      c.messages.forEach(msg=>{ if(!msg.id) msg.id=uid('m'); });
+      feed.innerHTML = renderMsgFeedHtml(c.messages, ch, true);
+      feed.scrollTop = feed.scrollHeight;
+    } else {
+      const pd = ensurePhoneData(ch).userChat;
+      ids.forEach(id=>{
+        const msg = pd.messages.find(m=>m.id===id);
+        if(msg && !msg.recalled && msg.from==='me'){
+          msg.recalledText = msg.text;
+          msg.recalled = true;
+          msg.text = '[撤回]';
+        }
+      });
+      saveState();
+      _chatSel.exit();
+      renderUserChatFeed();
+    }
+    renderChatList();
+    showToast(t('toast.recalled'));
   });
   bar.querySelector('.sel-mode-delete').addEventListener('click', ()=>{
     if(!_chatSel) return;
     const ids=_chatSel.getChecked();
-    if(!ids.length){ showToast('请先选择'); return; }
+    if(!ids.length){ showToast(t('sel.selectFirst')); return; }
     _chatSel.getOnDelete()(ids);
   });
-
-  // Show recall button only when selected message is from 'me'
-  // We hook into the createInlineSel render to update recall visibility
-  const origRender = _chatSel ? _chatSel.render : null;
+  // Update recall btn enabled state on selection change
+  bar.addEventListener('sel-changed', (e)=>{
+    const ids = e.detail.checked;
+    const ch = getCurrentChar();
+    let messages = [];
+    if(_currentContactIdx !== null && _currentContactIdx !== undefined){
+      const contacts = getUserContactChats(ch);
+      const c = contacts[_currentContactIdx];
+      messages = c ? (c.messages||[]) : [];
+    } else if(ch) {
+      messages = ensurePhoneData(ch).userChat.messages || [];
+    }
+    const allMine = ids.length>0 && ids.every(id=>{
+      const m = messages.find(m=>m.id===id);
+      return m && m.from==='me' && !m.recalled;
+    });
+    recallBtn.style.opacity = allMine ? '1' : '0.35';
+    recallBtn.style.pointerEvents = allMine ? '' : 'none';
+  });
 }
 
 function updateChatSelBarButtons(){
@@ -4506,7 +4720,7 @@ function renderDmFeed(){
     _dmSel.enter(id,
       ()=>dm.messages.filter(m=>!m._divider).map(m=>({id:m.id, text:m.text})),
       (ids)=>{ dm.messages=dm.messages.filter(m=>!ids.includes(m.id)); saveState(); _dmSel.exit(); renderDmFeed(); showToast(t('toast.msgDeleted')); },
-      (id)=>{ const msg=dm.messages.find(m=>m.id===id); if(!msg) return; showPromptModal('编辑消息',msg.text,(v)=>{ msg.text=v; saveState(); _dmSel.exit(); renderDmFeed(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg.text; },30); }
+      (id)=>{ const msg=dm.messages.find(m=>m.id===id); if(!msg) return; showPromptModal(t('sel.editMsg'),msg.text,(v)=>{ msg.text=v; saveState(); _dmSel.exit(); renderDmFeed(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg.text; },30); }
     );
   });
   feed.scrollTop = feed.scrollHeight;
@@ -4524,12 +4738,55 @@ function initDmSelBar(){
     _dmSel.getOnEdit()(ids[0]);
     _dmSel.exit();
   });
+  const recallBtn = bar.querySelector('.sel-mode-recall');
+  recallBtn.style.display = '';
+  recallBtn.style.opacity = '0.35';
+  recallBtn.style.pointerEvents = 'none';
+  recallBtn.addEventListener('click', ()=>{
+    if(!_dmSel || !currentDmCtx) return;
+    const ids=_dmSel.getChecked();
+    if(!ids.length){ showToast(t('sel.selectFirst')); return; }
+    const {scope,idx}=currentDmCtx;
+    const pd=resolveIgPd(scope);
+    const dm=pd?pd.dms[idx]:null;
+    if(!dm) return;
+    ids.forEach(id=>{
+      const msg=dm.messages.find(m=>m.id===id);
+      if(msg && !msg.recalled && msg.from==='me'){
+        msg.recalledText = msg.text;
+        msg.recalled = true;
+        msg.text = '[撤回]';
+      }
+    });
+    saveState();
+    _dmSel.exit();
+    renderDmFeed();
+    showToast(t('toast.recalled'));
+  });
   bar.querySelector('.sel-mode-delete').addEventListener('click', ()=>{
     if(!_dmSel) return;
     const ids=_dmSel.getChecked();
-    if(!ids.length){ showToast('请先选择'); return; }
+    if(!ids.length){ showToast(t('sel.selectFirst')); return; }
     _dmSel.getOnDelete()(ids);
   });
+  // Update recall availability on sel-changed
+  bar.addEventListener('sel-changed', (e)=>{
+    const ids = e.detail.checked;
+    if(!currentDmCtx){ recallBtn.style.opacity='0.35'; recallBtn.style.pointerEvents='none'; return; }
+    const {scope,idx}=currentDmCtx;
+    const pd=resolveIgPd(scope);
+    const dm=pd?pd.dms[idx]:null;
+    const allMine = dm && ids.length>0 && ids.every(id=>{
+      const m=dm.messages.find(m=>m.id===id);
+      return m && m.from==='me' && !m.recalled;
+    });
+    recallBtn.style.opacity = allMine ? '1' : '0.35';
+    recallBtn.style.pointerEvents = allMine ? '' : 'none';
+  });
+}
+
+function updateDmSelBarButtons(){
+  // Now handled via sel-changed event in initDmSelBar
 }
 
 /* ===================================================================
@@ -4541,7 +4798,11 @@ function initDmSelBar(){
 const _igSelState = {}; // keyed by bodyId
 
 function getOrCreateIgSel(scope){
-  const bodyId = scope==='idol' ? 'igBody' : scope==='idolAlt' ? 'igAltBody' : 'userIgBody';
+  const bodyId = scope==='idol' ? 'igBody'
+    : scope==='idolAlt' ? 'igAltBody'
+    : scope==='idol_dm' ? 'igBody'
+    : scope==='user_dm' ? 'userIgBody'
+    : 'userIgBody';
   const barId = 'igSelBar_'+scope;
   // Ensure sel bar exists
   let bar = document.getElementById(barId);
@@ -4549,7 +4810,7 @@ function getOrCreateIgSel(scope){
     bar = document.createElement('div');
     bar.id = barId;
     bar.className = 'sel-mode-bar';
-    bar.innerHTML = '<div class="sel-mode-actions"><span class="sel-mode-count">已选 0 条</span><button class="sel-mode-delete">删除</button><button class="sel-mode-cancel">取消</button></div>';
+    bar.innerHTML = '<div class="sel-mode-actions"><span class="sel-mode-count">'+t('sel.count0')+'</span><button class="sel-mode-delete">'+t('btn.delete')+'</button><button class="sel-mode-cancel">'+t('btn.cancel')+'</button></div>';
     const bodyEl = document.getElementById(bodyId);
     if(bodyEl && bodyEl.parentNode) bodyEl.parentNode.insertBefore(bar, bodyEl.nextSibling);
     bar.querySelector('.sel-mode-cancel').addEventListener('click', ()=>{
@@ -4560,7 +4821,7 @@ function getOrCreateIgSel(scope){
       const sel = _igSelState[scope];
       if(!sel) return;
       const ids = sel.getChecked();
-      if(!ids.length){ showToast('请先选择'); return; }
+      if(!ids.length){ showToast(t('sel.selectFirst')); return; }
       sel.getOnDelete()(ids);
     });
   }
@@ -4639,8 +4900,8 @@ function deleteCharacter(charId){
   const ch = state.characters.find(c=>c.id===charId);
   if(!ch) return;
   showActionSheet(
-    ch.idolName ? '删除「'+ch.idolName+'」？' : '删除此角色？',
-    [{value:'confirm', label:'确认删除（不可恢复）'}],
+    ch.idolName ? t('char.deleteTitle').replace('{name}', ch.idolName) : t('char.deleteGeneric'),
+    [{value:'confirm', label:t('menu.confirmDelete')}],
     (val)=>{
       if(val!=='confirm') return;
       state.characters = state.characters.filter(c=>c.id!==charId);
@@ -4669,9 +4930,9 @@ function renderSettingsMemory(){
   const ch = getCurrentChar();
   if(!ch){ body.innerHTML='<div class="empty-state">'+t('toast.charMissing')+'</div>'; return; }
   const entries = ensureMemoryEntries(ch);
-  let html = '<div class="field-hint" style="margin-bottom:14px;">角色记忆 — 记录每次生成内容带来的重要事件，会自动注入上下文。</div>';
+  let html = '<div class="field-hint" style="margin-bottom:14px;">'+t('memory.hint')+'</div>';
   if(!entries.length){
-    html += '<div class="empty-state">还没有记忆条目，点击下方按钮添加。</div>';
+    html += '<div class="empty-state">'+t('memory.empty')+'</div>';
   } else {
     entries.forEach((en,i)=>{
       html += '<div class="note-item" data-mem-idx="'+i+'">'
@@ -4680,7 +4941,7 @@ function renderSettingsMemory(){
         + '</div>';
     });
   }
-  html += '<button class="btn-block" id="memAddBtn">+ 添加记忆</button>';
+  html += '<button class="btn-block" id="memAddBtn">'+t('memory.add')+'</button>';
   body.innerHTML = html;
   body.querySelectorAll('[data-mem-idx]').forEach(el=>{
     el.addEventListener('click', ()=>openMemoryEntry(parseInt(el.getAttribute('data-mem-idx'),10)));
@@ -4696,7 +4957,7 @@ function openMemoryEntry(idx){
   const entries = ensureMemoryEntries(ch);
   _editingMemIdx = idx;
   if(idx===null){
-    _editingMemDraft = {id:uid('mem'), title:'记忆 '+(entries.length+1), content:''};
+    _editingMemDraft = {id:uid('mem'), title:t('memory.defaultTitle').replace('{n}', entries.length+1), content:''};
   } else {
     _editingMemDraft = JSON.parse(JSON.stringify(entries[idx]));
   }
@@ -4709,11 +4970,11 @@ function renderMemoryEntryForm(){
   const d = _editingMemDraft;
   const body = document.getElementById('memEditBody');
   body.innerHTML =
-    '<div class="field-label">标题</div>'
+    '<div class="field-label">'+t('memory.titleLabel')+'</div>'
     + '<input type="text" class="field-input" id="memTitleInput" value="'+escapeHtml(d.title)+'">'
     + '<div class="field-label">&nbsp;</div>'
-    + '<textarea class="field-textarea" id="memContentInput" style="min-height:240px;" placeholder="记录这条记忆的内容…">'+escapeHtml(d.content)+'</textarea>'
-    + (_editingMemIdx!==null ? '<button class="btn-block danger" id="memDeleteBtn">删除这条记忆</button>' : '');
+    + '<textarea class="field-textarea" id="memContentInput" style="min-height:240px;" placeholder="'+t('memory.contentPlaceholder')+'">'+escapeHtml(d.content)+'</textarea>'
+    + (_editingMemIdx!==null ? '<button class="btn-block danger" id="memDeleteBtn">'+t('memory.delete')+'</button>' : '');
 
   document.getElementById('memTitleInput').addEventListener('input', e=>{
     d.title = e.target.value;
@@ -4728,7 +4989,7 @@ function renderMemoryEntryForm(){
       const entries = ensureMemoryEntries(ch);
       entries.splice(_editingMemIdx,1);
       saveState();
-      showToast('记忆已删除');
+      showToast(t('toast.memDeleted'));
       goBack();
       renderSettingsMemory();
     });
@@ -4742,7 +5003,7 @@ function saveMemoryEntry(){
   if(_editingMemIdx===null) entries.push(_editingMemDraft);
   else entries[_editingMemIdx] = _editingMemDraft;
   saveState();
-  showToast('记忆已保存');
+  showToast(t('toast.memSaved'));
   goBack();
   renderSettingsMemory();
 }
@@ -4752,27 +5013,50 @@ document.getElementById('memSaveBtn').addEventListener('click', saveMemoryEntry)
 /* ===================================================================
    CHAT THREE-DOT MENU — avatar visibility + bubble colors
 =================================================================== */
+function applyAvatarShape(){
+  const shape = state.settings.avatarShape || 'circle';
+  const size = state.settings.avatarSize || 32;
+  const phone = document.getElementById('phone');
+  phone.setAttribute('data-avatar-shape', shape);
+  phone.style.setProperty('--chat-avatar-size', size+'px');
+}
+
 function showAvatarSettings(){
   const dd = document.getElementById('chatDropdown');
   if(dd) dd.style.display='none';
   const s = state.settings;
   const sendOn = s.chatShowSentAvatar !== false;
   const recvOn = s.chatShowRecvAvatar !== false;
+  const shape = s.avatarShape || 'circle';
   const overlay = document.getElementById('promptOverlay');
   const card = document.getElementById('promptCard');
   card.innerHTML =
-    '<div class="prompt-card-title">头像显示设置</div>'
+    '<div class="prompt-card-title">'+t('menu.avatarSettings')+'</div>'
     + '<div style="display:flex;flex-direction:column;gap:14px;margin:10px 0 16px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;">'
-        + '<span style="font-size:14px;color:var(--text);">显示我方头像</span>'
+        + '<span style="font-size:14px;color:var(--text);">'+t('avatar.showMine')+'</span>'
         + '<div class="ios-toggle'+(sendOn?' on':'')+'" id="avatarSentToggle"></div>'
       + '</div>'
       + '<div style="display:flex;align-items:center;justify-content:space-between;">'
-        + '<span style="font-size:14px;color:var(--text);">显示对方头像</span>'
+        + '<span style="font-size:14px;color:var(--text);">'+t('avatar.showTheir')+'</span>'
         + '<div class="ios-toggle'+(recvOn?' on':'')+'" id="avatarRecvToggle"></div>'
       + '</div>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+        + '<span style="font-size:14px;color:var(--text);">'+t('avatar.shape')+'</span>'
+        + '<div style="display:flex;gap:6px;">'
+          + '<button id="avatarShapeCircle" style="padding:5px 12px;border-radius:8px;font-size:12.5px;font-weight:600;border:1.5px solid var(--border);background:'+(shape==='circle'?'var(--accent)':'var(--surface-2)')+';color:'+(shape==='circle'?'var(--accent-text)':'var(--text)') +';">'+t('avatar.circle')+'</button>'
+          + '<button id="avatarShapeSquare" style="padding:5px 12px;border-radius:8px;font-size:12.5px;font-weight:600;border:1.5px solid var(--border);background:'+(shape==='square'?'var(--accent)':'var(--surface-2)')+';color:'+(shape==='square'?'var(--accent-text)':'var(--text)')+';">'+t('avatar.square')+'</button>'
+        + '</div>'
+      + '</div>'
+      + '<div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'
+          + '<span style="font-size:14px;color:var(--text);">'+t('avatar.size')+'</span>'
+          + '<span id="avatarSizeLabel" style="font-size:12px;color:var(--text-3);">'+(s.avatarSize||32)+'px</span>'
+        + '</div>'
+        + '<input type="range" id="avatarSizeSlider" min="22" max="48" step="2" value="'+(s.avatarSize||32)+'" style="-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;">'
+      + '</div>'
     + '</div>'
-    + '<div class="prompt-card-actions"><button class="pc-ok" style="flex:1;" data-v="__close">完成</button></div>';
+    + '<div class="prompt-card-actions"><button class="pc-ok" style="flex:1;" data-v="__close">'+t('btn.done')+'</button></div>';
   overlay.classList.add('open');
   document.getElementById('avatarSentToggle').addEventListener('click', function(){
     this.classList.toggle('on');
@@ -4786,6 +5070,34 @@ function showAvatarSettings(){
     saveState();
     renderUserChatFeed();
   });
+  document.getElementById('avatarShapeCircle').addEventListener('click', function(){
+    s.avatarShape = 'circle';
+    saveState();
+    applyAvatarShape();
+    renderUserChatFeed();
+    // Update button styles
+    this.style.background='var(--accent)'; this.style.color='var(--accent-text)';
+    const sq=document.getElementById('avatarShapeSquare');
+    if(sq){sq.style.background='var(--surface-2)';sq.style.color='var(--text)';}
+  });
+  document.getElementById('avatarShapeSquare').addEventListener('click', function(){
+    s.avatarShape = 'square';
+    saveState();
+    applyAvatarShape();
+    renderUserChatFeed();
+    // Update button styles
+    this.style.background='var(--accent)'; this.style.color='var(--accent-text)';
+    const ci=document.getElementById('avatarShapeCircle');
+    if(ci){ci.style.background='var(--surface-2)';ci.style.color='var(--text)';}
+  });
+  const sizeSlider = document.getElementById('avatarSizeSlider');
+  const sizeLabel = document.getElementById('avatarSizeLabel');
+  if(sizeSlider) sizeSlider.addEventListener('input', ()=>{
+    s.avatarSize = parseInt(sizeSlider.value);
+    sizeLabel.textContent = sizeSlider.value+'px';
+    applyAvatarShape();
+    renderUserChatFeed();
+  });
   function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
   function onClick(e){
     const btn = e.target.closest('[data-v]');
@@ -4795,10 +5107,10 @@ function showAvatarSettings(){
   overlay.addEventListener('click', onClick);
 }
 
-const BUBBLE_PRESETS_SENT_DARK = ['','#f2f2f3','#ffd60a','#ff453a','#30d158','#0a84ff','#bf5af2','#ff9f0a','#64d2ff'];
-const BUBBLE_PRESETS_RECV_DARK = ['','#262627','#2d4a3e','#1a3a5c','#3d2b4a','#2a3a4a','#4a2b2b','#1e3d59','#2b3a1a'];
-const BUBBLE_PRESETS_SENT_LIGHT = ['','#0e0e0f','#0056b3','#c0392b','#16a085','#7d3c98','#0071e3','#f5a623','#28b485'];
-const BUBBLE_PRESETS_RECV_LIGHT = ['','#ececee','#e8f4fd','#fdebd0','#f9ebea','#eaf4fb','#f4ecf7','#e9f7ef','#fef9e7'];
+const BUBBLE_APPLE_SENT_DARK = ['','#0a84ff','#30d158','#ff453a','#ffd60a','#bf5af2','#ff9f0a','#64d2ff'];
+const BUBBLE_APPLE_RECV_DARK = ['','#262627','#1c3a52','#2d4a3e','#3d2b4a','#2a3a4a','#4a2b2b','#1e3d59'];
+const BUBBLE_APPLE_SENT_LIGHT = ['','#0071e3','#34c759','#ff3b30','#ffd60a','#7d3c98','#ff9f0a','#5ac8fa'];
+const BUBBLE_APPLE_RECV_LIGHT = ['','#ececee','#e8f4fd','#e9f7ef','#fef9e7','#f4ecf7','#fdebd0','#f9ebea'];
 
 function showChatColorPicker(context){
   const dd = document.getElementById('chatDropdown');
@@ -4807,8 +5119,8 @@ function showChatColorPicker(context){
   const ctx = context || 'chat';
   const colors = s[ctx+'Colors'] || {sent:'',recv:''};
   const isDark = (s.theme||'dark')==='dark';
-  const sentPresets = isDark ? BUBBLE_PRESETS_SENT_DARK : BUBBLE_PRESETS_SENT_LIGHT;
-  const recvPresets = isDark ? BUBBLE_PRESETS_RECV_DARK : BUBBLE_PRESETS_RECV_LIGHT;
+  const sentPresets = isDark ? BUBBLE_APPLE_SENT_DARK : BUBBLE_APPLE_SENT_LIGHT;
+  const recvPresets = isDark ? BUBBLE_APPLE_RECV_DARK : BUBBLE_APPLE_RECV_LIGHT;
 
   const overlay = document.getElementById('promptOverlay');
   const card = document.getElementById('promptCard');
@@ -4819,23 +5131,21 @@ function showChatColorPicker(context){
     const stc = colors.sent ? (isLightColor(sc)?'#0a0a0a':'#ffffff') : (isDark?'#0a0a0a':'#ffffff');
     const rtc = colors.recv ? (isLightColor(rc)?'#0a0a0a':'#ffffff') : (isDark?'#f2f2f3':'#0a0a0a');
     return '<div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 14px;padding:10px 12px;background:var(--surface-3);border-radius:14px;">'
-      +'<div style="display:flex;justify-content:flex-end;"><div style="background:'+sc+';color:'+stc+';font-size:13px;padding:7px 13px;border-radius:18px 18px 4px 18px;max-width:75%;">我的消息</div></div>'
-      +'<div style="display:flex;justify-content:flex-start;"><div style="background:'+rc+';color:'+rtc+';font-size:13px;padding:7px 13px;border-radius:18px 18px 18px 4px;max-width:75%;">对方的回复</div></div>'
+      +'<div style="display:flex;justify-content:flex-end;"><div style="background:'+sc+';color:'+stc+';font-size:13px;padding:7px 13px;border-radius:18px 18px 4px 18px;max-width:75%;">'+t('preview.myMsg')+'</div></div>'
+      +'<div style="display:flex;justify-content:flex-start;"><div style="background:'+rc+';color:'+rtc+';font-size:13px;padding:7px 13px;border-radius:18px 18px 18px 4px;max-width:75%;">'+t('preview.theirMsg')+'</div></div>'
       +'</div>';
   }
 
   function swatchRow(presets, cur, type){
-    // first swatch = reset (默)
     return '<div class="color-swatches" id="'+type+'Swatches">'
       + presets.map((c,i)=>{
         const bg = c || (type==='sent' ? (isDark?'#f2f2f3':'#0e0e0f') : (isDark?'#262627':'#ececee'));
         const active = (!c && !cur) || c===cur;
-        const label = c==='' ? '<svg viewBox="0 0 14 14" style="width:12px;height:12px;stroke:var(--text-2);fill:none;stroke-width:1.5"><path d="M2 2l10 10M12 2 2 12"/></svg>' : '';
-        return '<div class="color-swatch'+(active?' active':'')+'" data-color="'+c+'" data-type="'+type+'" title="'+(c||'默认')+'" style="background:'+bg+';position:relative;">'
-          +label
+        // Default swatch: just show the color, no X
+        return '<div class="color-swatch'+(active?' active':'')+'" data-color="'+c+'" data-type="'+type+'" style="background:'+bg+';">'
         +'</div>';
       }).join('')
-      + '<label class="color-swatch color-swatch-custom" title="自定义" style="cursor:pointer;display:flex;align-items:center;justify-content:center;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);border:2px solid var(--border);">'
+      + '<label class="color-swatch color-swatch-custom" title="Custom" style="cursor:pointer;display:flex;align-items:center;justify-content:center;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);border:2px solid var(--border);">'
         + '<input type="color" data-custom-type="'+type+'" style="opacity:0;position:absolute;width:0;height:0;" value="'+(cur&&cur!==''?cur:'#ffffff')+'">'
         + '<svg viewBox="0 0 14 14" style="width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2;filter:drop-shadow(0 0 1px #000);"><path d="M1 7h12M7 1v12"/></svg>'
       + '</label>'
@@ -4843,15 +5153,15 @@ function showChatColorPicker(context){
   }
 
   card.innerHTML =
-    '<div class="prompt-card-title">修改气泡颜色</div>'
+    '<div class="prompt-card-title">'+t('menu.bubbleColor')+'</div>'
     + '<div id="colorPickerPreview">'+previewHtml()+'</div>'
-    + '<div style="font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">我方气泡</div>'
+    + '<div style="font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">'+t('color.mySide')+'</div>'
     + swatchRow(sentPresets, colors.sent, 'sent')
-    + '<div style="font-size:11px;color:var(--text-3);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.06em;">对方气泡</div>'
+    + '<div style="font-size:11px;color:var(--text-3);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.06em;">'+t('color.theirSide')+'</div>'
     + swatchRow(recvPresets, colors.recv, 'recv')
     + '<div class="prompt-card-actions" style="margin-top:16px;">'
-      + '<button class="pc-cancel" data-v="__reset">重置</button>'
-      + '<button class="pc-ok" data-v="__close">完成</button>'
+      + '<button class="pc-cancel" data-v="__reset">'+t('btn.reset')+'</button>'
+      + '<button class="pc-ok" data-v="__close">'+t('btn.done')+'</button>'
     + '</div>';
   overlay.classList.add('open');
 
@@ -4862,7 +5172,6 @@ function showChatColorPicker(context){
     saveState();
     applyChatColors();
     document.getElementById('colorPickerPreview').innerHTML = previewHtml();
-    // Update swatch active states
     card.querySelectorAll('.color-swatch[data-type="'+type+'"]').forEach(sw=>{
       const c = sw.getAttribute('data-color');
       sw.classList.toggle('active', c===color || (c==='' && color===''));
@@ -4909,6 +5218,9 @@ function isLightColor(hex){
   return (0.299*r+0.587*g+0.114*b) > 160;
 }
 
+/* ===================================================================
+   APPLY CHAT COLORS ON INIT
+=================================================================== */
 function applyChatColors(){
   const s = state.settings;
   const phone = document.getElementById('phone');
@@ -4936,7 +5248,7 @@ function chatMsgHtml(m, ch, opts){
   // Recalled message
   if(m.recalled){
     return '<div class="recalled-msg" data-msg-id="'+m.id+'">'
-      + (mine ? '你撤回了一条消息' : (ch?ch.idolName||'对方':'对方')+'撤回了一条消息')
+      + (mine ? t('recall.mine') : (ch?ch.idolName||t('recall.other'):t('recall.other'))+t('recall.otherSuffix'))
       + (m.recalledText ? '<span style="color:var(--text-3);font-size:11px;"> ('+escapeHtml(m.recalledText)+')</span>' : '')
     + '</div>';
   }
@@ -5186,9 +5498,160 @@ function openOfflineApp(){
 // we use a simpler approach: long-press header or a separate settings btn)
 // For now: wire up DM feed three-dot from igDmInputBar area - skip for DM (covered by chat menu)
 
-/* ===================================================================
-   APPLY CHAT COLORS ON INIT
-=================================================================== */
+function showChatWallpaperPicker(){
+  const dd=document.getElementById('chatDropdown'); if(dd) dd.style.display='none';
+  const s=state.settings;
+  if(!s.chatWallpaper) s.chatWallpaper={image:'',opacity:0.4,blur:0};
+  const cw=s.chatWallpaper;
+  const overlay=document.getElementById('promptOverlay');
+  const card=document.getElementById('promptCard');
+
+  function buildHtml(){
+    const hasImg = !!cw.image;
+    return '<div class="prompt-card-title">'+t('menu.chatWallpaper')+'</div>'
+      +'<div style="display:flex;justify-content:center;margin-bottom:12px;">'
+        +'<div id="cwPreview" style="width:120px;height:80px;border-radius:12px;border:1px solid var(--border);background:var(--surface-3);'+(hasImg?'background-image:url('+cw.image+');background-size:cover;background-position:center;':'')+';overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;">'
+          +(hasImg?'':'<span style="font-size:11px;color:var(--text-3);">'+t('btn.uploadImage')+'</span>')
+        +'</div>'
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px;">'
+        +'<div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">'+t('wallpaper.opacity')+' <span id="cwOpacityVal">'+(Math.round((cw.opacity||0.4)*100))+'%</span></div>'
+          +'<input type="range" id="cwOpacity" min="0" max="100" step="5" value="'+(Math.round((cw.opacity||0.4)*100))+'" style="-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;">'
+        +'</div>'
+        +'<div><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">'+t('wallpaper.blur')+' <span id="cwBlurVal">'+(cw.blur||0)+'px</span></div>'
+          +'<input type="range" id="cwBlur" min="0" max="20" step="1" value="'+(cw.blur||0)+'" style="-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;">'
+        +'</div>'
+      +'</div>'
+      +'<div class="prompt-card-actions">'
+        +'<button class="pc-cancel" data-v="__reset">'+t('btn.reset')+'</button>'
+        +'<button class="pc-ok" data-v="__close">'+t('btn.done')+'</button>'
+      +'</div>';
+  }
+
+  card.innerHTML = buildHtml();
+  overlay.classList.add('open');
+
+  function applyToFeed(){
+    const feed=document.getElementById('userChatFeed');
+    if(!feed) return;
+    if(cw.image){
+      feed.classList.add('has-chat-bg');
+      feed.style.backgroundImage='url('+cw.image+')';
+      feed.style.backgroundSize='cover';
+      feed.style.backgroundPosition='center';
+      // overlay for opacity+blur
+      let ol=feed.querySelector('.chat-bg-overlay');
+      if(!ol){ ol=document.createElement('div'); ol.className='chat-bg-overlay'; feed.insertBefore(ol,feed.firstChild); }
+      const isDark=(state.settings.theme||'dark')==='dark';
+      const opacity=cw.opacity||0.4;
+      ol.style.background=isDark?'rgba(0,0,0,'+opacity+')':'rgba(255,255,255,'+opacity+')';
+      ol.style.backdropFilter='blur('+(cw.blur||0)+'px)';
+      ol.style.webkitBackdropFilter='blur('+(cw.blur||0)+'px)';
+    } else {
+      feed.classList.remove('has-chat-bg');
+      feed.style.backgroundImage='';
+      const ol=feed.querySelector('.chat-bg-overlay');
+      if(ol) ol.remove();
+    }
+    saveState();
+  }
+
+  document.getElementById('cwPreview').addEventListener('click', ()=>{
+    const input=document.createElement('input'); input.type='file'; input.accept='image/*';
+    input.onchange=async()=>{
+      if(!input.files||!input.files[0]) return;
+      try{
+        const url=await fileToResizedDataUrl(input.files[0],800);
+        cw.image=url;
+        card.innerHTML=buildHtml();
+        rebindEvents();
+        applyToFeed();
+      }catch(e){ showToast(t('toast.genFailed')); }
+    };
+    input.click();
+  });
+
+  function rebindEvents(){
+    document.getElementById('cwPreview').addEventListener('click', arguments.callee||function(){});
+    const opSlider=document.getElementById('cwOpacity');
+    const blurSlider=document.getElementById('cwBlur');
+    if(opSlider) opSlider.addEventListener('input',()=>{
+      cw.opacity=parseInt(opSlider.value)/100;
+      document.getElementById('cwOpacityVal').textContent=opSlider.value+'%';
+      applyToFeed();
+    });
+    if(blurSlider) blurSlider.addEventListener('input',()=>{
+      cw.blur=parseInt(blurSlider.value);
+      document.getElementById('cwBlurVal').textContent=blurSlider.value+'px';
+      applyToFeed();
+    });
+  }
+
+  function bindAll(){
+    const preview=document.getElementById('cwPreview');
+    if(preview) preview.addEventListener('click', ()=>{
+      const input=document.createElement('input'); input.type='file'; input.accept='image/*';
+      input.onchange=async()=>{
+        if(!input.files||!input.files[0]) return;
+        try{
+          const url=await fileToResizedDataUrl(input.files[0],800);
+          cw.image=url;
+          card.innerHTML=buildHtml();
+          bindAll(); applyToFeed();
+        }catch(e){ showToast(t('toast.genFailed')); }
+      };
+      input.click();
+    });
+    const opSlider=document.getElementById('cwOpacity');
+    const blurSlider=document.getElementById('cwBlur');
+    if(opSlider) opSlider.addEventListener('input',()=>{
+      cw.opacity=parseInt(opSlider.value)/100;
+      document.getElementById('cwOpacityVal').textContent=opSlider.value+'%';
+      applyToFeed();
+    });
+    if(blurSlider) blurSlider.addEventListener('input',()=>{
+      cw.blur=parseInt(blurSlider.value);
+      document.getElementById('cwBlurVal').textContent=blurSlider.value+'px';
+      applyToFeed();
+    });
+  }
+  bindAll();
+
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v=btn.getAttribute('data-v');
+    if(v==='__reset'){
+      s.chatWallpaper={image:'',opacity:0.4,blur:0};
+      Object.assign(cw,s.chatWallpaper);
+      applyToFeed();
+      card.innerHTML=buildHtml(); bindAll();
+      return;
+    }
+    close();
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+function applyChatWallpaper(){
+  const cw=(state.settings.chatWallpaper)||{image:'',opacity:0.4,blur:0};
+  const feed=document.getElementById('userChatFeed');
+  if(!feed) return;
+  if(cw.image){
+    feed.classList.add('has-chat-bg');
+    feed.style.backgroundImage='url('+cw.image+')';
+    let ol=feed.querySelector('.chat-bg-overlay');
+    if(!ol){ ol=document.createElement('div'); ol.className='chat-bg-overlay'; feed.insertBefore(ol,feed.firstChild); }
+    const isDark=(state.settings.theme||'dark')==='dark';
+    ol.style.background=isDark?'rgba(0,0,0,'+(cw.opacity||0.4)+')':'rgba(255,255,255,'+(cw.opacity||0.4)+')';
+    ol.style.backdropFilter='blur('+(cw.blur||0)+'px)';
+    ol.style.webkitBackdropFilter='blur('+(cw.blur||0)+'px)';
+  } else {
+    feed.classList.remove('has-chat-bg');
+    feed.style.backgroundImage='';
+  }
+}
 
 /* ===================================================================
    MESSAGE NOTIFICATION BANNER
@@ -5224,11 +5687,30 @@ function formatMsgDate(ts){
   const d = new Date(ts);
   const now = new Date();
   const diff = now - d;
-  if(diff < 86400000){ return formatMsgTime(ts); }
-  if(diff < 604800000){
-    const days=['日','一','二','三','四','五','六'];
-    return '周'+days[d.getDay()]+' '+formatMsgTime(ts);
+  const lang = state.settings.language || 'zh';
+  const isEn = lang === 'en';
+  // < 1 min: just now
+  if(diff < 60000) return isEn ? 'Now' : '刚刚';
+  // < 60 min: X min ago / X分钟前
+  if(diff < 3600000){
+    const mins = Math.floor(diff/60000);
+    return isEn ? mins+'m' : mins+'分钟前';
   }
+  // Same day: HH:MM
+  const sameDay = d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth() && d.getDate()===now.getDate();
+  if(sameDay) return formatMsgTime(ts);
+  // < 7 days: weekday + time
+  if(diff < 604800000){
+    if(isEn){
+      const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      return days[d.getDay()]+' '+formatMsgTime(ts);
+    } else {
+      const days=['日','一','二','三','四','五','六'];
+      return '周'+days[d.getDay()]+' '+formatMsgTime(ts);
+    }
+  }
+  // Older: date + time
+  if(isEn) return (d.getMonth()+1)+'/'+(d.getDate())+' '+formatMsgTime(ts);
   return (d.getMonth()+1)+'月'+d.getDate()+'日 '+formatMsgTime(ts);
 }
 
@@ -5356,10 +5838,10 @@ function openDmMenu(){
     (ensurePhoneData(ch).userChat.contacts||[]).find(c=>c.name===dm.name);
 
   dd.innerHTML =
-    '<button class="dropdown-item" onclick="togglePinDm()">'+( isPinned ? '取消保留记录' : '保留此聊天记录')+'</button>'
-    + (!alreadyContact ? '<button class="dropdown-item" onclick="addDmAsContact()">添加到我的通讯录</button>' : '<button class="dropdown-item" style="opacity:.4;" disabled>已在通讯录</button>')
-    + '<button class="dropdown-item" onclick="showChatColorPicker(\'dm\')">修改气泡颜色</button>'
-    + '<button class="dropdown-item" onclick="showBubbleSizeMenu()">修改气泡大小</button>';
+    '<button class="dropdown-item" onclick="togglePinDm()">'+( isPinned ? t('menu.unpinDm') : t('menu.pinDm'))+'</button>'
+    + (!alreadyContact ? '<button class="dropdown-item" onclick="addDmAsContact()">'+t('menu.addContact')+'</button>' : '<button class="dropdown-item" style="opacity:.4;" disabled>'+t('menu.alreadyContact')+'</button>')
+    + '<button class="dropdown-item" onclick="showChatColorPicker(\'dm\')">'+t('menu.bubbleColor')+'</button>'
+    + '<button class="dropdown-item" onclick="showBubbleSizeMenu()">'+t('menu.bubbleSize')+'</button>';
   dd.style.display = 'block';
   setTimeout(()=>{
     document.addEventListener('click', function closeDD(e){
@@ -5380,7 +5862,7 @@ function togglePinDm(){
   if(!dm) return;
   dm.pinned = !dm.pinned;
   saveState();
-  showToast(dm.pinned ? '已保留此聊天记录' : '已取消保留');
+  showToast(dm.pinned ? t('menu.pinDm') : t('menu.unpinDm'));
 }
 
 function addDmAsContact(){
@@ -5393,7 +5875,7 @@ function addDmAsContact(){
   if(!dm) return;
   const upd=ensurePhoneData(ch);
   if(!upd.userChat.contacts) upd.userChat.contacts=[];
-  if(upd.userChat.contacts.find(c=>c.name===dm.name)){ showToast('已在通讯录'); return; }
+  if(upd.userChat.contacts.find(c=>c.name===dm.name)){ showToast(t('menu.alreadyContact')); return; }
   // Save context (messages as memory)
   const memLines = dm.messages.map(m=>(m.from==='me'?(ch.userName||'用户'):dm.name)+'：'+m.text).join('\n');
   upd.userChat.contacts.push({
@@ -5401,7 +5883,7 @@ function addDmAsContact(){
     memory:memLines
   });
   saveState();
-  showToast('已添加 '+dm.name+' 到通讯录');
+  showToast(t('toast.contactAdded').replace('{name}', dm.name));
   // Add to user chat list if not already there
   if(!upd.userContactChats) upd.userContactChats=[];
   if(!upd.userContactChats.find(c=>c.name===dm.name)){
@@ -5423,10 +5905,20 @@ document.getElementById('dmMenuBtn').addEventListener('click', (e)=>{
 function openChatMenu(){
   const dd = document.getElementById('chatDropdown');
   if(!dd) return;
-  dd.innerHTML =
-    '<button class="dropdown-item" onclick="showAvatarSettings()">头像显示设置</button>'
-    + '<button class="dropdown-item" onclick="showChatColorPicker(\'chat\')">修改气泡颜色</button>'
-    + '<button class="dropdown-item" onclick="showBubbleSizeMenu()">修改气泡大小</button>';
+  const ch = getCurrentChar();
+  // Detect if we're in a contact chat or main idol chat
+  const isContact = _currentContactIdx !== null && _currentContactIdx !== undefined;
+  let items =
+    '<button class="dropdown-item" onclick="showAvatarSettings()">'+t('menu.avatarSettings')+'</button>'
+    + '<button class="dropdown-item" onclick="showChatColorPicker(\'chat\')">'+t('menu.bubbleColor')+'</button>'
+    + '<button class="dropdown-item" onclick="showBubbleSizeMenu()">'+t('menu.bubbleSize')+'</button>'
+    + '<button class="dropdown-item" onclick="showChatWallpaperPicker()">'+t('menu.chatWallpaper')+'</button>'
+    + '<div class="dropdown-divider"></div>'
+    + '<button class="dropdown-item" style="color:#ff3b30;" onclick="deleteChatHistory()">'+t('menu.deleteChatHistory')+'</button>';
+  if(isContact){
+    items += '<button class="dropdown-item" style="color:#ff3b30;" onclick="deleteContactChat()">'+t('menu.deleteContact')+'</button>';
+  }
+  dd.innerHTML = items;
   dd.style.display = 'block';
   setTimeout(()=>{
     document.addEventListener('click', function closeMenu(e){
@@ -5436,6 +5928,40 @@ function openChatMenu(){
       }
     });
   }, 0);
+}
+
+function deleteChatHistory(){
+  const dd=document.getElementById('chatDropdown'); if(dd) dd.style.display='none';
+  const ch=getCurrentChar(); if(!ch) return;
+  const isContact = _currentContactIdx !== null && _currentContactIdx !== undefined;
+  showActionSheet(t('menu.deleteChatHistory'), [{value:'confirm', label:t('menu.confirmDelete')}], (val)=>{
+    if(val!=='confirm') return;
+    if(isContact){
+      const contacts = getUserContactChats(ch);
+      if(contacts[_currentContactIdx]) contacts[_currentContactIdx].messages = [];
+    } else {
+      ensurePhoneData(ch).userChat.messages = [];
+    }
+    saveState();
+    renderUserChatFeed();
+    showToast(t('toast.msgDeleted'));
+  });
+}
+
+function deleteContactChat(){
+  const dd=document.getElementById('chatDropdown'); if(dd) dd.style.display='none';
+  const ch=getCurrentChar(); if(!ch) return;
+  if(_currentContactIdx===null||_currentContactIdx===undefined) return;
+  showActionSheet(t('menu.deleteContact'), [{value:'confirm', label:t('menu.confirmDelete')}], (val)=>{
+    if(val!=='confirm') return;
+    const pd=ensurePhoneData(ch);
+    if(pd.userContactChats) pd.userContactChats.splice(_currentContactIdx,1);
+    saveState();
+    _currentContactIdx = null;
+    goBack();
+    renderChatList();
+    showToast(t('toast.contactDeleted'));
+  });
 }
 
 /* ===================================================================
@@ -5448,18 +5974,18 @@ function showBubbleSizeMenu(){
   const overlay = document.getElementById('promptOverlay');
   const card = document.getElementById('promptCard');
   card.innerHTML =
-    '<div class="prompt-card-title">气泡大小</div>'
+    '<div class="prompt-card-title">'+t('menu.bubbleSize')+'</div>'
     + '<div style="display:flex;flex-direction:column;align-items:center;gap:14px;margin:10px 0;">'
       + '<div style="display:flex;gap:12px;align-items:flex-end;">'
-        + '<div style="background:var(--recv-bg);color:var(--recv-text);padding:8px 14px;border-radius:14px;font-size:14px;" id="previewRecv">对方消息预览</div>'
-        + '<div style="background:var(--sent-bg);color:var(--sent-text);padding:8px 14px;border-radius:14px;font-size:14px;" id="previewSent">我的消息</div>'
+        + '<div style="background:var(--recv-bg);color:var(--recv-text);padding:8px 14px;border-radius:14px;font-size:14px;" id="previewRecv">'+t('preview.theirMsg')+'</div>'
+        + '<div style="background:var(--sent-bg);color:var(--sent-text);padding:8px 14px;border-radius:14px;font-size:14px;" id="previewSent">'+t('preview.myMsg')+'</div>'
       + '</div>'
       + '<input type="range" id="bubbleScaleSlider" min="70" max="130" step="5" value="'+curScale+'" style="-webkit-appearance:none;appearance:none;width:90%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;cursor:pointer;">'
       + '<span id="bubbleScaleLabel" style="font-size:12px;color:var(--text-3);">'+curScale+'%</span>'
     + '</div>'
     + '<div class="prompt-card-actions">'
-      + '<button class="pc-cancel" data-v="__reset">重置</button>'
-      + '<button class="pc-ok" data-v="__close">完成</button>'
+      + '<button class="pc-cancel" data-v="__reset">'+t('btn.reset')+'</button>'
+      + '<button class="pc-ok" data-v="__close">'+t('btn.done')+'</button>'
     + '</div>';
   overlay.classList.add('open');
 
@@ -5565,6 +6091,8 @@ function renderMsgFeedHtml(messages, ch, isChat){
   return html;
 }
 
+/* Track current contact chat index */
+
 /* ===================================================================
    CONTACT CHATS in user phone (people added from DM)
 =================================================================== */
@@ -5580,7 +6108,7 @@ function renderChatList(){
   const ch = getCurrentChar();
   const body = document.getElementById('chatListBody');
   if(!ch){
-    body.innerHTML = '<div class="empty-state">请先在 Settings 创建角色</div>';
+    body.innerHTML = '<div class="empty-state">'+t('empty.noChar')+'</div>';
     return;
   }
   const pd = ensurePhoneData(ch);
@@ -5588,7 +6116,7 @@ function renderChatList(){
   const mainChat = pd.userChat;
   const mainLast = mainChat.messages[mainChat.messages.length-1];
   const mainTs = mainLast ? (mainLast.ts||0) : 0;
-  const mainPreview = mainLast ? (mainLast.recalled?'[消息已撤回]':mainLast.text) : '';
+  const mainPreview = mainLast ? (mainLast.recalled ? t('toast.recalled') : mainLast.text) : '';
   const mainName = (mainChat.idolNickname||ch.idolName||'Chat');
 
   // Contact chats from DMs added
@@ -5598,12 +6126,12 @@ function renderChatList(){
   const allChats = [{type:'main', name:mainName, preview:mainPreview, ts:mainTs, avatar:ch.idolAvatar}];
   contacts.forEach((c,i)=>{
     const last = c.messages && c.messages[c.messages.length-1];
-    allChats.push({type:'contact', idx:i, name:c.name||'联系人', preview:last?(last.recalled?'[消息已撤回]':last.text):'', ts:last?(last.ts||0):0, avatar:''});
+    allChats.push({type:'contact', idx:i, name:c.name||t('contact.default'), preview:last?(last.recalled?t('toast.recalled'):last.text):'', ts:last?(last.ts||0):0, avatar:''});
   });
   allChats.sort((a,b)=>b.ts-a.ts);
 
   if(!allChats.length){
-    body.innerHTML = '<div class="empty-state">暂无聊天记录</div>';
+    body.innerHTML = '<div class="empty-state">'+t('empty.chat')+'</div>';
     return;
   }
   body.innerHTML = allChats.map(item=>{
@@ -5640,19 +6168,65 @@ function openContactChat(idx){
   const contacts = getUserContactChats(ch);
   const c = contacts[idx];
   if(!c) return;
-  // Re-use DM feed screen
-  currentDmCtx = {scope:'user', idx:0}; // placeholder
-  // Actually open user chat with a contact — show in a generic DM-like view
-  // For simplicity open in the userChat screen with a special header
+  _currentContactIdx = idx;
   goTo('screen-userchat');
   const titleEl = document.getElementById('userChatTitle');
   titleEl.textContent = c.name||'联系人';
   titleEl.onclick = null;
   const feed = document.getElementById('userChatFeed');
   c.messages = c.messages||[];
-  c.messages.forEach(m=>{ if(!m.id) m.id=uid('m'); });
+  c.messages.forEach(m=>{ if(!m.id) m.id=uid('m'); if(!m.ts) m.ts=0; });
   feed.innerHTML = renderMsgFeedHtml(c.messages, ch, true);
   feed.scrollTop = feed.scrollHeight;
+
+  // Wire input bar to this contact
+  const input = document.getElementById('userChatInput');
+  const sendBtn = document.getElementById('userChatSendBtn');
+  const triggerBtn = document.getElementById('userChatTriggerBtn');
+
+  // Replace send handlers for contact chat
+  sendBtn.onclick = ()=>{
+    const val = input.value.trim();
+    if(!val) return;
+    input.value='';
+    const m = {from:'me', text:val, id:uid('m'), ts:Date.now()};
+    c.messages.push(m);
+    saveState();
+    // Re-render feed
+    c.messages.forEach(msg=>{ if(!msg.id) msg.id=uid('m'); if(!msg.ts) msg.ts=0; });
+    feed.innerHTML = renderMsgFeedHtml(c.messages, ch, true);
+    feed.scrollTop = feed.scrollHeight;
+    renderChatList();
+  };
+  input.onkeydown = (e)=>{ if(e.key==='Enter') sendBtn.onclick(); };
+  triggerBtn.onclick = async ()=>{
+    const currentCh = getCurrentChar();
+    if(!currentCh){ showToast(t('toast.charMissing')); return; }
+    if(!normalizeBaseUrl(state.settings.apiUrl)||!state.settings.model){ showToast(t('toast.apiMissing')); return; }
+    const currentContacts = getUserContactChats(currentCh);
+    const currentC = currentContacts[idx];
+    if(!currentC) return;
+    showPhoneGenerating();
+    try{
+      const speaker = currentCh.userName||'用户';
+      const history = (currentC.messages||[]).map(m=>(m.from==='me'?speaker:currentC.name)+'：'+m.text).join('\n');
+      const sys = buildBaseSystemPrompt(currentCh, '现在请扮演「'+currentC.name+'」（'+(currentC.tag||'联系人')+'），根据对话历史自然地回复用户。');
+      const usr = '对话历史：\n'+history+'\n\n请生成「'+currentC.name+'」接下来发的消息。\n输出 JSON：{"messages":["消息1","消息2",...]}';
+      const data = await generateJSON(sys, usr);
+      if(data && Array.isArray(data.messages) && data.messages.length){
+        const now=Date.now();
+        const newMsgs=data.messages.filter(t=>t&&t.trim()).map((t,i)=>({from:'them',text:t.trim(),id:uid('m'),ts:now+i*1000}));
+        newMsgs.forEach(m=>currentC.messages.push(m));
+        saveState();
+        currentC.messages.forEach(msg=>{ if(!msg.id) msg.id=uid('m'); if(!msg.ts) msg.ts=0; });
+        feed.innerHTML = renderMsgFeedHtml(currentC.messages, currentCh, true);
+        feed.scrollTop = feed.scrollHeight;
+        renderChatList();
+      }
+    }catch(err){ showToast(t('toast.genFailed')); }
+    finally{ hidePhoneGenerating(); }
+  };
+  applyBubbleScale();
 }
 
 /* ===================================================================
@@ -5674,6 +6248,8 @@ function init(){
   applyPhoneScale();
   applyWallpaper();
   applyChatColors();
+  applyChatWallpaper();
+  applyAvatarShape();
   renderHome();
   showScreenRaw('screen-home');
   tick();
