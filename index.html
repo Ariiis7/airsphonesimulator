@@ -231,10 +231,10 @@ input, textarea{ outline:none; }
 .bubble-row.recv{justify-content:flex-start;}
 .bubble{
   max-width:74%;
-  padding:10px 14px;
+  padding:8px 13px;
   border-radius:18px;
-  font-size:14.5px;
-  line-height:1.45;
+  font-size:14px;
+  line-height:1.44;
   word-break:break-word;
 }
 .bubble.sent{background:var(--sent-bg);color:var(--sent-text);border-bottom-right-radius:5px;}
@@ -343,33 +343,35 @@ input, textarea{ outline:none; }
 
 .ig-post{
   border-bottom:1px solid var(--border);
-  padding-bottom:14px;margin-bottom:14px;
+  padding-bottom:12px;margin-bottom:12px;
 }
-.ig-post-head{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.ig-post-head{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
 .ig-avatar{
-  width:34px;height:34px;border-radius:11px;
+  width:32px;height:32px;border-radius:10px;
   background:var(--surface-2);border:1px solid var(--border);
   background-size:cover;background-position:center;
   flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;color:var(--text-2);
 }
-.ig-post-name{font-size:13.5px;font-weight:600;}
+.ig-post-name{font-size:13px;font-weight:600;}
 .ig-post-time{font-size:11px;color:var(--text-3);}
 .ig-image-block{
   width:100%;aspect-ratio:1/1;
-  border-radius:14px;
+  border-radius:12px;
   background:var(--surface-2);
   border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;
-  text-align:center;padding:20px;
-  font-size:12.5px;color:var(--text-2);line-height:1.6;
-  margin-bottom:9px;
+  text-align:center;padding:16px;
+  font-size:12px;color:var(--text-2);line-height:1.6;
+  margin-bottom:8px;
 }
-.ig-caption{font-size:13.5px;line-height:1.5;margin-bottom:7px;}
-.ig-likes{font-size:12px;color:var(--text-3);margin-bottom:7px;}
-.ig-stats{display:flex;gap:16px;margin-bottom:8px;}
-.ig-stat{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-2);}
-.ig-stat svg{width:15px;height:15px;stroke:var(--text-2);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
-.ig-comment{font-size:12.5px;margin-bottom:4px;line-height:1.4;}
+.ig-caption{font-size:13px;line-height:1.5;margin-bottom:6px;}
+.ig-likes{font-size:11.5px;color:var(--text-3);margin-bottom:6px;}
+.ig-stats{display:flex;gap:14px;margin-bottom:7px;}
+.ig-stat{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-2);}
+.ig-stat svg{width:14px;height:14px;stroke:var(--text-2);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+.ig-comment{font-size:12px;margin-bottom:4px;line-height:1.4;}
 .ig-comment b{font-weight:600;margin-right:5px;}
 
 .ig-alt-trigger{
@@ -692,6 +694,7 @@ body.has-fit-screen{padding:0;}
 }
 
 .toast{
+  display:none; /* replaced by in-phone toast */
   position:fixed;bottom:40px;left:50%;
   transform:translateX(-50%) translateY(20px);
   background:rgba(30,30,31,0.94);color:#f2f2f3;
@@ -767,20 +770,23 @@ body.has-fit-screen{padding:0;}
 /* When .sel-mode is active on a feed container, messages slide right to reveal circle */
 .sel-mode-bar{
   display:none;
-  position:absolute;bottom:0;left:0;right:0;
+  position:absolute;top:46px;left:0;right:0;
   z-index:50;
   background:var(--surface);
-  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
   padding:8px 12px;
   flex-direction:column;
   gap:6px;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  box-shadow:0 2px 12px rgba(0,0,0,0.12);
 }
 .sel-mode-bar.open{display:flex;}
 .sel-mode-actions{display:flex;gap:8px;align-items:center;}
 .sel-mode-count{flex:1;font-size:13px;color:var(--text-2);}
-.sel-mode-edit{font-size:13.5px;font-weight:600;color:var(--text);padding:8px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
-.sel-mode-delete{font-size:13.5px;font-weight:600;color:var(--danger);padding:8px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
-.sel-mode-cancel{font-size:13.5px;font-weight:500;color:var(--text-2);padding:8px 10px;}
+.sel-mode-edit{font-size:13px;font-weight:600;color:var(--text);padding:7px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
+.sel-mode-delete{font-size:13px;font-weight:600;color:#ff3b30;padding:7px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);}
+.sel-mode-cancel{font-size:13px;font-weight:500;color:var(--text-2);padding:7px 10px;border-radius:10px;}
 
 /* bubble-row and dm-feed rows get a circle on left in sel-mode */
 .feed-selectable{position:relative;}
@@ -793,6 +799,7 @@ body.has-fit-screen{padding:0;}
   align-items:center;justify-content:center;
   cursor:pointer;
   transition:transform .12s ease;
+  margin-right:6px;
 }
 .sel-circle.on{background:var(--accent);border-color:var(--accent);}
 .sel-circle.on:after{
@@ -803,9 +810,10 @@ body.has-fit-screen{padding:0;}
   transform:rotate(45deg) translate(-1px,-1px);
 }
 .in-sel-mode .sel-circle{display:flex;}
+/* Messages stay in place, circle appears to the left */
 .in-sel-mode .bubble-row{
-  transform:translateX(30px);
-  transition:transform .18s ease;
+  transform:none !important;
+  transition:none !important;
 }
 
 /* Keep old sel-overlay for posts/DM-list/search-history (not inline chat) */
@@ -859,6 +867,221 @@ body.has-fit-screen{padding:0;}
   #phone{width:100vw;height:100vh;border-radius:0;border:none;}
 }
 
+/* ===== iOS-style toggle switch ===== */
+.ios-toggle{
+  width:51px;height:31px;border-radius:16px;
+  background:var(--surface-3);
+  position:relative;cursor:pointer;
+  transition:background .2s ease;
+  flex:0 0 auto;
+  border:1px solid var(--border);
+}
+.ios-toggle:after{
+  content:'';position:absolute;
+  top:2px;left:2px;
+  width:25px;height:25px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.25);
+  transition:transform .2s ease;
+}
+.ios-toggle.on{background:#34c759;border-color:#34c759;}
+.ios-toggle.on:after{transform:translateX(20px);}
+
+/* ===== Chat/DM context menu (long-press) — fancy popup above message ===== */
+.msg-ctx-menu{
+  position:absolute;
+  z-index:500;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.22);
+  display:flex;
+  gap:0;
+  overflow:hidden;
+  animation:ctxPop .14s ease;
+}
+@keyframes ctxPop{from{opacity:0;transform:scale(.85);}to{opacity:1;transform:scale(1);}}
+.msg-ctx-btn{
+  padding:11px 18px;
+  font-size:13.5px;font-weight:500;
+  color:var(--text);
+  border-right:1px solid var(--border);
+  white-space:nowrap;
+}
+.msg-ctx-btn:last-child{border-right:none;}
+.msg-ctx-btn.danger{color:#ff3b30;}
+.msg-ctx-btn:active{background:var(--surface-2);}
+
+/* ===== Phone size slider ===== */
+#phoneSizeSliderWrap{
+  margin-top:18px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+#phoneSizeSlider{
+  -webkit-appearance:none;appearance:none;
+  width:260px;height:4px;border-radius:2px;
+  background:var(--surface-3);outline:none;cursor:pointer;
+}
+#phoneSizeSlider::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,0.18);
+  cursor:pointer;
+}
+#phoneSizeSlider::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--accent);border:none;
+  box-shadow:0 1px 4px rgba(0,0,0,0.18);cursor:pointer;
+}
+#phoneSizeLabel{font-size:12px;color:var(--text-3);}
+
+/* ===== Bubble color swatch picker ===== */
+.color-swatch{
+  width:28px;height:28px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:transform .12s ease;
+  position:relative;flex:0 0 auto;
+}
+.color-swatch.active{border-color:var(--text);transform:scale(1.15);}
+.color-swatch:active{transform:scale(.92);}
+.color-swatches{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0;}
+.color-swatch-custom{
+  width:28px;height:28px;border-radius:50%;
+  overflow:hidden;position:relative;
+  border:2px solid var(--border) !important;
+}
+.color-swatch-custom input[type="color"]{
+  opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer;
+}
+
+/* ===== Avatar display in chat ===== */
+.chat-avatar{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--surface-3);
+  background-size:cover;background-position:center;
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;color:var(--text-2);
+  border:1px solid var(--border);
+}
+
+/* ===== In-phone notification banner ===== */
+#msg-notification{
+  position:absolute;
+  top:52px;left:8px;right:8px;
+  z-index:9200;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px 14px;
+  display:none;
+  align-items:center;gap:10px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.22);
+  animation:notifSlideIn .22s cubic-bezier(.34,1.56,.64,1);
+  cursor:pointer;
+}
+@keyframes notifSlideIn{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+#msg-notification.show{display:flex;}
+.notif-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:var(--accent);
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+}
+.notif-icon svg{width:18px;height:18px;stroke:var(--accent-text);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.notif-content{flex:1;min-width:0;}
+.notif-app{font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:.04em;}
+.notif-text{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.notif-time{font-size:11px;color:var(--text-3);flex:0 0 auto;}
+
+/* ===== Chat timestamp divider ===== */
+.chat-time-divider{
+  text-align:center;
+  font-size:11px;color:var(--text-3);
+  margin:10px 0 6px;
+  position:relative;
+}
+.chat-time-divider span{
+  background:var(--bg);
+  padding:0 10px;
+  position:relative;z-index:1;
+}
+.chat-time-divider:before{
+  content:'';position:absolute;top:50%;left:10%;right:10%;
+  height:1px;background:var(--border);
+}
+
+/* ===== Transfer message bubble — WeChat style horizontal ===== */
+.transfer-bubble{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px 16px;
+  min-width:180px;
+  max-width:240px;
+}
+.transfer-bubble-icon{
+  display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto;
+}
+.transfer-bubble-icon svg{width:26px;height:26px;stroke:#8a8a8e;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+.transfer-bubble-icon span{font-size:10px;color:#8a8a8e;letter-spacing:.03em;}
+.transfer-bubble-main{flex:1 1 auto;min-width:0;}
+.transfer-bubble-amount{font-size:20px;font-weight:700;color:#e8e8ea;letter-spacing:.02em;}
+#phone[data-theme="light"] .transfer-bubble-amount{color:#1a1a1b;}
+.transfer-bubble-note{font-size:12px;color:#8a8a8e;margin-top:2px;}
+
+/* ===== Recalled message ===== */
+.recalled-msg{
+  text-align:center;
+  font-size:12px;
+  color:var(--text-3);
+  padding:4px 0 8px;
+  font-style:italic;
+}
+
+/* ===== DM list last-message time ===== */
+.dm-list-time{font-size:11px;color:var(--text-3);white-space:nowrap;flex:0 0 auto;align-self:flex-start;margin-top:2px;}
+
+/* ===== Chat bubble scale ===== */
+.bubble-feed,.dm-feed{--bubble-scale:1;}
+.bubble,.transfer-bubble{
+  transform-origin:left center;
+}
+.bubble-row.sent .bubble,.bubble-row.sent .transfer-bubble{
+  transform-origin:right center;
+}
+
+/* ===== Add contact button in DM header ===== */
+.three-dot-btn{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  padding:0;position:relative;z-index:1;
+}
+.three-dot-btn svg{width:18px;height:18px;stroke:var(--text-2);fill:none;stroke-width:2;stroke-linecap:round;}
+
+/* ===== Dropdown menu ===== */
+.dropdown-menu{
+  position:absolute;top:44px;right:8px;
+  min-width:180px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.18);
+  z-index:600;
+  overflow:hidden;
+  animation:ctxPop .14s ease;
+}
+.dropdown-item{
+  display:block;width:100%;text-align:left;
+  padding:12px 16px;
+  font-size:13.5px;color:var(--text);
+  border-bottom:1px solid var(--border);
+}
+.dropdown-item:last-child{border-bottom:none;}
+.dropdown-item:active{background:var(--surface-2);}
+.dropdown-divider{height:1px;background:var(--border);}
+
 /* ===== Refresh button spin when loading ===== */
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .refresh-btn.spinning{
@@ -873,30 +1096,79 @@ body.has-fit-screen{padding:0;}
 }
 
 /* ===== In-phone generating indicator (for chat/DM reply) ===== */
+/* Animated dots via CSS */
+@keyframes dot1{0%,20%{opacity:0}40%,100%{opacity:1}}
+@keyframes dot2{0%,40%{opacity:0}60%,100%{opacity:1}}
+@keyframes dot3{0%,60%{opacity:0}80%,100%{opacity:1}}
 #phone-gen-indicator{
   display:none;
   position:absolute;
-  bottom:80px;
+  bottom:90px;
   left:50%;
   transform:translateX(-50%);
   z-index:9000;
-  background:rgba(40,40,42,0.82);
+  background:rgba(40,40,42,0.90);
   color:#e8e8ea;
   font-size:13px;
-  letter-spacing:.04em;
+  letter-spacing:.03em;
   padding:8px 18px;
   border-radius:20px;
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
   border:1px solid rgba(255,255,255,0.10);
   white-space:nowrap;
   pointer-events:none;
+  animation:fadeSlideDown .18s ease;
 }
+#phone-gen-indicator .gen-dot{
+  display:inline-block;
+}
+#phone-gen-indicator .gen-dot:nth-child(1){animation:dot1 1.2s infinite;}
+#phone-gen-indicator .gen-dot:nth-child(2){animation:dot2 1.2s infinite;}
+#phone-gen-indicator .gen-dot:nth-child(3){animation:dot3 1.2s infinite;}
+@keyframes fadeSlideDown{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
 #phone[data-theme="light"] #phone-gen-indicator{
-  background:rgba(230,230,232,0.88);
+  background:rgba(240,240,242,0.92);
   color:#1a1a1b;
-  border:1px solid rgba(0,0,0,0.08);
+  border:1px solid rgba(0,0,0,0.10);
 }
+
+/* System toast (saved, error etc) — now also inside phone, top center */
+#phone-sys-toast{
+  display:none;
+  position:absolute;
+  top:60px;
+  left:50%;
+  transform:translateX(-50%) translateY(-8px);
+  z-index:9100;
+  background:rgba(40,40,42,0.90);
+  color:#e8e8ea;
+  font-size:13px;
+  letter-spacing:.03em;
+  padding:8px 18px;
+  border-radius:20px;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.10);
+  white-space:normal;
+  word-break:break-word;
+  max-width:80%;
+  text-align:center;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .2s, transform .2s;
+}
+#phone-sys-toast.show{
+  display:block;
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+#phone[data-theme="light"] #phone-sys-toast{
+  background:rgba(240,240,242,0.92);
+  color:#1a1a1b;
+  border:1px solid rgba(0,0,0,0.10);
+}
+
 #gen-indicator{
   display:none;
   text-align:center;
@@ -904,9 +1176,8 @@ body.has-fit-screen{padding:0;}
   color:#6b6b6e;
   letter-spacing:.04em;
   margin-top:14px;
-  width:390px; /* match phone width in fixed mode */
+  width:390px;
 }
-/* In fit-screen mode the phone fills viewport; overlay indicator at bottom */
 body.has-fit-screen #gen-indicator{
   position:fixed;
   bottom:16px;
@@ -1023,10 +1294,13 @@ body.has-fit-screen #gen-indicator{
 
     <!-- ---------- IG dm conversation ---------- -->
     <div id="screen-ig-dm" class="screen app-screen">
-      <div class="app-header">
+      <div class="app-header" style="position:relative;">
         <button class="hdr-btn back-btn" data-action="back">Back</button>
         <div class="hdr-title" id="igDmTitle">DM</div>
-        <span class="hdr-spacer"></span>
+        <button class="three-dot-btn" id="dmMenuBtn" aria-label="DM options">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.3" fill="var(--text-2)" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="var(--text-2)" stroke="none"/><circle cx="12" cy="19" r="1.3" fill="var(--text-2)" stroke="none"/></svg>
+        </button>
+        <div id="dmDropdown" class="dropdown-menu" style="display:none;"></div>
       </div>
       <div class="dm-feed" id="igDmFeed"></div>
       <div class="sel-mode-bar" id="dmSelBar">
@@ -1038,6 +1312,7 @@ body.has-fit-screen #gen-indicator{
         </div>
       </div>
       <div class="bubble-inputbar" id="igDmInputBar">
+        <button class="photo-btn" id="igDmPhotoBtn" title="photo/transfer"></button>
         <input type="text" id="igDmInput" class="thin-input" placeholder="Type a message...">
         <button class="chat-trigger-btn" id="igDmTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
         <button class="send-btn" id="igDmSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
@@ -1111,21 +1386,26 @@ body.has-fit-screen #gen-indicator{
 
     <!-- ---------- USER CHAT APP ---------- -->
     <div id="screen-userchat" class="screen app-screen">
-      <div class="app-header">
+      <div class="app-header" style="position:relative;">
         <button class="hdr-btn back-btn" data-action="back">Back</button>
         <div class="hdr-title" id="userChatTitle" style="cursor:pointer;pointer-events:all;" title="点击修改备注名">Chat</div>
-        <span class="hdr-spacer"></span>
+        <button class="three-dot-btn" id="chatMenuBtn" aria-label="Chat settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.3" fill="var(--text-2)" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="var(--text-2)" stroke="none"/><circle cx="12" cy="19" r="1.3" fill="var(--text-2)" stroke="none"/></svg>
+        </button>
+        <div id="chatDropdown" class="dropdown-menu" style="display:none;"></div>
       </div>
       <div class="dm-feed" id="userChatFeed"></div>
       <div class="sel-mode-bar" id="chatSelBar">
         <div class="sel-mode-actions">
           <span class="sel-mode-count">已选 0 条</span>
           <button class="sel-mode-edit" style="display:none;">编辑</button>
+          <button class="sel-mode-recall" style="display:none;">撤回</button>
           <button class="sel-mode-delete">删除</button>
           <button class="sel-mode-cancel">取消</button>
         </div>
       </div>
       <div class="bubble-inputbar">
+        <button class="photo-btn" id="userChatPhotoBtn" title="photo/transfer"></button>
         <input type="text" id="userChatInput" class="thin-input" placeholder="Type a message...">
         <button class="chat-trigger-btn" id="userChatTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
         <button class="send-btn" id="userChatSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
@@ -1265,7 +1545,71 @@ body.has-fit-screen #gen-indicator{
       </div>
       <div class="sel-list" id="selList"></div>
     </div>
-    <div id="phone-gen-indicator">Generating...</div>
+    <div id="phone-gen-indicator">Generating<span class="gen-dot">.</span><span class="gen-dot">.</span><span class="gen-dot">.</span></div>
+    <div id="phone-sys-toast"></div>
+    <!-- Notification banner -->
+    <div id="msg-notification">
+      <div class="notif-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="notif-content">
+        <div class="notif-app" id="notifApp">Chat</div>
+        <div class="notif-text" id="notifText"></div>
+      </div>
+      <div class="notif-time" id="notifTime"></div>
+    </div>
+
+    <!-- ---------- OFFLINE / IRL APP ---------- -->
+    <div id="screen-offline" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="offlineTitle">线下</div>
+        <button class="hdr-btn icon-btn" id="offlineMenuBtn" aria-label="Settings" style="position:relative;z-index:1;">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text-2);fill:none;stroke-width:2;stroke-linecap:round;"><circle cx="12" cy="5" r="1.2" fill="var(--text-2)" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="var(--text-2)" stroke="none"/><circle cx="12" cy="19" r="1.2" fill="var(--text-2)" stroke="none"/></svg>
+        </button>
+      </div>
+      <div class="dm-feed" id="offlineBody" style="padding:16px 14px;">
+        <div class="empty-state" style="padding:80px 20px;">点击右上角菜单配置并生成线下内容</div>
+      </div>
+      <div class="bubble-inputbar" id="offlineChatBar">
+        <button class="photo-btn" id="offlinePhotoBtn" title="图片"></button>
+        <input type="text" id="offlineChatInput" class="thin-input" placeholder="发送消息…">
+        <button class="chat-trigger-btn" id="offlineTriggerBtn" aria-label="生成回复"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
+        <button class="send-btn" id="offlineSendBtn" aria-label="发送"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
+      </div>
+    </div>
+
+    <!-- ---------- CHAT LIST SCREEN (user phone) ---------- -->
+    <div id="screen-chat-list" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">Chat</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="ig-body" id="chatListBody" style="overflow-y:auto;flex:1;"></div>
+    </div>
+
+    <!-- ---------- OFFLINE SETTINGS OVERLAY ---------- -->
+    <div id="offlineSettingsOverlay" style="display:none;position:absolute;inset:0;z-index:400;background:rgba(0,0,0,0.35);align-items:flex-end;justify-content:center;">
+      <div id="offlineSettingsPanel" style="width:100%;background:var(--surface);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px)+16px);animation:sheetUp .18s ease;">
+        <div style="text-align:center;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text);">线下内容设置</div>
+        <div class="field-label">场景要求（可选）</div>
+        <textarea id="offlinePromptInput" class="field-textarea" style="min-height:90px;" placeholder="描述线下场景、氛围、特殊要求等…"></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:var(--text-2);">保存为预设</span>
+          <div id="offlinePresetToggle" class="ios-toggle" onclick="toggleOfflinePreset()"></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:var(--text-2);">应用此要求</span>
+          <div id="offlineApplyToggle" class="ios-toggle on" onclick="toggleOfflineApply()"></div>
+        </div>
+        <div id="offlinePresetsList" style="margin-top:10px;"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button class="btn-block secondary" style="flex:1;" onclick="closeOfflineSettings()">取消</button>
+          <button class="btn-block" style="flex:1;" onclick="generateOffline()">生成内容</button>
+        </div>
+      </div>
+    </div>
 
   </div>
   <!-- ================= /PHONE FRAME ================= -->
@@ -1494,7 +1838,13 @@ function defaultState(){
       modelList:[],
       customIcons:{}, // appKey -> {name, icon(dataURL)}
       wallpaper:'',
-      fitScreen:false
+      fitScreen:false,
+      phoneScale:100,
+      chatShowSentAvatar:true,
+      chatShowRecvAvatar:true,
+      bubbleColors:{sent:'', recv:''},
+      chatColors:{sent:'', recv:''},
+      dmColors:{sent:'', recv:''}
     },
     characters:[],
     currentCharacterId:null,
@@ -1576,7 +1926,9 @@ function ensureWorldBookEntries(ch){
 function worldBookCombinedText(ch){
   const entries = ensureWorldBookEntries(ch);
   if(!entries.length) return '';
-  return entries.map(e=>'【'+(e.title||'')+'】\n'+(e.content||'')).join('\n\n');
+  return entries
+    .filter(e=>e.enabled !== false)
+    .map(e=>'【'+(e.title||'')+'】\n'+(e.content||'')).join('\n\n');
 }
 
 /* ===================================================================
@@ -1592,11 +1944,22 @@ function escapeHtml(str){
 }
 
 function showToast(msg, duration){
+  // Show inside phone as a pill toast at top
+  const phone = document.getElementById('phone-sys-toast');
+  if(phone){
+    phone.textContent = msg;
+    phone.classList.add('show');
+    clearTimeout(phone._t);
+    phone._t = setTimeout(()=>phone.classList.remove('show'), duration||2200);
+  }
+  // Also keep old external toast as fallback (hidden but for timing)
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(()=>el.classList.remove('show'), duration||2200);
+  if(el){
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(()=>el.classList.remove('show'), duration||2200);
+  }
 }
 let _genCount = 0;
 let _genDotInterval = null;
@@ -1629,12 +1992,6 @@ function showPhoneGenerating(){
   const el = document.getElementById('phone-gen-indicator');
   if(!el) return;
   el.style.display = 'block';
-  let dots = 0;
-  clearInterval(_phoneGenTimer);
-  _phoneGenTimer = setInterval(()=>{
-    dots = (dots+1)%4;
-    el.textContent = 'Generating'+'.'.repeat(dots);
-  }, 400);
 }
 function hidePhoneGenerating(){
   _phoneGenCount = Math.max(0, _phoneGenCount-1);
@@ -1642,7 +1999,7 @@ function hidePhoneGenerating(){
   clearInterval(_phoneGenTimer);
   _phoneGenTimer = null;
   const el = document.getElementById('phone-gen-indicator');
-  if(el){ el.style.display='none'; el.textContent='Generating...'; }
+  if(el){ el.style.display='none'; }
 }
 
 /* Generic bottom action sheet. options: [{label, value}], callback(value) */
@@ -1757,7 +2114,8 @@ const ICONS = {
   chat:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg>',
   heart:'<svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.8-9.4A5 5 0 0 1 12 6a5 5 0 0 1 9.8 4.6C19.5 15.4 12 20 12 20z"/></svg>',
   commentIcon:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg>',
-  share:'<svg viewBox="0 0 24 24"><path d="M7 7h8a3 3 0 0 1 3 3v2M17 17H9a3 3 0 0 1-3-3v-2"/><path d="M5 9l2-2-2-2M19 15l-2 2 2 2"/></svg>'
+  share:'<svg viewBox="0 0 24 24"><path d="M7 7h8a3 3 0 0 1 3 3v2M17 17H9a3 3 0 0 1-3-3v-2"/><path d="M5 9l2-2-2-2M19 15l-2 2 2 2"/></svg>',
+  offline:'<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linejoin="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
 };
 
 function iconMarkup(appKey){
@@ -1783,7 +2141,8 @@ const APP_DEFS_IDOL = [
   {key:'settings', name:'Settings', screen:'screen-settings'},
 ];
 const APP_DEFS_USER = [
-  {key:'chat', name:'Chat', screen:'screen-userchat'},
+  {key:'chat', name:'Chat', screen:'screen-chat-list'},
+  {key:'offline', name:'线下', screen:'screen-offline'},
   {key:'instagram_user', name:'Instagram', screen:'screen-user-instagram'},
   {key:'settings', name:'Settings', screen:'screen-settings'},
 ];
@@ -1816,6 +2175,20 @@ function applyWallpaper(){
     home.style.backgroundImage = '';
     home.classList.remove('has-wallpaper');
   }
+}
+function applyPhoneScale(){
+  const scale = state.settings.phoneScale || 100;
+  const phone = document.getElementById('phone');
+  if(state.settings.fitScreen){
+    phone.style.transform = '';
+    return;
+  }
+  const s = scale/100;
+  phone.style.transform = 'scale('+s+')';
+  phone.style.transformOrigin = 'top center';
+  // Adjust wrapper height so it doesn't overlap
+  const root = document.getElementById('app-root');
+  root.style.minHeight = (844*s+48)+'px';
 }
 
 /* ===================================================================
@@ -1875,8 +2248,9 @@ function openApp(appkey, screen){
   else if(appkey==='paypal') renderPaypal();
   else if(appkey==='maps') renderMaps();
   else if(appkey==='notes') renderNotes();
-  else if(appkey==='chat') renderUserChat();
+  else if(appkey==='chat'){ goTo('screen-chat-list'); renderChatList(); return; }
   else if(appkey==='instagram_user') renderUserInstagram();
+  else if(appkey==='offline') renderOfflineBody();
 }
 
 document.getElementById('ownerSwitch').addEventListener('click', ()=>{
@@ -2323,15 +2697,7 @@ function renderIgBody(){
   } else if(igActiveTab==='dm'){
     html = '<div class="ig-pane active">';
     if(!pd.dms.length){ html += '<div class="empty-state">'+t('empty.dm')+'</div>'; }
-    else {
-      html += pd.dms.map((d,i)=>{
-        const last = d.messages[d.messages.length-1];
-        return '<div class="dm-list-item" data-dm-idx="'+i+'">'
-          + '<div class="ig-avatar"></div>'
-          + '<div class="dm-list-text"><div class="dm-list-name">'+escapeHtml(d.name)+'<span class="dm-list-tag">'+escapeHtml(d.tag||'')+'</span></div>'
-          + '<div class="dm-list-preview">'+escapeHtml(last? last.text : '')+'</div></div></div>';
-      }).join('');
-    }
+    else { html += dmListHtml(pd.dms, 'idol'); }
     html += '</div>';
   }
   body.innerHTML = html;
@@ -2421,7 +2787,7 @@ async function generateDms(ch, mode){
 async function igRefreshPosts(ch, pd){ const data = await generateIgPosts(ch); if(data){ pd.posts = data.map(p=>Object.assign({},p,{id:uid('p')})); saveState(); } }
 async function igRefreshSearch(ch, pd){ const data = await generateSearchTopics(ch); if(data){ pd.searchHistory = data; pd.searchCache = {}; saveState(); } }
 async function igRefreshTrending(ch, pd){ const data = await generateTrendingTopics(ch, false); if(data){ pd.trending = data; pd.topicCache = {}; saveState(); } }
-async function igRefreshDm(ch, pd){ const data = await generateDms(ch, 'idol'); if(data){ pd.dms = data; saveState(); } }
+async function igRefreshDm(ch, pd){ const data = await generateDms(ch, 'idol'); if(data){ const pinned=(pd.dms||[]).filter(d=>d.pinned); pd.dms = [...pinned, ...data]; saveState(); } }
 
 function safeRenderInstagram(scope){
   try{
@@ -2509,15 +2875,7 @@ function renderIgAltBody(){
   } else if(igAltActiveTab==='dm'){
     html = '<div class="ig-pane active">';
     if(!pd.dms.length){ html += '<div class="empty-state">'+t('empty.dm')+'</div>'; }
-    else {
-      html += pd.dms.map((d,i)=>{
-        const last = d.messages[d.messages.length-1];
-        return '<div class="dm-list-item" data-dm-idx="'+i+'">'
-          + '<div class="ig-avatar"></div>'
-          + '<div class="dm-list-text"><div class="dm-list-name">'+escapeHtml(d.name)+'<span class="dm-list-tag">'+escapeHtml(d.tag||'')+'</span></div>'
-          + '<div class="dm-list-preview">'+escapeHtml(last? last.text : '')+'</div></div></div>';
-      }).join('');
-    }
+    else { html += dmListHtml(pd.dms, 'idolAlt'); }
     html += '</div>';
   }
   body.innerHTML = html;
@@ -2574,7 +2932,7 @@ async function igAltRefreshPosts(ch, pd){
   if(data && Array.isArray(data.posts)){ pd.posts = data.posts.map(p=>Object.assign({},p,{id:uid('p')})); saveState(); }
 }
 async function igAltRefreshSearch(ch, pd){ const data = await generateAltSearchHistory(ch); if(data){ pd.searchHistory = data; saveState(); } }
-async function igAltRefreshDm(ch, pd){ const data = await generateDms(ch, 'idolAlt'); if(data){ pd.dms = data; saveState(); } }
+async function igAltRefreshDm(ch, pd){ const data = await generateDms(ch, 'idolAlt'); if(data){ const pinned=(pd.dms||[]).filter(d=>d.pinned); pd.dms=[...pinned,...data]; saveState(); } }
 
 async function refreshInstagramAltSection(section){
   const ch = getCurrentChar();
@@ -2629,7 +2987,7 @@ async function openTopicDetail(scope, kind, idx){
   showGenerating();
   try{
     const sys = buildBaseSystemPrompt(ch, '请为指定的话题生成对应的文章内容与网友评论。');
-    const usr = (kind==='search' ? '搜索词' : '热搜话题')+'：「'+topic.title+'」\n请生成与这个词条相关的正文内容，约400字左右，可以是新闻报道、爆料、自媒体解读或网友长文等贴合内容性质的形式。再生成3到5条网友评论。\n输出 JSON：{"article":"约400字正文","comments":[{"name":"昵称","text":"评论"}]}';
+    const usr = (kind==='search' ? '搜索词' : '热搜话题')+'：「'+topic.title+'」\n请生成与这个词条相关的内容，包含：发帖人昵称、发帖时间、正文内容（约400字，可以是新闻报道、爆料、自媒体解读或网友长文等），以及3到5条网友评论。\n输出 JSON：{"poster":"发帖人昵称","postTime":"如 2小时前","article":"约400字正文","comments":[{"name":"昵称","text":"评论"}]}';
     const data = await generateJSON(sys, usr);
     if(data && data.article){
       cache[cacheKey] = data;
@@ -2649,7 +3007,15 @@ async function openTopicDetail(scope, kind, idx){
 
 function renderTopicBody(data){
   const body = document.getElementById('igTopicBody');
-  let html = '<div class="detail-text">'+escapeHtml(data.article||'')+'</div>';
+  let html = '';
+  // Post header (poster + time)
+  if(data.poster || data.postTime){
+    html += '<div class="ig-post-head" style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);">'
+      + '<div class="ig-avatar" style="background:var(--surface-3);"></div>'
+      + '<div><div class="ig-post-name">'+escapeHtml(data.poster||'匿名')+'</div>'
+      + '<div class="ig-post-time">'+escapeHtml(data.postTime||'')+'</div></div></div>';
+  }
+  html += '<div class="detail-text">'+escapeHtml(data.article||'')+'</div>';
   if(Array.isArray(data.comments) && data.comments.length){
     html += '<div class="detail-comments"><div class="section-label">'+t('label.comments')+'</div>';
     data.comments.forEach(c=>{
@@ -2681,7 +3047,7 @@ async function sendDmReply(text){
   const {scope, idx} = currentDmCtx;
   const pd = resolveIgPd(scope);
   const dm = pd.dms[idx];
-  dm.messages.push({from:'me', text, id:uid('dm')});
+  dm.messages.push({from:'me', text, id:uid('dm'), ts:Date.now()});
   saveState();
   renderDmFeed();
   // Auto-reply removed: click the trigger icon to generate a reply
@@ -2713,22 +3079,23 @@ document.getElementById('igDmTriggerBtn').addEventListener('click', async ()=>{
     const usr = '私信历史：\n'+history+'\n\n请生成「'+dm.name+'」接下来发的消息，条数自然即可。\n输出 JSON：{"messages":["消息1","消息2",...]}';
     const data = await generateJSON(sys, usr);
     if(data && Array.isArray(data.messages) && data.messages.length){
-      const newMsgs = data.messages.filter(t=>t&&t.trim()).map(t=>({from:'them',text:t.trim(),id:uid('dm')}));
+      const now = Date.now();
+      const newMsgs = data.messages.filter(t=>t&&t.trim()).map((t,i)=>({from:'them',text:t.trim(),id:uid('dm'),ts:now+i*1000}));
       newMsgs.forEach(m=>dm.messages.push(m));
       saveState();
+      // Show notification for first message
+      if(newMsgs.length) showMsgNotification('DM', dm.name, newMsgs[0].text);
       // Stream
       const feed = document.getElementById('igDmFeed');
       const existingMsgs = dm.messages.slice(0, dm.messages.length - newMsgs.length);
-      feed.innerHTML = existingMsgs.map(m=>{
-        const mine=m.from==='me';
-        return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
-      }).join('');
-      streamMessages(feed, newMsgs, 650);
+      feed.innerHTML = renderMsgFeedHtml(existingMsgs, null, false);
+      streamMessages(feed, newMsgs, 1100);
     } else if(data && data.text){
       // fallback single message
-      const m = {from:'them',text:data.text,id:uid('dm')};
+      const m = {from:'them',text:data.text,id:uid('dm'),ts:Date.now()};
       dm.messages.push(m);
       saveState();
+      showMsgNotification('DM', dm.name, m.text);
       renderDmFeed();
     } else { throw new Error('parse failed'); }
   }catch(err){
@@ -3061,14 +3428,18 @@ function recentUserChatContext(ch, limit){
   const pd = ensurePhoneData(ch).userChat;
   const msgs = pd.messages.slice(-1*(limit||10));
   if(!msgs.length) return '';
-  const lines = msgs.map(m=>(m.from==='me' ? (ch.userName||'用户') : (ch.idolName||'idol'))+'：'+m.text).join('\n');
+  const lines = msgs.map(m=>{
+    const speaker = m.from==='me' ? (ch.userName||'用户') : (ch.idolName||'idol');
+    if(m.recalled) return speaker+'：[撤回了一条消息：「'+m.recalledText+'」]';
+    return speaker+'：'+m.text;
+  }).join('\n');
   return '\n【用户与idol最近的私下聊天记录，生成内容时请参考并保持一致】\n'+lines;
 }
 
 function addUserChatMessage(text){
   const ch = getCurrentChar();
   const pd = ensurePhoneData(ch).userChat;
-  pd.messages.push({from:'me', text, id:uid('m')});
+  pd.messages.push({from:'me', text, id:uid('m'), ts:Date.now()});
   saveState();
   renderUserChatFeed();
 }
@@ -3088,27 +3459,38 @@ async function triggerIdolChatReply(){
       +'- 可以有短促的感叹（如"哈哈"、"啊"、"嗯"）作为独立消息\n'
       +'- 可以分多次说完一件事，像真实聊天一样断句\n'
       +'- 语气、用词、聊天节奏必须完全符合idol人设与两人的关系设定\n'
-      +'- 消息之间要有逻辑连贯性，不要重复同一意思'
+      +'- 消息之间要有逻辑连贯性，不要重复同一意思\n'
+      +'- 根据剧情需要，你也可以选择撤回idol之前发送过的某条消息，在recall_ids字段填写要撤回的消息id（如果不需要撤回则填空数组）'
     );
-    const history = pd.messages.map(m=>(m.from==='me'? (ch.userName||'用户') : (ch.idolName||'idol'))+'：'+m.text).join('\n');
-    const usr = '聊天记录：\n'+history+'\n\n请生成idol接下来要发送的消息，条数完全由人设和对话内容决定，自然即可。\n输出 JSON：{"messages":["消息1","消息2",...]}';
+    const history = pd.messages.map(m=>{
+      const speaker = m.from==='me' ? (ch.userName||'用户') : (ch.idolName||'idol');
+      if(m.recalled) return speaker+'[id:'+m.id+']：[已撤回:「'+m.recalledText+'」]';
+      return speaker+'[id:'+m.id+']：'+m.text;
+    }).join('\n');
+    const usr = '聊天记录（每条消息有id标记）：\n'+history+'\n\n请生成idol接下来要发送的消息，并根据剧情需要决定是否撤回之前的消息。\n输出 JSON：{"messages":["消息1","消息2",...],"recall_ids":[]}\nrecall_ids填写idol想撤回的自己之前消息的id，不撤回则填[]。';
     const data = await generateJSON(sys, usr);
     if(data && Array.isArray(data.messages) && data.messages.length){
+      // Handle recalls first
+      if(Array.isArray(data.recall_ids) && data.recall_ids.length){
+        data.recall_ids.forEach(rid=>{
+          const msg = pd.messages.find(m=>m.id===rid && m.from==='them' && !m.recalled);
+          if(msg){ msg.recalledText = msg.text; msg.recalled = true; msg.text = '[撤回]'; }
+        });
+      }
+      const now = Date.now();
       const newMsgs = data.messages
         .filter(text=>text && text.trim())
-        .map(text=>({from:'them', text:text.trim(), id:uid('m')}));
+        .map((text,i)=>({from:'them', text:text.trim(), id:uid('m'), ts:now+i*1000}));
       newMsgs.forEach(m=>pd.messages.push(m));
       saveState();
+      // Show notification for first received message
+      if(newMsgs.length) showMsgNotification('Chat', ch.idolName||'idol', newMsgs[0].text);
       // Stream: show messages one by one
       const feed = document.getElementById('userChatFeed');
-      // Re-render existing messages first (without new ones), then stream new
       const allMsgs = pd.messages;
       const existingMsgs = allMsgs.slice(0, allMsgs.length - newMsgs.length);
-      feed.innerHTML = existingMsgs.map(m=>{
-        const mine = m.from==='me';
-        return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
-      }).join('') || '<div class="empty-state">'+t('empty.dm')+'</div>';
-      streamMessages(feed, newMsgs, 700);
+      feed.innerHTML = renderMsgFeedHtml(existingMsgs, ch, true) || '<div class="empty-state">'+t('empty.dm')+'</div>';
+      streamMessages(feed, newMsgs, 1200);
     } else { throw new Error('Could not parse a reply from the API response'); }
   }catch(err){
     console.warn(err);
@@ -3160,15 +3542,7 @@ function renderUserIgBody(){
   } else if(userIgActiveTab==='dm'){
     html = '<div class="ig-pane active">';
     if(!pd.dms.length){ html += '<div class="empty-state">'+t('empty.dm')+'</div>'; }
-    else {
-      html += pd.dms.map((d,i)=>{
-        const last = d.messages[d.messages.length-1];
-        return '<div class="dm-list-item" data-dm-idx="'+i+'">'
-          + '<div class="ig-avatar"></div>'
-          + '<div class="dm-list-text"><div class="dm-list-name">'+escapeHtml(d.name)+'<span class="dm-list-tag">'+escapeHtml(d.tag||'')+'</span></div>'
-          + '<div class="dm-list-preview">'+escapeHtml(last? last.text : '')+'</div></div></div>';
-      }).join('');
-    }
+    else { html += dmListHtml(pd.dms, 'user'); }
     html += '</div>';
   }
   body.innerHTML = html;
@@ -3216,7 +3590,7 @@ async function generateUserFeed(ch){
 /* ---- user IG refresh ---- */
 async function userIgRefreshFeed(ch, pd){ const data = await generateUserFeed(ch); if(data){ pd.feed = data; saveState(); } }
 async function userIgRefreshTrending(ch, pd){ const data = await generateTrendingTopics(ch, true); if(data){ pd.trending = data; pd.topicCache = {}; saveState(); } }
-async function userIgRefreshDm(ch, pd){ const data = await generateDms(ch, 'user'); if(data){ pd.dms = data; saveState(); } }
+async function userIgRefreshDm(ch, pd){ const data = await generateDms(ch, 'user'); if(data){ const pinned=(pd.dms||[]).filter(d=>d.pinned); pd.dms=[...pinned,...data]; saveState(); } }
 
 async function refreshUserInstagramSection(section){
   const ch = getCurrentChar();
@@ -3273,6 +3647,13 @@ function renderSettingsHome(){
           + '<div class="seg-btn" data-fit="0">'+t('settings.fitscreen.fixed')+'</div>'
           + '<div class="seg-btn" data-fit="1">'+t('settings.fitscreen.fit')+'</div>'
         + '</div></div>'
+      + '<div class="settings-row single" style="flex-direction:column;align-items:flex-start;gap:10px;">'
+        + '<div class="settings-row-label">手机大小</div>'
+        + '<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;">'
+          + '<input type="range" id="phoneSizeSlider" min="60" max="130" step="5" value="'+(state.settings.phoneScale||100)+'" style="-webkit-appearance:none;appearance:none;width:90%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;cursor:pointer;">'
+          + '<span id="phoneSizeLabel" style="font-size:12px;color:var(--text-3);">'+(state.settings.phoneScale||100)+'%</span>'
+        + '</div>'
+      + '</div>'
     + '</div>'
     + '<div class="settings-group">'
       + '<div class="settings-row" data-go="screen-settings-wallpaper"><div class="settings-row-label">'+t('settings.row.wallpaper')+'</div><div class="settings-row-value"><span class="settings-chevron">›</span></div></div>'
@@ -3319,6 +3700,22 @@ function renderSettingsHome(){
       renderSettingsHome();
     });
   });
+  // Phone size slider
+  const sizeSlider = document.getElementById('phoneSizeSlider');
+  const sizeLabel = document.getElementById('phoneSizeLabel');
+  if(sizeSlider){
+    // Style the slider thumb
+    sizeSlider.style.cssText += ';--thumb-color:var(--accent);';
+    sizeSlider.addEventListener('input', ()=>{
+      const v = parseInt(sizeSlider.value,10);
+      sizeLabel.textContent = v+'%';
+      state.settings.phoneScale = v;
+      applyPhoneScale();
+    });
+    sizeSlider.addEventListener('change', ()=>{
+      saveState();
+    });
+  }
 }
 
 /* ===================================================================
@@ -3611,9 +4008,13 @@ function renderSettingsWorldbook(){
     html += '<div class="empty-state">'+t('settings.worldbookEmpty')+'</div>';
   } else {
     entries.forEach((en,i)=>{
-      html += '<div class="note-item" data-wb-idx="'+i+'">'
-        + '<div class="note-title">'+escapeHtml(en.title||'')+'</div>'
-        + '<div class="note-preview">'+escapeHtml((en.content||'').slice(0,40))+'</div>'
+      const enabled = en.enabled !== false; // default true
+      html += '<div class="note-item" style="display:flex;align-items:center;gap:10px;" data-wb-idx="'+i+'">'
+        + '<div style="flex:1;min-width:0;">'
+          + '<div class="note-title" style="'+(enabled?'':'opacity:.4;')+'">'+escapeHtml(en.title||'')+'</div>'
+          + '<div class="note-preview" style="'+(enabled?'':'opacity:.4;')+'">'+escapeHtml((en.content||'').slice(0,40))+'</div>'
+        + '</div>'
+        + '<div class="ios-toggle'+(enabled?' on':'')+'" data-wb-toggle="'+i+'" style="margin-left:auto;flex:0 0 auto;"></div>'
         + '</div>';
     });
   }
@@ -3621,7 +4022,20 @@ function renderSettingsWorldbook(){
   body.innerHTML = html;
 
   body.querySelectorAll('[data-wb-idx]').forEach(el=>{
-    el.addEventListener('click', ()=>openWorldbookEntry(parseInt(el.getAttribute('data-wb-idx'),10)));
+    el.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-wb-toggle]')) return;
+      openWorldbookEntry(parseInt(el.getAttribute('data-wb-idx'),10));
+    });
+  });
+  body.querySelectorAll('[data-wb-toggle]').forEach(tog=>{
+    tog.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const i = parseInt(tog.getAttribute('data-wb-toggle'),10);
+      const en = entries[i];
+      en.enabled = !(en.enabled !== false);
+      saveState();
+      renderSettingsWorldbook();
+    });
   });
   document.getElementById('wbAddBtn').addEventListener('click', ()=>openWorldbookEntry(null));
 }
@@ -3822,7 +4236,8 @@ function createInlineSel(feedId, barId){
     feed.classList.remove('in-sel-mode');
     feed.querySelectorAll('.sel-circle').forEach(c=>c.remove());
     feed.querySelectorAll('[data-msg-id]').forEach(row=>{
-      row.style.transform=''; row.style.transition='';
+      row.style.transform='';
+      row.style.transition='';
     });
   }
   function render(){
@@ -3839,8 +4254,9 @@ function createInlineSel(feedId, barId){
         row.insertBefore(circle, row.firstChild);
       }
       circle.classList.toggle('on', checked.has(id));
-      row.style.transform = 'translateX(30px)';
-      row.style.transition = 'transform .15s ease';
+      // Messages stay in place — circle is beside the message
+      row.style.transform = '';
+      row.style.transition = '';
     });
     // Update bar
     const bar = document.getElementById(barId);
@@ -3970,22 +4386,23 @@ function renderUserChatFeed(){
     feed.innerHTML = '<div class="empty-state">'+t('empty.dm')+'</div>';
     return;
   }
-  pd.messages.forEach(m=>{ if(!m.id) m.id=uid('m'); });
-  feed.innerHTML = pd.messages.map(m=>{
-    const mine = m.from==='me';
-    return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
-  }).join('');
+  pd.messages.forEach(m=>{ if(!m.id) m.id=uid('m'); if(!m.ts) m.ts=0; });
+  feed.innerHTML = renderMsgFeedHtml(pd.messages, ch, true);
 
   if(!_chatSel) _chatSel = createInlineSel('userChatFeed', 'chatSelBar');
   attachLongPress(feed, '[data-msg-id]', 600, (el)=>{
     const id = el.getAttribute('data-msg-id');
+    // Only enter sel for non-recalled messages
+    const msg = pd.messages.find(m=>m.id===id);
+    if(msg && msg.recalled) return;
     _chatSel.enter(id,
-      ()=>pd.messages.map(m=>({id:m.id, text:m.text})),
+      ()=>pd.messages.filter(m=>m.id&&!m.recalled).map(m=>({id:m.id, text:m.text, from:m.from})),
       (ids)=>{ pd.messages=pd.messages.filter(m=>!ids.includes(m.id)); saveState(); _chatSel.exit(); renderUserChatFeed(); showToast(t('toast.msgDeleted')); },
       (id)=>{ const msg=pd.messages.find(m=>m.id===id); if(!msg) return; showPromptModal('编辑消息',msg.text,(v)=>{ msg.text=v; saveState(); _chatSel.exit(); renderUserChatFeed(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg.text; },30); }
     );
   });
   feed.scrollTop = feed.scrollHeight;
+  applyBubbleScale();
 }
 
 function initChatSelBar(){
@@ -3999,12 +4416,54 @@ function initChatSelBar(){
     _chatSel.getOnEdit()(ids[0]);
     _chatSel.exit();
   });
+  bar.querySelector('.sel-mode-recall').addEventListener('click', ()=>{
+    if(!_chatSel) return;
+    const ids=_chatSel.getChecked();
+    if(!ids.length){ showToast('请先选择'); return; }
+    const ch = getCurrentChar();
+    const pd = ensurePhoneData(ch).userChat;
+    ids.forEach(id=>{
+      const msg = pd.messages.find(m=>m.id===id);
+      if(msg && !msg.recalled){
+        msg.recalledText = msg.text;
+        msg.recalled = true;
+        msg.text = '[撤回]';
+      }
+    });
+    saveState();
+    _chatSel.exit();
+    renderUserChatFeed();
+    showToast('消息已撤回');
+  });
   bar.querySelector('.sel-mode-delete').addEventListener('click', ()=>{
     if(!_chatSel) return;
     const ids=_chatSel.getChecked();
     if(!ids.length){ showToast('请先选择'); return; }
     _chatSel.getOnDelete()(ids);
   });
+
+  // Show recall button only when selected message is from 'me'
+  // We hook into the createInlineSel render to update recall visibility
+  const origRender = _chatSel ? _chatSel.render : null;
+}
+
+function updateChatSelBarButtons(){
+  if(!_chatSel) return;
+  const bar = document.getElementById('chatSelBar');
+  if(!bar) return;
+  const recallBtn = bar.querySelector('.sel-mode-recall');
+  const editBtn = bar.querySelector('.sel-mode-edit');
+  const ids = _chatSel.getChecked();
+  const ch = getCurrentChar();
+  const pd = ch ? ensurePhoneData(ch).userChat : null;
+  if(!pd){ if(recallBtn) recallBtn.style.display='none'; return; }
+  // Show recall if all selected messages are from 'me' and not already recalled
+  const allMine = ids.length>0 && ids.every(id=>{
+    const m = pd.messages.find(m=>m.id===id);
+    return m && m.from==='me' && !m.recalled;
+  });
+  if(recallBtn) recallBtn.style.display = allMine ? '' : 'none';
+  if(editBtn) editBtn.style.display = (ids.length===1 && _chatSel.getOnEdit()) ? '' : 'none';
 }
 
 /* Streamed delivery: append messages one by one with delay */
@@ -4038,22 +4497,20 @@ function renderDmFeed(){
   const pd = resolveIgPd(scope);
   const dm = pd.dms[idx];
   const feed = document.getElementById('igDmFeed');
-  dm.messages.forEach(m=>{ if(!m.id) m.id=uid('dm'); });
-  feed.innerHTML = dm.messages.map(m=>{
-    const mine = m.from==='me';
-    return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
-  }).join('');
+  dm.messages.forEach(m=>{ if(!m.id) m.id=uid('dm'); if(!m.ts) m.ts=0; });
+  feed.innerHTML = renderMsgFeedHtml(dm.messages, null, false);
 
   if(!_dmSel) _dmSel = createInlineSel('igDmFeed', 'dmSelBar');
   attachLongPress(feed, '[data-msg-id]', 600, (el)=>{
     const id = el.getAttribute('data-msg-id');
     _dmSel.enter(id,
-      ()=>dm.messages.map(m=>({id:m.id, text:m.text})),
+      ()=>dm.messages.filter(m=>!m._divider).map(m=>({id:m.id, text:m.text})),
       (ids)=>{ dm.messages=dm.messages.filter(m=>!ids.includes(m.id)); saveState(); _dmSel.exit(); renderDmFeed(); showToast(t('toast.msgDeleted')); },
       (id)=>{ const msg=dm.messages.find(m=>m.id===id); if(!msg) return; showPromptModal('编辑消息',msg.text,(v)=>{ msg.text=v; saveState(); _dmSel.exit(); renderDmFeed(); showToast(t('toast.msgEdited')); }); setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg.text; },30); }
     );
   });
   feed.scrollTop = feed.scrollHeight;
+  applyBubbleScale();
 }
 
 function initDmSelBar(){
@@ -4078,6 +4535,41 @@ function initDmSelBar(){
 /* ===================================================================
    INSTAGRAM POSTS — overlay long-press to delete posts
 =================================================================== */
+/* ===================================================================
+   IG POSTS — inline selection (same style as chat long-press)
+=================================================================== */
+const _igSelState = {}; // keyed by bodyId
+
+function getOrCreateIgSel(scope){
+  const bodyId = scope==='idol' ? 'igBody' : scope==='idolAlt' ? 'igAltBody' : 'userIgBody';
+  const barId = 'igSelBar_'+scope;
+  // Ensure sel bar exists
+  let bar = document.getElementById(barId);
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = barId;
+    bar.className = 'sel-mode-bar';
+    bar.innerHTML = '<div class="sel-mode-actions"><span class="sel-mode-count">已选 0 条</span><button class="sel-mode-delete">删除</button><button class="sel-mode-cancel">取消</button></div>';
+    const bodyEl = document.getElementById(bodyId);
+    if(bodyEl && bodyEl.parentNode) bodyEl.parentNode.insertBefore(bar, bodyEl.nextSibling);
+    bar.querySelector('.sel-mode-cancel').addEventListener('click', ()=>{
+      const sel = _igSelState[scope];
+      if(sel) sel.exit();
+    });
+    bar.querySelector('.sel-mode-delete').addEventListener('click', ()=>{
+      const sel = _igSelState[scope];
+      if(!sel) return;
+      const ids = sel.getChecked();
+      if(!ids.length){ showToast('请先选择'); return; }
+      sel.getOnDelete()(ids);
+    });
+  }
+  if(!_igSelState[scope]){
+    _igSelState[scope] = createInlineSel(bodyId, barId);
+  }
+  return _igSelState[scope];
+}
+
 function renderIgBodyWithLongPress(scope){
   const bodyId = scope==='idol' ? 'igBody' : scope==='idolAlt' ? 'igAltBody' : 'userIgBody';
   const body = document.getElementById(bodyId);
@@ -4086,23 +4578,33 @@ function renderIgBodyWithLongPress(scope){
   const posts = pane.querySelectorAll('.ig-post');
   if(!posts.length) return;
   const pd = resolveIgPd(scope);
+  const postList = pd.posts || pd.feed || [];
+
+  const sel = getOrCreateIgSel(scope);
+
+  // Give each post a data-msg-id if missing
+  posts.forEach((el,i)=>{
+    const p = postList[i];
+    if(p && !p.id) p.id = uid('p');
+    if(p) el.setAttribute('data-msg-id', p.id||String(i));
+  });
+
   attachLongPress(pane, '.ig-post', 600, (el)=>{
-    const postList = pd.posts || pd.feed || [];
-    const items = postList.map((p,i)=>({id:p.id||String(i), label:(p.caption||p.imageDesc||'').slice(0,80), sublabel:p.time||''}));
-    const idx = Array.from(posts).indexOf(el);
-    openSelOverlay({type:'igPost', scope},
-      items,
+    const id = el.getAttribute('data-msg-id');
+    sel.enter(id,
+      ()=>postList.map((p,i)=>({id:p.id||String(i), label:(p.caption||p.imageDesc||'').slice(0,80)})),
       (ids)=>{
         if(pd.posts) pd.posts = pd.posts.filter((p,i)=>!ids.includes(p.id||String(i)));
         else if(pd.feed) pd.feed = pd.feed.filter((p,i)=>!ids.includes(p.id||String(i)));
         saveState();
+        sel.exit();
         if(scope==='idol') renderInstagram();
         else if(scope==='idolAlt') renderInstagramAlt();
         else renderUserInstagram();
         showToast(t('toast.postDeleted'));
-      }
+      },
+      null // no edit for posts
     );
-    if(idx>=0 && items[idx]){ _selChecked.add(items[idx].id); _renderSelOverlay(); }
   });
 }
 
@@ -4248,8 +4750,919 @@ function saveMemoryEntry(){
 document.getElementById('memSaveBtn').addEventListener('click', saveMemoryEntry);
 
 /* ===================================================================
-   INIT
+   CHAT THREE-DOT MENU — avatar visibility + bubble colors
 =================================================================== */
+function showAvatarSettings(){
+  const dd = document.getElementById('chatDropdown');
+  if(dd) dd.style.display='none';
+  const s = state.settings;
+  const sendOn = s.chatShowSentAvatar !== false;
+  const recvOn = s.chatShowRecvAvatar !== false;
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML =
+    '<div class="prompt-card-title">头像显示设置</div>'
+    + '<div style="display:flex;flex-direction:column;gap:14px;margin:10px 0 16px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+        + '<span style="font-size:14px;color:var(--text);">显示我方头像</span>'
+        + '<div class="ios-toggle'+(sendOn?' on':'')+'" id="avatarSentToggle"></div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;">'
+        + '<span style="font-size:14px;color:var(--text);">显示对方头像</span>'
+        + '<div class="ios-toggle'+(recvOn?' on':'')+'" id="avatarRecvToggle"></div>'
+      + '</div>'
+    + '</div>'
+    + '<div class="prompt-card-actions"><button class="pc-ok" style="flex:1;" data-v="__close">完成</button></div>';
+  overlay.classList.add('open');
+  document.getElementById('avatarSentToggle').addEventListener('click', function(){
+    this.classList.toggle('on');
+    s.chatShowSentAvatar = this.classList.contains('on');
+    saveState();
+    renderUserChatFeed();
+  });
+  document.getElementById('avatarRecvToggle').addEventListener('click', function(){
+    this.classList.toggle('on');
+    s.chatShowRecvAvatar = this.classList.contains('on');
+    saveState();
+    renderUserChatFeed();
+  });
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    close();
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+const BUBBLE_PRESETS_SENT_DARK = ['','#f2f2f3','#ffd60a','#ff453a','#30d158','#0a84ff','#bf5af2','#ff9f0a','#64d2ff'];
+const BUBBLE_PRESETS_RECV_DARK = ['','#262627','#2d4a3e','#1a3a5c','#3d2b4a','#2a3a4a','#4a2b2b','#1e3d59','#2b3a1a'];
+const BUBBLE_PRESETS_SENT_LIGHT = ['','#0e0e0f','#0056b3','#c0392b','#16a085','#7d3c98','#0071e3','#f5a623','#28b485'];
+const BUBBLE_PRESETS_RECV_LIGHT = ['','#ececee','#e8f4fd','#fdebd0','#f9ebea','#eaf4fb','#f4ecf7','#e9f7ef','#fef9e7'];
+
+function showChatColorPicker(context){
+  const dd = document.getElementById('chatDropdown');
+  if(dd) dd.style.display='none';
+  const s = state.settings;
+  const ctx = context || 'chat';
+  const colors = s[ctx+'Colors'] || {sent:'',recv:''};
+  const isDark = (s.theme||'dark')==='dark';
+  const sentPresets = isDark ? BUBBLE_PRESETS_SENT_DARK : BUBBLE_PRESETS_SENT_LIGHT;
+  const recvPresets = isDark ? BUBBLE_PRESETS_RECV_DARK : BUBBLE_PRESETS_RECV_LIGHT;
+
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+
+  function previewHtml(){
+    const sc = colors.sent || (isDark?'#f2f2f3':'#0e0e0f');
+    const rc = colors.recv || (isDark?'#262627':'#ececee');
+    const stc = colors.sent ? (isLightColor(sc)?'#0a0a0a':'#ffffff') : (isDark?'#0a0a0a':'#ffffff');
+    const rtc = colors.recv ? (isLightColor(rc)?'#0a0a0a':'#ffffff') : (isDark?'#f2f2f3':'#0a0a0a');
+    return '<div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 14px;padding:10px 12px;background:var(--surface-3);border-radius:14px;">'
+      +'<div style="display:flex;justify-content:flex-end;"><div style="background:'+sc+';color:'+stc+';font-size:13px;padding:7px 13px;border-radius:18px 18px 4px 18px;max-width:75%;">我的消息</div></div>'
+      +'<div style="display:flex;justify-content:flex-start;"><div style="background:'+rc+';color:'+rtc+';font-size:13px;padding:7px 13px;border-radius:18px 18px 18px 4px;max-width:75%;">对方的回复</div></div>'
+      +'</div>';
+  }
+
+  function swatchRow(presets, cur, type){
+    // first swatch = reset (默)
+    return '<div class="color-swatches" id="'+type+'Swatches">'
+      + presets.map((c,i)=>{
+        const bg = c || (type==='sent' ? (isDark?'#f2f2f3':'#0e0e0f') : (isDark?'#262627':'#ececee'));
+        const active = (!c && !cur) || c===cur;
+        const label = c==='' ? '<svg viewBox="0 0 14 14" style="width:12px;height:12px;stroke:var(--text-2);fill:none;stroke-width:1.5"><path d="M2 2l10 10M12 2 2 12"/></svg>' : '';
+        return '<div class="color-swatch'+(active?' active':'')+'" data-color="'+c+'" data-type="'+type+'" title="'+(c||'默认')+'" style="background:'+bg+';position:relative;">'
+          +label
+        +'</div>';
+      }).join('')
+      + '<label class="color-swatch color-swatch-custom" title="自定义" style="cursor:pointer;display:flex;align-items:center;justify-content:center;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);border:2px solid var(--border);">'
+        + '<input type="color" data-custom-type="'+type+'" style="opacity:0;position:absolute;width:0;height:0;" value="'+(cur&&cur!==''?cur:'#ffffff')+'">'
+        + '<svg viewBox="0 0 14 14" style="width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2;filter:drop-shadow(0 0 1px #000);"><path d="M1 7h12M7 1v12"/></svg>'
+      + '</label>'
+    + '</div>';
+  }
+
+  card.innerHTML =
+    '<div class="prompt-card-title">修改气泡颜色</div>'
+    + '<div id="colorPickerPreview">'+previewHtml()+'</div>'
+    + '<div style="font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">我方气泡</div>'
+    + swatchRow(sentPresets, colors.sent, 'sent')
+    + '<div style="font-size:11px;color:var(--text-3);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.06em;">对方气泡</div>'
+    + swatchRow(recvPresets, colors.recv, 'recv')
+    + '<div class="prompt-card-actions" style="margin-top:16px;">'
+      + '<button class="pc-cancel" data-v="__reset">重置</button>'
+      + '<button class="pc-ok" data-v="__close">完成</button>'
+    + '</div>';
+  overlay.classList.add('open');
+
+  function applyColor(type, color){
+    if(!s[ctx+'Colors']) s[ctx+'Colors'] = {sent:'',recv:''};
+    s[ctx+'Colors'][type] = color;
+    Object.assign(colors, s[ctx+'Colors']);
+    saveState();
+    applyChatColors();
+    document.getElementById('colorPickerPreview').innerHTML = previewHtml();
+    // Update swatch active states
+    card.querySelectorAll('.color-swatch[data-type="'+type+'"]').forEach(sw=>{
+      const c = sw.getAttribute('data-color');
+      sw.classList.toggle('active', c===color || (c==='' && color===''));
+    });
+  }
+
+  card.querySelectorAll('.color-swatch[data-color]').forEach(sw=>{
+    sw.addEventListener('click', ()=>{
+      const type = sw.getAttribute('data-type');
+      const color = sw.getAttribute('data-color');
+      applyColor(type, color);
+    });
+  });
+
+  card.querySelectorAll('input[type="color"]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const type = inp.getAttribute('data-custom-type');
+      applyColor(type, inp.value);
+    });
+  });
+
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); renderUserChatFeed(); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v = btn.getAttribute('data-v');
+    if(v==='__reset'){
+      if(!s[ctx+'Colors']) s[ctx+'Colors']={sent:'',recv:''};
+      s[ctx+'Colors'] = {sent:'',recv:''};
+      Object.assign(colors, {sent:'',recv:''});
+      saveState();
+      applyChatColors();
+    }
+    close();
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+function isLightColor(hex){
+  if(!hex||hex==='') return false;
+  const c = hex.replace('#','');
+  if(c.length<6) return false;
+  const r=parseInt(c.slice(0,2),16), g=parseInt(c.slice(2,4),16), b=parseInt(c.slice(4,6),16);
+  return (0.299*r+0.587*g+0.114*b) > 160;
+}
+
+function applyChatColors(){
+  const s = state.settings;
+  const phone = document.getElementById('phone');
+  ['chat','bubble','dm'].forEach(ctx=>{
+    const colors = s[ctx+'Colors'] || {sent:'',recv:''};
+    if(colors.sent) phone.style.setProperty('--'+ctx+'-sent-bg', colors.sent);
+    else phone.style.removeProperty('--'+ctx+'-sent-bg');
+    if(colors.recv) phone.style.setProperty('--'+ctx+'-recv-bg', colors.recv);
+    else phone.style.removeProperty('--'+ctx+'-recv-bg');
+  });
+}
+
+// Wire up chat menu button
+document.getElementById('chatMenuBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  openChatMenu();
+});
+
+/* ===================================================================
+   AVATAR DISPLAY IN CHAT MESSAGES
+=================================================================== */
+function chatMsgHtml(m, ch, opts){
+  opts = opts||{};
+  const mine = m.from==='me';
+  // Recalled message
+  if(m.recalled){
+    return '<div class="recalled-msg" data-msg-id="'+m.id+'">'
+      + (mine ? '你撤回了一条消息' : (ch?ch.idolName||'对方':'对方')+'撤回了一条消息')
+      + (m.recalledText ? '<span style="color:var(--text-3);font-size:11px;"> ('+escapeHtml(m.recalledText)+')</span>' : '')
+    + '</div>';
+  }
+  const showSentAv = state.settings.chatShowSentAvatar !== false;
+  const showRecvAv = state.settings.chatShowRecvAvatar !== false;
+  const sentColor = (state.settings.chatColors||{}).sent;
+  const recvColor = (state.settings.chatColors||{}).recv;
+  const sentStyle = sentColor ? 'background:'+sentColor+' !important;' : '';
+  const recvStyle = recvColor ? 'background:'+recvColor+' !important;' : '';
+
+  let html = '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'">';
+  if(!mine && showRecvAv){
+    const av = ch && ch.idolAvatar ? avatarStyle(ch.idolAvatar) : '';
+    const init = ch ? avatarInitial(ch.idolName) : '?';
+    html += '<div class="chat-avatar" style="'+(av||'')+'">'+(av?'':init)+'</div>';
+  }
+  html += '<div class="bubble '+(mine?'sent':'recv')+'" style="'+(mine?sentStyle:recvStyle)+'">'+escapeHtml(m.text)+'</div>';
+  if(mine && showSentAv){
+    const av = ch && ch.userAvatar ? avatarStyle(ch.userAvatar) : '';
+    const init = ch ? avatarInitial(ch.userName) : '我';
+    html += '<div class="chat-avatar" style="'+(av||'')+'">'+(av?'':init)+'</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+/* ===================================================================
+   OFFLINE / IRL APP — novel-style scene generation
+=================================================================== */
+function initOfflineApp(){
+  document.getElementById('offlineMenuBtn').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    openOfflineSettings();
+  });
+}
+
+function openOfflineSettings(){
+  const overlay = document.getElementById('offlineSettingsOverlay');
+  overlay.style.display = 'flex';
+  // Load saved preset if any
+  const preset = state.settings.offlinePromptPreset || '';
+  const applyOn = state.settings.offlineApplyPrompt !== false;
+  const presetActive = state.settings.offlineSavePreset || false;
+  const input = document.getElementById('offlinePromptInput');
+  if(input) input.value = preset;
+  const presetToggle = document.getElementById('offlinePresetToggle');
+  if(presetToggle) presetToggle.className = 'ios-toggle'+(presetActive?' on':'');
+  const applyToggle = document.getElementById('offlineApplyToggle');
+  if(applyToggle) applyToggle.className = 'ios-toggle'+(applyOn?' on':'');
+  renderOfflinePresets();
+}
+
+function closeOfflineSettings(){
+  document.getElementById('offlineSettingsOverlay').style.display='none';
+}
+
+function toggleOfflinePreset(){
+  state.settings.offlineSavePreset = !(state.settings.offlineSavePreset||false);
+  saveState();
+  const tog = document.getElementById('offlinePresetToggle');
+  if(tog) tog.className = 'ios-toggle'+(state.settings.offlineSavePreset?' on':'');
+}
+
+function toggleOfflineApply(){
+  state.settings.offlineApplyPrompt = !(state.settings.offlineApplyPrompt !== false);
+  saveState();
+  const tog = document.getElementById('offlineApplyToggle');
+  if(tog) tog.className = 'ios-toggle'+(state.settings.offlineApplyPrompt!==false?' on':'');
+}
+
+function renderOfflinePresets(){
+  const presets = state.settings.offlinePresets || [];
+  const container = document.getElementById('offlinePresetsList');
+  if(!container) return;
+  if(!presets.length){ container.innerHTML=''; return; }
+  container.innerHTML = '<div style="font-size:12px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">已保存的预设</div>'
+    + presets.map((p,i)=>'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">'
+      + '<div style="flex:1;font-size:13px;color:var(--text);cursor:pointer;" onclick="loadOfflinePreset('+i+')" >'+escapeHtml(p.slice(0,40))+'…</div>'
+      + '<button style="font-size:12px;color:#ff3b30;padding:4px 8px;" onclick="deleteOfflinePreset('+i+')">删除</button>'
+    + '</div>').join('');
+}
+
+function loadOfflinePreset(i){
+  const p = (state.settings.offlinePresets||[])[i];
+  if(p){ document.getElementById('offlinePromptInput').value = p; }
+}
+
+function deleteOfflinePreset(i){
+  if(!state.settings.offlinePresets) return;
+  state.settings.offlinePresets.splice(i,1);
+  saveState();
+  renderOfflinePresets();
+}
+
+async function generateOffline(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); closeOfflineSettings(); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); closeOfflineSettings(); return; }
+
+  const promptInput = document.getElementById('offlinePromptInput');
+  const extraPrompt = promptInput ? promptInput.value.trim() : '';
+
+  // Save preset if toggle on
+  if(state.settings.offlineSavePreset && extraPrompt){
+    if(!state.settings.offlinePresets) state.settings.offlinePresets = [];
+    if(!state.settings.offlinePresets.includes(extraPrompt)){
+      state.settings.offlinePresets.push(extraPrompt);
+    }
+    saveState();
+  }
+
+  const useExtra = state.settings.offlineApplyPrompt !== false;
+
+  closeOfflineSettings();
+
+  const body = document.getElementById('offlineBody');
+  body.innerHTML = '<div class="loading-row">'+t('toast.generating')+'</div>';
+  showPhoneGenerating();
+
+  try{
+    const memCtx = recentUserChatContext(ch, 6);
+    const sys = buildBaseSystemPrompt(ch,
+      '现在请为用户和idol生成一段线下相遇、约会或互动的小说式场景描写。'
+      + '内容要求：至少350字，包含详细的动作描写、环境描写、心理描写，以及真实自然的对话（用引号表示）。'
+      + '风格类似现代言情或青春小说，有画面感、有情感张力，细节丰富。'
+      + (useExtra && extraPrompt ? '\n【用户额外要求】'+extraPrompt : '')
+    );
+    const usr = '请生成用户（'+(ch.userName||'用户')+'）与idol（'+(ch.idolName||'idol')+'）的一段线下互动场景，至少350字。场景要有地点、时间背景、具体的行为动作、对话和情感细节。输出纯文本（不需要JSON格式）。';
+    const text = await callAPI(sys, usr);
+    if(!text) throw new Error('empty');
+    const ch2 = getCurrentChar();
+    const pd2 = ensurePhoneData(ch2);
+    if(!pd2.offlineScenes) pd2.offlineScenes = [];
+    pd2.offlineScenes.unshift({text, time: new Date().toLocaleDateString('zh-CN')});
+    saveState();
+    renderOfflineChatMsgs();
+  }catch(err){
+    console.warn(err);
+    showToast(t('toast.genFailed')+': '+(err && err.message ? err.message : String(err)));
+    renderOfflineBody();
+  }finally{
+    hidePhoneGenerating();
+  }
+}
+
+function renderOfflineBody(){
+  const ch = getCurrentChar();
+  const pd = ch ? ensurePhoneData(ch) : null;
+  const scenes = pd && pd.offlineScenes ? pd.offlineScenes : [];
+  const body = document.getElementById('offlineBody');
+  if(!scenes.length){
+    body.innerHTML = '<div class="empty-state" style="padding:80px 20px;">点击右上角菜单生成线下内容</div>';
+    return;
+  }
+  renderOfflineScene(scenes[0].text, scenes[0].time);
+  // Wire offline chat bar
+  wireOfflineChatBar();
+}
+
+function wireOfflineChatBar(){
+  const sendBtn = document.getElementById('offlineSendBtn');
+  const triggerBtn = document.getElementById('offlineTriggerBtn');
+  const input = document.getElementById('offlineChatInput');
+  if(!sendBtn || !triggerBtn || !input) return;
+  // Prevent duplicate listeners
+  sendBtn.onclick = ()=>{
+    const val = input.value.trim();
+    if(!val) return;
+    input.value='';
+    const ch = getCurrentChar();
+    if(!ch) return;
+    const pd = ensurePhoneData(ch);
+    if(!pd.offlineChatMsgs) pd.offlineChatMsgs = [];
+    pd.offlineChatMsgs.push({from:'me', text:val, id:uid('oc'), ts:Date.now()});
+    saveState();
+    renderOfflineChatMsgs();
+  };
+  input.onkeydown = (e)=>{ if(e.key==='Enter') sendBtn.click(); };
+  triggerBtn.onclick = async()=>{
+    const ch = getCurrentChar();
+    if(!ch){ showToast(t('toast.charMissing')); return; }
+    if(!normalizeBaseUrl(state.settings.apiUrl)||!state.settings.model){ showToast(t('toast.apiMissing')); return; }
+    const pd = ensurePhoneData(ch);
+    if(!pd.offlineChatMsgs) pd.offlineChatMsgs=[];
+    showPhoneGenerating();
+    try{
+      const sceneCtx = (pd.offlineScenes&&pd.offlineScenes.length) ? '\n【当前线下场景】\n'+pd.offlineScenes[0].text.slice(0,400) : '';
+      const hist = pd.offlineChatMsgs.slice(-10).map(m=>(m.from==='me'?(ch.userName||'用户'):(ch.idolName||'idol'))+'：'+m.text).join('\n');
+      const sys = buildBaseSystemPrompt(ch,
+        '现在你们正在线下相处，请以idol身份自然地回复用户说的话。语气亲近自然，符合当前场景和两人关系。可以发1-4条消息。'+sceneCtx
+      );
+      const usr = hist+'\n\n请以idol身份继续对话，输出JSON：{"messages":["消息1",...]}';
+      const data = await generateJSON(sys,usr);
+      if(data&&Array.isArray(data.messages)&&data.messages.length){
+        const now=Date.now();
+        data.messages.filter(Boolean).forEach((txt,i)=>{
+          pd.offlineChatMsgs.push({from:'them',text:txt.trim(),id:uid('oc'),ts:now+i*1000});
+        });
+        saveState();
+        renderOfflineChatMsgs();
+      }
+    }catch(err){ showToast(t('toast.genFailed')); }
+    finally{ hidePhoneGenerating(); }
+  };
+}
+
+function renderOfflineChatMsgs(){
+  const ch = getCurrentChar();
+  const pd = ch ? ensurePhoneData(ch) : null;
+  const msgs = pd && pd.offlineChatMsgs ? pd.offlineChatMsgs : [];
+  const body = document.getElementById('offlineBody');
+  const scenes = pd && pd.offlineScenes ? pd.offlineScenes : [];
+  let html = '';
+  if(scenes.length){
+    const s = scenes[0];
+    html += (s.time ? '<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;">'+escapeHtml(s.time)+'</div>' : '')
+      + '<div class="detail-text" style="line-height:1.9;font-size:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">'+escapeHtml(s.text)+'</div>';
+  }
+  msgs.forEach(m=>{
+    const mine = m.from==='me';
+    html += '<div class="bubble-row '+(mine?'sent':'recv')+'" style="margin:4px 0;">'
+      +'<div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div>'
+      +'</div>';
+  });
+  body.innerHTML = html || '<div class="empty-state">点击右上角菜单生成场景内容</div>';
+  body.scrollTop = body.scrollHeight;
+}
+
+function renderOfflineScene(text, time){
+  const body = document.getElementById('offlineBody');
+  body.innerHTML =
+    (time ? '<div style="font-size:11px;color:var(--text-3);margin-bottom:12px;">'+escapeHtml(time)+'</div>' : '')
+    + '<div class="detail-text" style="line-height:1.9;font-size:14.5px;">'+escapeHtml(text)+'</div>';
+}
+
+function openOfflineApp(){
+  goTo('screen-offline');
+  const ch = getCurrentChar();
+  if(ch){ ensurePhoneData(ch); }
+  renderOfflineBody();
+}
+
+/* ===================================================================
+   CHAT + DM DOTS MENU — bubble color picker per context
+=================================================================== */
+// Also wire Bubble app menu (add three-dot btn dynamically in render isn't easy,
+// we use a simpler approach: long-press header or a separate settings btn)
+// For now: wire up DM feed three-dot from igDmInputBar area - skip for DM (covered by chat menu)
+
+/* ===================================================================
+   APPLY CHAT COLORS ON INIT
+=================================================================== */
+
+/* ===================================================================
+   MESSAGE NOTIFICATION BANNER
+=================================================================== */
+let _notifTimer = null;
+function showMsgNotification(appName, senderName, text, onClick){
+  const banner = document.getElementById('msg-notification');
+  if(!banner) return;
+  document.getElementById('notifApp').textContent = appName;
+  document.getElementById('notifText').textContent = (senderName ? senderName+': ' : '') + text;
+  const now = new Date();
+  document.getElementById('notifTime').textContent = (now.getHours()<10?'0':'')+now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+  banner.classList.add('show');
+  clearTimeout(_notifTimer);
+  _notifTimer = setTimeout(()=>banner.classList.remove('show'), 3500);
+  banner.onclick = ()=>{
+    banner.classList.remove('show');
+    if(onClick) onClick();
+  };
+}
+
+/* ===================================================================
+   CHAT TIMESTAMPS — insert time dividers every 30 min gap
+=================================================================== */
+function formatMsgTime(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  const h = d.getHours(), m = d.getMinutes();
+  return (h<10?'0'+h:h)+':'+(m<10?'0'+m:m);
+}
+function formatMsgDate(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  const diff = now - d;
+  if(diff < 86400000){ return formatMsgTime(ts); }
+  if(diff < 604800000){
+    const days=['日','一','二','三','四','五','六'];
+    return '周'+days[d.getDay()]+' '+formatMsgTime(ts);
+  }
+  return (d.getMonth()+1)+'月'+d.getDate()+'日 '+formatMsgTime(ts);
+}
+
+function msgsWithTimestamps(messages){
+  // Insert time divider objects into array every 30min gap or at start
+  const THRESHOLD = 30 * 60 * 1000; // 30 min
+  const result = [];
+  let lastTs = 0;
+  messages.forEach(m=>{
+    const ts = m.ts || 0;
+    if(!lastTs || (ts && ts - lastTs > THRESHOLD)){
+      result.push({_divider: true, ts: ts || Date.now()});
+    }
+    result.push(m);
+    if(ts) lastTs = ts;
+  });
+  return result;
+}
+
+/* ===================================================================
+   PHOTO + TRANSFER MODAL for Chat and DM
+=================================================================== */
+function showPhotoTransferModal(onPhoto, onTransfer){
+  showActionSheet('发送内容', [
+    {value:'photo', label:'发送图片（文字描述）'},
+    {value:'transfer', label:'转账'},
+  ], (val)=>{
+    if(val==='photo') onPhoto();
+    else if(val==='transfer') onTransfer();
+  });
+}
+
+function showTransferModal(onSend){
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML =
+    '<div class="prompt-card-title">转账</div>'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+      + '<svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--text-2);fill:none;stroke-width:1.4;stroke-linecap:round;flex:0 0 auto;"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h2"/></svg>'
+      + '<input type="number" id="transferAmount" class="field-input" placeholder="金额" style="flex:1;height:36px;padding:0 12px;" min="0">'
+    + '</div>'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">'
+      + '<svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:var(--text-2);fill:none;stroke-width:1.4;stroke-linecap:round;flex:0 0 auto;"><path d="M4 6h16M4 12h10M4 18h12"/></svg>'
+      + '<input type="text" id="transferNote" class="field-input" placeholder="备注（选填）" style="flex:1;height:36px;padding:0 12px;">'
+    + '</div>'
+    + '<div class="prompt-card-actions" style="margin-top:14px;">'
+      + '<button class="pc-cancel" data-v="__cancel">取消</button>'
+      + '<button class="pc-ok" data-v="__send">发送</button>'
+    + '</div>';
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v = btn.getAttribute('data-v');
+    close();
+    if(v==='__send'){
+      const amt = document.getElementById('transferAmount').value.trim();
+      const note = document.getElementById('transferNote').value.trim();
+      if(amt) onSend(amt, note);
+    }
+  }
+  overlay.addEventListener('click', onClick);
+  setTimeout(()=>{ const a=document.getElementById('transferAmount'); if(a) a.focus(); }, 30);
+}
+
+function transferMsgHtml(m, ch){
+  const mine = m.from==='me';
+  return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'">'
+    + '<div class="transfer-bubble">'
+      + '<div class="transfer-bubble-icon">'
+        + '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h2"/></svg>'
+        + '<span>转账</span>'
+      + '</div>'
+      + '<div class="transfer-bubble-main">'
+        + '<div class="transfer-bubble-amount">¥'+escapeHtml(m.amount||'0')+'</div>'
+        + (m.note ? '<div class="transfer-bubble-note">'+escapeHtml(m.note)+'</div>' : '<div class="transfer-bubble-note">'+(mine?'转给对方':'收到转账')+'</div>')
+      + '</div>'
+    + '</div>'
+  + '</div>';
+}
+
+/* Wire photo/transfer buttons */
+document.getElementById('userChatPhotoBtn').addEventListener('click', ()=>{
+  showPhotoTransferModal(
+    ()=>{ showPromptModal(t('btn.sendPhoto'), t('ph.photoDesc'), (desc)=>{ addUserChatMessage('[图片] '+desc); }); },
+    ()=>{ showTransferModal((amt,note)=>{
+      const ch=getCurrentChar(); if(!ch) return;
+      const pd=ensurePhoneData(ch).userChat;
+      const m={from:'me',text:'[转账] ¥'+amt+(note?' '+note:''),amount:amt,note:note,type:'transfer',id:uid('m'),ts:Date.now()};
+      pd.messages.push(m); saveState(); renderUserChatFeed();
+      showMsgNotification('Chat','你','已发送转账');
+    }); }
+  );
+});
+
+document.getElementById('igDmPhotoBtn').addEventListener('click', ()=>{
+  showPhotoTransferModal(
+    ()=>{ showPromptModal(t('btn.sendPhoto'), t('ph.photoDesc'), (desc)=>{ sendDmReply('[图片] '+desc); }); },
+    ()=>{ showTransferModal((amt,note)=>{
+      if(!currentDmCtx) return;
+      const ch=getCurrentChar(); const {scope,idx}=currentDmCtx;
+      const pd=resolveIgPd(scope); const dm=pd.dms[idx]; if(!dm) return;
+      const m={from:'me',text:'[转账] ¥'+amt+(note?' '+note:''),amount:amt,note:note,type:'transfer',id:uid('dm'),ts:Date.now()};
+      dm.messages.push(m); saveState(); renderDmFeed();
+    }); }
+  );
+});
+
+/* ===================================================================
+   DM THREE-DOT MENU — add contact, pin/preserve, color picker
+=================================================================== */
+function openDmMenu(){
+  const dd = document.getElementById('dmDropdown');
+  if(!dd) return;
+  const ch = getCurrentChar();
+  if(!currentDmCtx){ dd.style.display='none'; return; }
+  const {scope, idx} = currentDmCtx;
+  const pd = resolveIgPd(scope);
+  const dm = pd ? pd.dms[idx] : null;
+  if(!dm){ dd.style.display='none'; return; }
+
+  const isPinned = dm.pinned || false;
+  const alreadyContact = ch && ensurePhoneData(ch).userChat &&
+    (ensurePhoneData(ch).userChat.contacts||[]).find(c=>c.name===dm.name);
+
+  dd.innerHTML =
+    '<button class="dropdown-item" onclick="togglePinDm()">'+( isPinned ? '取消保留记录' : '保留此聊天记录')+'</button>'
+    + (!alreadyContact ? '<button class="dropdown-item" onclick="addDmAsContact()">添加到我的通讯录</button>' : '<button class="dropdown-item" style="opacity:.4;" disabled>已在通讯录</button>')
+    + '<button class="dropdown-item" onclick="showChatColorPicker(\'dm\')">修改气泡颜色</button>'
+    + '<button class="dropdown-item" onclick="showBubbleSizeMenu()">修改气泡大小</button>';
+  dd.style.display = 'block';
+  setTimeout(()=>{
+    document.addEventListener('click', function closeDD(e){
+      if(!dd.contains(e.target) && e.target.id!=='dmMenuBtn'){
+        dd.style.display='none';
+        document.removeEventListener('click', closeDD);
+      }
+    });
+  }, 0);
+}
+
+function togglePinDm(){
+  const dd=document.getElementById('dmDropdown'); if(dd) dd.style.display='none';
+  if(!currentDmCtx) return;
+  const {scope,idx}=currentDmCtx;
+  const pd=resolveIgPd(scope);
+  const dm=pd?pd.dms[idx]:null;
+  if(!dm) return;
+  dm.pinned = !dm.pinned;
+  saveState();
+  showToast(dm.pinned ? '已保留此聊天记录' : '已取消保留');
+}
+
+function addDmAsContact(){
+  const dd=document.getElementById('dmDropdown'); if(dd) dd.style.display='none';
+  if(!currentDmCtx) return;
+  const ch=getCurrentChar(); if(!ch) return;
+  const {scope,idx}=currentDmCtx;
+  const pd=resolveIgPd(scope);
+  const dm=pd?pd.dms[idx]:null;
+  if(!dm) return;
+  const upd=ensurePhoneData(ch);
+  if(!upd.userChat.contacts) upd.userChat.contacts=[];
+  if(upd.userChat.contacts.find(c=>c.name===dm.name)){ showToast('已在通讯录'); return; }
+  // Save context (messages as memory)
+  const memLines = dm.messages.map(m=>(m.from==='me'?(ch.userName||'用户'):dm.name)+'：'+m.text).join('\n');
+  upd.userChat.contacts.push({
+    name:dm.name, tag:dm.tag||'', scope, dmIdx:idx,
+    memory:memLines
+  });
+  saveState();
+  showToast('已添加 '+dm.name+' 到通讯录');
+  // Add to user chat list if not already there
+  if(!upd.userContactChats) upd.userContactChats=[];
+  if(!upd.userContactChats.find(c=>c.name===dm.name)){
+    upd.userContactChats.push({
+      name:dm.name,tag:dm.tag||'',messages:[],memory:memLines,id:uid('contact')
+    });
+    saveState();
+  }
+}
+
+document.getElementById('dmMenuBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  openDmMenu();
+});
+
+/* ===================================================================
+   CHAT MENU — also add bubble size option
+=================================================================== */
+function openChatMenu(){
+  const dd = document.getElementById('chatDropdown');
+  if(!dd) return;
+  dd.innerHTML =
+    '<button class="dropdown-item" onclick="showAvatarSettings()">头像显示设置</button>'
+    + '<button class="dropdown-item" onclick="showChatColorPicker(\'chat\')">修改气泡颜色</button>'
+    + '<button class="dropdown-item" onclick="showBubbleSizeMenu()">修改气泡大小</button>';
+  dd.style.display = 'block';
+  setTimeout(()=>{
+    document.addEventListener('click', function closeMenu(e){
+      if(!dd.contains(e.target) && e.target.id!=='chatMenuBtn'){
+        dd.style.display='none';
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  }, 0);
+}
+
+/* ===================================================================
+   BUBBLE SIZE SLIDER with preview
+=================================================================== */
+function showBubbleSizeMenu(){
+  // Close any open dropdowns
+  ['chatDropdown','dmDropdown'].forEach(id=>{const d=document.getElementById(id);if(d)d.style.display='none';});
+  const curScale = state.settings.bubbleScale || 100;
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML =
+    '<div class="prompt-card-title">气泡大小</div>'
+    + '<div style="display:flex;flex-direction:column;align-items:center;gap:14px;margin:10px 0;">'
+      + '<div style="display:flex;gap:12px;align-items:flex-end;">'
+        + '<div style="background:var(--recv-bg);color:var(--recv-text);padding:8px 14px;border-radius:14px;font-size:14px;" id="previewRecv">对方消息预览</div>'
+        + '<div style="background:var(--sent-bg);color:var(--sent-text);padding:8px 14px;border-radius:14px;font-size:14px;" id="previewSent">我的消息</div>'
+      + '</div>'
+      + '<input type="range" id="bubbleScaleSlider" min="70" max="130" step="5" value="'+curScale+'" style="-webkit-appearance:none;appearance:none;width:90%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;cursor:pointer;">'
+      + '<span id="bubbleScaleLabel" style="font-size:12px;color:var(--text-3);">'+curScale+'%</span>'
+    + '</div>'
+    + '<div class="prompt-card-actions">'
+      + '<button class="pc-cancel" data-v="__reset">重置</button>'
+      + '<button class="pc-ok" data-v="__close">完成</button>'
+    + '</div>';
+  overlay.classList.add('open');
+
+  const slider = document.getElementById('bubbleScaleSlider');
+  const label = document.getElementById('bubbleScaleLabel');
+  const prevR = document.getElementById('previewRecv');
+  const prevS = document.getElementById('previewSent');
+
+  function applyPreview(v){
+    const s = v/100;
+    const fs = Math.round(14.5*s)+'px';
+    const pad = Math.round(10*s)+'px '+Math.round(14*s)+'px';
+    prevR.style.fontSize=fs; prevR.style.padding=pad;
+    prevS.style.fontSize=fs; prevS.style.padding=pad;
+  }
+  applyPreview(curScale);
+
+  slider.addEventListener('input', ()=>{
+    const v = parseInt(slider.value);
+    label.textContent = v+'%';
+    applyPreview(v);
+    state.settings.bubbleScale = v;
+    applyBubbleScale();
+  });
+
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); saveState(); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v = btn.getAttribute('data-v');
+    if(v==='__reset'){
+      state.settings.bubbleScale = 100;
+      applyBubbleScale();
+    }
+    close();
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+function applyBubbleScale(){
+  const s = state.settings.bubbleScale || 100;
+  const scale = s/100;
+  const fs = (14.5*scale).toFixed(1)+'px';
+  const padV = (10*scale).toFixed(1)+'px';
+  const padH = (14*scale).toFixed(1)+'px';
+  // Apply via CSS custom property
+  document.querySelectorAll('.bubble').forEach(b=>{
+    b.style.fontSize = fs;
+    b.style.padding = padV+' '+padH;
+  });
+}
+
+/* ===================================================================
+   DM LIST — sort by last message time, show preserved, show time
+=================================================================== */
+function dmListHtml(dms, scope){
+  // Sort: pinned first, then by last message ts desc
+  const sorted = dms.map((d,i)=>({d,i})).sort((a,b)=>{
+    if(a.d.pinned && !b.d.pinned) return -1;
+    if(!a.d.pinned && b.d.pinned) return 1;
+    const ta = (a.d.messages[a.d.messages.length-1]||{}).ts||0;
+    const tb = (b.d.messages[b.d.messages.length-1]||{}).ts||0;
+    return tb - ta;
+  });
+  return sorted.map(({d,i})=>{
+    const last = d.messages[d.messages.length-1];
+    const ts = last ? last.ts : 0;
+    const timeStr = ts ? formatMsgDate(ts) : '';
+    return '<div class="dm-list-item" data-dm-idx="'+i+'"'+(d.pinned?' style="background:var(--surface-2);"':'')+'>'
+      + '<div class="ig-avatar" style="position:relative;">'+(d.pinned?'<div style="position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;background:var(--accent);border-radius:50%;border:1.5px solid var(--bg);"></div>':'')+'</div>'
+      + '<div class="dm-list-text"><div class="dm-list-name">'+escapeHtml(d.name)+'<span class="dm-list-tag">'+escapeHtml(d.tag||'')+'</span></div>'
+      + '<div class="dm-list-preview">'+escapeHtml(last? (last.type==='transfer'?'[转账]':last.text) : '')+'</div></div>'
+      + (timeStr ? '<div class="dm-list-time">'+timeStr+'</div>' : '')
+    + '</div>';
+  }).join('');
+}
+
+/* ===================================================================
+   RENDER DM FEED WITH TIMESTAMPS
+=================================================================== */
+function renderMsgFeedHtml(messages, ch, isChat){
+  if(!messages.length) return '<div class="empty-state">'+t('empty.dm')+'</div>';
+  const THRESHOLD = 30*60*1000;
+  let lastTs = 0;
+  let html = '';
+  messages.forEach(m=>{
+    const ts = m.ts || 0;
+    if(ts && (!lastTs || ts - lastTs > THRESHOLD)){
+      html += '<div class="chat-time-divider"><span>'+formatMsgDate(ts)+'</span></div>';
+      lastTs = ts;
+    }
+    if(m.type==='transfer'){
+      html += transferMsgHtml(m, ch);
+    } else {
+      const mine = m.from==='me';
+      if(isChat){
+        html += chatMsgHtml(m, ch);
+      } else {
+        html += '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'"><div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div></div>';
+      }
+    }
+  });
+  return html;
+}
+
+/* ===================================================================
+   CONTACT CHATS in user phone (people added from DM)
+=================================================================== */
+function getUserContactChats(ch){
+  const pd = ch ? ensurePhoneData(ch) : null;
+  return (pd && pd.userContactChats) ? pd.userContactChats : [];
+}
+
+/* ===================================================================
+   CHAT LIST — shown when opening Chat app on user phone
+=================================================================== */
+function renderChatList(){
+  const ch = getCurrentChar();
+  const body = document.getElementById('chatListBody');
+  if(!ch){
+    body.innerHTML = '<div class="empty-state">请先在 Settings 创建角色</div>';
+    return;
+  }
+  const pd = ensurePhoneData(ch);
+  // Build list: main chat with idol + any contact chats
+  const mainChat = pd.userChat;
+  const mainLast = mainChat.messages[mainChat.messages.length-1];
+  const mainTs = mainLast ? (mainLast.ts||0) : 0;
+  const mainPreview = mainLast ? (mainLast.recalled?'[消息已撤回]':mainLast.text) : '';
+  const mainName = (mainChat.idolNickname||ch.idolName||'Chat');
+
+  // Contact chats from DMs added
+  const contacts = getUserContactChats(ch);
+
+  // Combine and sort by ts desc
+  const allChats = [{type:'main', name:mainName, preview:mainPreview, ts:mainTs, avatar:ch.idolAvatar}];
+  contacts.forEach((c,i)=>{
+    const last = c.messages && c.messages[c.messages.length-1];
+    allChats.push({type:'contact', idx:i, name:c.name||'联系人', preview:last?(last.recalled?'[消息已撤回]':last.text):'', ts:last?(last.ts||0):0, avatar:''});
+  });
+  allChats.sort((a,b)=>b.ts-a.ts);
+
+  if(!allChats.length){
+    body.innerHTML = '<div class="empty-state">暂无聊天记录</div>';
+    return;
+  }
+  body.innerHTML = allChats.map(item=>{
+    const timeStr = item.ts ? formatMsgDate(item.ts) : '';
+    const avStyle = item.avatar ? avatarStyle(item.avatar) : '';
+    const avInit = item.name ? item.name.slice(0,1) : '?';
+    return '<div class="dm-list-item chat-list-entry" data-chat-type="'+item.type+'" data-chat-idx="'+(item.idx||0)+'">'
+      +'<div class="ig-avatar" style="'+(avStyle||'')+'">'+(avStyle?'':avInit)+'</div>'
+      +'<div class="dm-list-text">'
+        +'<div class="dm-list-name">'+escapeHtml(item.name)+'</div>'
+        +'<div class="dm-list-preview">'+escapeHtml(item.preview)+'</div>'
+      +'</div>'
+      +(timeStr?'<div class="dm-list-time">'+timeStr+'</div>':'')
+    +'</div>';
+  }).join('');
+
+  body.querySelectorAll('.chat-list-entry').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const type = el.getAttribute('data-chat-type');
+      if(type==='main'){
+        goTo('screen-userchat');
+        renderUserChat();
+      } else {
+        const idx = parseInt(el.getAttribute('data-chat-idx'),10);
+        openContactChat(idx);
+      }
+    });
+  });
+}
+
+function openContactChat(idx){
+  const ch = getCurrentChar();
+  if(!ch) return;
+  const contacts = getUserContactChats(ch);
+  const c = contacts[idx];
+  if(!c) return;
+  // Re-use DM feed screen
+  currentDmCtx = {scope:'user', idx:0}; // placeholder
+  // Actually open user chat with a contact — show in a generic DM-like view
+  // For simplicity open in the userChat screen with a special header
+  goTo('screen-userchat');
+  const titleEl = document.getElementById('userChatTitle');
+  titleEl.textContent = c.name||'联系人';
+  titleEl.onclick = null;
+  const feed = document.getElementById('userChatFeed');
+  c.messages = c.messages||[];
+  c.messages.forEach(m=>{ if(!m.id) m.id=uid('m'); });
+  feed.innerHTML = renderMsgFeedHtml(c.messages, ch, true);
+  feed.scrollTop = feed.scrollHeight;
+}
+
+/* ===================================================================
+   CHAT RECALL — user can recall their own sent messages
+=================================================================== */
+function addRecallOptionToChat(){
+  // Called after renderUserChatFeed, adds recall to long-press for 'me' messages
+  // This is integrated into the existing long-press through chatMsgHtml recall button
+}
+
 function tick(){
   document.getElementById('sbTime').textContent = formatClock();
 }
@@ -4258,7 +5671,9 @@ function init(){
   applyTheme();
   applyLanguage();
   applyFitScreen();
+  applyPhoneScale();
   applyWallpaper();
+  applyChatColors();
   renderHome();
   showScreenRaw('screen-home');
   tick();
@@ -4266,6 +5681,7 @@ function init(){
   initBubbleSelBar();
   initChatSelBar();
   initDmSelBar();
+  initOfflineApp();
 }
 
 init();
