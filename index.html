@@ -15,7 +15,7 @@ body{
   min-height:100vh;
   padding:24px;
 }
-#app-root{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#app-root{width:100%;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 0;box-sizing:border-box;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;}
 input{font-family:inherit;}
 img{display:block;max-width:100%;}
@@ -64,13 +64,14 @@ img{display:block;max-width:100%;}
   height:844px;
   background:var(--bg);
   color:var(--text);
-  border-radius:46px;
+  border-radius:var(--phone-radius,46px);
   border:1px solid var(--border);
   box-shadow:var(--shadow);
   overflow:hidden;
   position:relative;
   display:flex;
   flex-direction:column;
+  flex-shrink:0;
 }
 .statusbar{
   height:46px;
@@ -267,20 +268,26 @@ input, textarea{ outline:none; }
 .fan-reply-item{display:flex;flex-direction:column;gap:2px;}
 .bubble-inputbar{
   flex:0 0 auto;
-  display:flex;align-items:center;gap:8px;
+  display:flex;align-items:flex-end;gap:8px;
   padding:8px 12px;
   border-top:1px solid var(--border);
   background:var(--surface);
 }
 .thin-input{
   flex:1 1 auto;
-  height:32px;
+  min-height:32px;
+  max-height:120px;
   border-radius:16px;
   background:var(--surface-2);
   border:1px solid var(--border);
-  padding:0 14px;
+  padding:6px 14px;
   font-size:13.5px;
   color:var(--text);
+  resize:none;
+  overflow-y:auto;
+  line-height:1.45;
+  font-family:inherit;
+  display:block;
 }
 .thin-input::placeholder{color:var(--text-3);}
 .photo-btn{
@@ -397,8 +404,10 @@ input, textarea{ outline:none; }
 
 #phone.fit-screen{
   width:100vw;height:100vh;border-radius:0;border:none;
+  position:fixed;top:0;left:0;
 }
-body.has-fit-screen{padding:0;}
+body.has-fit-screen{padding:0;overflow:hidden;}
+body.has-fit-screen #app-root{width:100%;height:100vh;display:flex;align-items:center;justify-content:center;}
 
 .search-history-wrap{margin-bottom:18px;}
 .section-label{font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px;}
@@ -868,12 +877,31 @@ body.has-fit-screen{padding:0;}
 .sel-item-meta{font-size:11.5px;color:var(--text-3);margin-top:2px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
+/* ===== News App ===== */
+.news-item{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  position:relative;
+}
+.news-item:active{background:var(--surface-2);}
+.news-source{font-size:11px;color:var(--text-3);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.news-source-dot{width:6px;height:6px;border-radius:50%;background:#ff3b30;flex:0 0 auto;}
+.news-title{font-size:14.5px;font-weight:700;line-height:1.4;color:var(--text);margin-bottom:4px;}
+.news-summary{font-size:12.5px;color:var(--text-2);line-height:1.5;margin-bottom:6px;}
+.news-meta{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:8px;}
+.news-delete-btn{position:absolute;top:12px;right:12px;font-size:12px;color:#ff3b30;padding:4px 8px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);}
+.news-empty{text-align:center;padding:60px 24px;font-size:13.5px;color:var(--text-3);line-height:1.7;}
+.news-breaking-banner{background:linear-gradient(90deg,#ff3b30,#ff6b35);color:#fff;padding:8px 16px;font-size:12px;font-weight:700;letter-spacing:.06em;display:flex;align-items:center;gap:8px;}
+.news-breaking-banner span{background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:4px;font-size:10.5px;}
+
+
+
+
 @media (max-width:420px){
   body{padding:0;}
   #phone{width:100vw;height:100vh;border-radius:0;border:none;}
 }
-
-/* ===== iOS-style toggle switch ===== */
 .ios-toggle{
   width:51px;height:31px;border-radius:16px;
   background:var(--surface-3);
@@ -1264,7 +1292,7 @@ body.has-fit-screen #gen-indicator{
       </div>
       <div class="bubble-inputbar">
         <button class="photo-btn" id="bubblePhotoBtn" title="photo"></button>
-        <input type="text" id="bubbleInput" class="thin-input" placeholder="Type a message...">
+        <textarea id="bubbleInput" class="thin-input" placeholder="Type a message..." rows="1"></textarea>
         <button class="chat-trigger-btn" id="bubbleTriggerBtn" aria-label="Get fan replies"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
         <button class="send-btn" id="bubbleSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
       </div>
@@ -1333,7 +1361,7 @@ body.has-fit-screen #gen-indicator{
       </div>
       <div class="bubble-inputbar" id="igDmInputBar">
         <button class="photo-btn" id="igDmPhotoBtn" title="photo/transfer"></button>
-        <input type="text" id="igDmInput" class="thin-input" placeholder="Type a message...">
+        <textarea id="igDmInput" class="thin-input" placeholder="Type a message..." rows="1"></textarea>
         <button class="chat-trigger-btn" id="igDmTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
         <button class="send-btn" id="igDmSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
       </div>
@@ -1426,7 +1454,7 @@ body.has-fit-screen #gen-indicator{
       </div>
       <div class="bubble-inputbar">
         <button class="photo-btn" id="userChatPhotoBtn" title="photo/transfer"></button>
-        <input type="text" id="userChatInput" class="thin-input" placeholder="Type a message...">
+        <textarea id="userChatInput" class="thin-input" placeholder="Type a message..." rows="1"></textarea>
         <button class="chat-trigger-btn" id="userChatTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
         <button class="send-btn" id="userChatSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
       </div>
@@ -1593,6 +1621,11 @@ body.has-fit-screen #gen-indicator{
       <div class="dm-feed" id="offlineBody" style="padding:16px 14px;">
         <div class="empty-state" style="padding:80px 20px;">点击右上角菜单配置并生成线下内容</div>
       </div>
+      <div class="bubble-inputbar" id="offlineInputBar">
+        <textarea id="offlineChatInput" class="thin-input" placeholder="发消息…" rows="1"></textarea>
+        <button class="chat-trigger-btn" id="offlineTriggerBtn" aria-label="Get reply"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg></button>
+        <button class="send-btn" id="offlineSendBtn" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></button>
+      </div>
     </div>
 
     <!-- ---------- CHAT LIST SCREEN (user phone) ---------- -->
@@ -1600,29 +1633,41 @@ body.has-fit-screen #gen-indicator{
       <div class="app-header">
         <button class="hdr-btn back-btn" data-action="back">Back</button>
         <div class="hdr-title">Chat</div>
-        <span class="hdr-spacer"></span>
+        <button class="hdr-btn icon-btn" id="chatListAddBtn" aria-label="Add contact" style="position:relative;z-index:1;">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text-2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
       </div>
       <div class="ig-body" id="chatListBody" style="overflow-y:auto;flex:1;"></div>
     </div>
 
-    <!-- ---------- OFFLINE SETTINGS OVERLAY ---------- -->
-    <div id="offlineSettingsOverlay" style="display:none;position:absolute;inset:0;z-index:400;background:rgba(0,0,0,0.35);align-items:flex-end;justify-content:center;">
-      <div id="offlineSettingsPanel" style="width:100%;background:var(--surface);border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px)+16px);animation:sheetUp .18s ease;">
-        <div style="text-align:center;font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text);" data-i18n="offline.title">线下内容设置</div>
-        <div class="field-label" data-i18n="offline.label">场景要求（可选）</div>
-        <textarea id="offlinePromptInput" class="field-textarea" style="min-height:90px;" data-i18n-placeholder="offline.placeholder" placeholder="描述线下场景、氛围、特殊要求等…"></textarea>
-        <div style="display:flex;gap:8px;margin-top:6px;align-items:center;justify-content:space-between;">
-          <span style="font-size:13px;color:var(--text-2);" data-i18n="offline.savePreset">保存为预设</span>
+    <!-- ---------- NEWS APP (idol phone) ---------- -->
+    <div id="screen-news" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title">新闻</div>
+        <button class="hdr-btn" id="newsAddBtn" style="font-size:13px;font-weight:600;color:var(--text-2);">+ 添加</button>
+      </div>
+      <div style="flex:1 1 auto;overflow-y:auto;" id="newsBody"></div>
+    </div>
+
+    <!-- ---------- OFFLINE SETTINGS OVERLAY (floating prompt card style) ---------- -->
+    <div id="offlineSettingsOverlay" style="display:none;position:absolute;inset:0;z-index:400;background:rgba(0,0,0,0.42);align-items:center;justify-content:center;">
+      <div id="offlineSettingsPanel" style="width:calc(100% - 40px);max-width:340px;background:var(--surface);border-radius:18px;padding:18px 16px;animation:ctxPop .14s ease;box-shadow:0 8px 32px rgba(0,0,0,0.28);">
+        <div style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text);text-align:center;" data-i18n="offline.title">线下内容设置</div>
+        <div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:5px;">文风预设（选填，描述文风与描写要求）</div>
+        <textarea id="offlinePromptInput" class="field-textarea" style="min-height:72px;max-height:120px;font-size:13px;" placeholder="描述文风要求、写作风格等…"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;justify-content:space-between;">
+          <span style="font-size:12.5px;color:var(--text-2);" data-i18n="offline.savePreset">保存为预设</span>
           <div id="offlinePresetToggle" class="ios-toggle" onclick="toggleOfflinePreset()"></div>
         </div>
-        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:space-between;">
-          <span style="font-size:13px;color:var(--text-2);" data-i18n="offline.applyPrompt">应用此要求</span>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center;justify-content:space-between;">
+          <span style="font-size:12.5px;color:var(--text-2);" data-i18n="offline.applyPrompt">应用此要求</span>
           <div id="offlineApplyToggle" class="ios-toggle on" onclick="toggleOfflineApply()"></div>
         </div>
-        <div id="offlinePresetsList" style="margin-top:10px;"></div>
+        <div id="offlinePresetsList" style="margin-top:8px;max-height:90px;overflow-y:auto;"></div>
         <div style="display:flex;gap:8px;margin-top:14px;">
-          <button class="btn-block secondary" style="flex:1;" onclick="closeOfflineSettings()" data-i18n="btn.cancel">取消</button>
-          <button class="btn-block" style="flex:1;" onclick="generateOffline()" data-i18n="offline.generate">生成内容</button>
+          <button class="btn-block secondary" style="flex:1;font-size:13px;padding:9px 0;" onclick="closeOfflineSettings()" data-i18n="btn.cancel">取消</button>
+          <button class="btn-block" style="flex:1;font-size:13px;padding:9px 0;" onclick="generateOffline()" data-i18n="offline.generate">生成内容</button>
         </div>
       </div>
     </div>
@@ -2029,6 +2074,11 @@ function ensurePhoneData(ch){
   return pd;
 }
 
+function ensureNewsData(){
+  if(!state.newsItems) state.newsItems = [];
+  return state.newsItems;
+}
+
 function newCharacterTemplate(){
   return {
     id:'c'+Date.now()+Math.floor(Math.random()*1000),
@@ -2073,6 +2123,15 @@ function escapeHtml(str){
   return String(str)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+/* Auto-resize textarea to fit content (WeChat-style) */
+function autoResizeTextarea(el){
+  if(!el) return;
+  el.style.height='auto';
+  const maxH = 120;
+  el.style.height = Math.min(el.scrollHeight, maxH)+'px';
+  el.style.overflowY = el.scrollHeight > maxH ? 'auto' : 'hidden';
 }
 
 /* === Unified phone pill (toast + generating indicator) === */
@@ -2261,7 +2320,8 @@ const ICONS = {
   heart:'<svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.8-9.4A5 5 0 0 1 12 6a5 5 0 0 1 9.8 4.6C19.5 15.4 12 20 12 20z"/></svg>',
   commentIcon:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg>',
   share:'<svg viewBox="0 0 24 24"><path d="M7 7h8a3 3 0 0 1 3 3v2M17 17H9a3 3 0 0 1-3-3v-2"/><path d="M5 9l2-2-2-2M19 15l-2 2 2 2"/></svg>',
-  offline:'<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linejoin="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+  offline:'<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linejoin="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  news:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 8h10M7 12h7M7 16h5"/><path d="M14 12h3v4h-3z"/></svg>'
 };
 
 function iconMarkup(appKey){
@@ -2284,12 +2344,14 @@ const APP_DEFS_IDOL = [
   {key:'paypal', name:'PayPal', screen:'screen-paypal'},
   {key:'maps', name:'Maps', screen:'screen-maps'},
   {key:'notes', name:'Notes', screen:'screen-notes'},
+  {key:'news', name:'新闻', screen:'screen-news'},
   {key:'settings', name:'Settings', screen:'screen-settings'},
 ];
 const APP_DEFS_USER = [
   {key:'chat', name:'Chat', screen:'screen-chat-list'},
   {key:'offline', name:'线下', screen:'screen-offline'},
   {key:'instagram_user', name:'Instagram', screen:'screen-user-instagram'},
+  {key:'news', name:'新闻', screen:'screen-news'},
   {key:'settings', name:'Settings', screen:'screen-settings'},
 ];
 
@@ -2310,8 +2372,23 @@ function applyLanguage(){
 }
 function applyFitScreen(){
   const phone = document.getElementById('phone');
-  phone.classList.toggle('fit-screen', !!state.settings.fitScreen);
-  document.body.classList.toggle('has-fit-screen', !!state.settings.fitScreen);
+  const root = document.getElementById('app-root');
+  const isFit = !!state.settings.fitScreen;
+  phone.classList.toggle('fit-screen', isFit);
+  document.body.classList.toggle('has-fit-screen', isFit);
+  if(isFit){
+    // Fill entire viewport, use CSS to handle it
+    phone.style.width = '100vw';
+    phone.style.height = '100vh';
+    phone.style.transform = '';
+    phone.style.transformOrigin = '';
+    root.style.height = '';
+    root.style.padding = '0';
+  } else {
+    phone.style.width = '';
+    phone.style.height = '';
+    applyPhoneScale();
+  }
 }
 function applyWallpaper(){
   const home = document.getElementById('screen-home');
@@ -2324,19 +2401,27 @@ function applyWallpaper(){
   }
 }
 function applyPhoneScale(){
-  const scale = state.settings.phoneScale || 100;
   const phone = document.getElementById('phone');
+  const root = document.getElementById('app-root');
   if(state.settings.fitScreen){
     phone.style.transform = '';
     phone.style.transformOrigin = '';
+    phone.style.width = '';
+    phone.style.height = '';
+    root.style.height = '';
+    root.style.width = '';
     return;
   }
-  const s = scale/100;
-  phone.style.transform = 'scale('+s+')';
-  phone.style.transformOrigin = 'center center';
-  // Keep app-root sized so page doesn't collapse / overflow
-  const root = document.getElementById('app-root');
-  root.style.height = (844*s+48)+'px';
+  const scale = (state.settings.phoneScale || 100) / 100;
+  // Calculate scaled dimensions
+  const baseW = 390, baseH = 844;
+  phone.style.width = baseW+'px';
+  phone.style.height = baseH+'px';
+  phone.style.transform = 'scale('+scale+')';
+  phone.style.transformOrigin = 'center top';
+  // Prevent page from collapsing under scaled phone
+  root.style.height = (baseH * scale + 48)+'px';
+  root.style.minWidth = (baseW * scale)+'px';
 }
 
 /* ===================================================================
@@ -2396,6 +2481,7 @@ function openApp(appkey, screen){
   else if(appkey==='paypal') renderPaypal();
   else if(appkey==='maps') renderMaps();
   else if(appkey==='notes') renderNotes();
+  else if(appkey==='news') renderNewsApp();
   else if(appkey==='chat'){ goTo('screen-chat-list'); renderChatList(); return; }
   else if(appkey==='instagram_user') renderUserInstagram();
   else if(appkey==='offline') renderOfflineBody();
@@ -2533,20 +2619,22 @@ function buildBaseSystemPrompt(ch, extra){
   const chatCtx = recentUserChatContext(ch, 10);
   if(chatCtx) memoryParts.push(chatCtx);
 
-  // Bubble 发言记录
+  // Bubble 发言记录（含用户在idol手机上发送的内容）
   try{
     const pd = ensurePhoneData(ch);
     if(pd.bubble && pd.bubble.rounds && pd.bubble.rounds.length){
       const recentBubble = pd.bubble.rounds.slice(-5);
       const bubbleLines = recentBubble.map(r=>{
-        let line = 'idol（Bubble）：'+r.text;
+        // Distinguish: rounds without a 'from' field = idol's own bubble posts; rounds with from='user' = user sent on idol's phone
+        const speaker = r.from==='user' ? (ch.userName||'用户')+'（通过idol的手机发送）' : 'idol（Bubble）';
+        let line = speaker+'：'+r.text;
         if(r.replies && r.replies.length){
           const sampleReplies = r.replies.slice(0,2).map(rep=>rep.name+'：'+rep.text).join('；');
           line += '  [粉丝回复示例：'+sampleReplies+']';
         }
         return line;
       }).join('\n');
-      if(bubbleLines) memoryParts.push('\n【idol最近在Bubble上发布的内容（请保持风格与话题一致）】\n'+bubbleLines);
+      if(bubbleLines) memoryParts.push('\n【Bubble上的内容（idol自己发的和用户通过idol手机发的，idol都知道）】\n'+bubbleLines);
     }
   }catch(e){}
 
@@ -2579,6 +2667,20 @@ function buildBaseSystemPrompt(ch, extra){
     }
   }catch(e){}
 
+  // 线下互动场景和对话记忆
+  try{
+    const pd = ensurePhoneData(ch);
+    const offlineCtx = [];
+    if(pd.offlineScenes && pd.offlineScenes.length){
+      offlineCtx.push('最近线下场景：'+pd.offlineScenes[0].text.slice(0,200));
+    }
+    if(pd.offlineChatMsgs && pd.offlineChatMsgs.length){
+      const recent = pd.offlineChatMsgs.slice(-4).map(m=>(m.from==='me'?(ch.userName||'用户'):(ch.idolName||'idol'))+'：'+m.text).join('\n');
+      offlineCtx.push('线下对话记录：\n'+recent);
+    }
+    if(offlineCtx.length) memoryParts.push('\n【线下互动记忆（请与此保持一致）】\n'+offlineCtx.join('\n'));
+  }catch(e){}
+
   return [
     '你是一个手机模拟应用的内容生成引擎，为虚构角色生成手机里各软件的内容。',
     '【idol 人设】姓名：'+(ch.idolName||'未命名')+'；简介：'+(ch.idolBio||'无'),
@@ -2586,6 +2688,7 @@ function buildBaseSystemPrompt(ch, extra){
     '【关系设定】'+relation,
     wb ? ('【世界书 / 生成要求】\n'+wb) : '【世界书】无特殊设定。',
     memoryParts.join(''),
+    getNewsContext(),
     '【语言要求】除非是无法翻译的专有名词、品牌名或英文缩写，全部内容必须使用简体中文输出。',
     '【内容要求】内容真实自然、有生活气息，避免空洞和重复，不要使用表情符号(emoji)。',
     extra || ''
@@ -2706,11 +2809,13 @@ document.getElementById('bubbleSendBtn').addEventListener('click', ()=>{
   const val = input.value.trim();
   if(!val) return;
   input.value = '';
+  autoResizeTextarea(input);
   sendBubbleMessage(val, false);
 });
 document.getElementById('bubbleInput').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){ document.getElementById('bubbleSendBtn').click(); }
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); document.getElementById('bubbleSendBtn').click(); }
 });
+document.getElementById('bubbleInput').addEventListener('input', ()=>autoResizeTextarea(document.getElementById('bubbleInput')));
 /* Generic text-input modal. callback(text) only fires if confirmed with non-empty text. */
 function showPromptModal(title, placeholder, callback){
   const overlay = document.getElementById('promptOverlay');
@@ -2769,8 +2874,12 @@ function igStatsHtml(p){
 
 function igPostHtml(ch, p, overrideName){
   const displayName = overrideName || ch.idolName || 'idol';
+  // For main account, show idolMainIgId if set
+  const igId = (!overrideName && ch.idolMainIgId && ch.idolMainIgId.trim())
+    ? ch.idolMainIgId.trim()
+    : (overrideName && ch.idolAltName && ch.idolAltName.trim() ? ch.idolAltName.trim() : null);
   let html = '<div class="ig-post">';
-  html += '<div class="ig-post-head"><div class="ig-avatar" style="'+avatarStyle(ch.idolAvatar)+'"></div><div><div class="ig-post-name">'+escapeHtml(displayName)+'</div><div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
+  html += '<div class="ig-post-head"><div class="ig-avatar" style="'+avatarStyle(ch.idolAvatar)+'"></div><div><div class="ig-post-name">'+escapeHtml(displayName)+(igId ? ' <span style="font-size:11px;color:var(--text-3);">'+escapeHtml(igId)+'</span>':'')+'</div><div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
   if(p.hasImage){ html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+'</div>'; }
   html += '<div class="ig-caption">'+escapeHtml(p.caption||'')+'</div>';
   html += igStatsHtml(p);
@@ -2983,11 +3092,30 @@ function showIgRefreshMenu(scope){
   } else {
     opts = [{value:'posts', label:t('btn.refreshPosts')}, {value:'search', label:t('btn.refreshSearch')}, {value:'trending', label:t('btn.refreshTrending')}, {value:'dm', label:t('btn.refreshDm')}, {value:'all', label:t('btn.refreshAll')}];
   }
-  showActionSheet(null, opts, (val)=>{
-    if(scope==='user') refreshUserInstagramSection(val);
-    else if(scope==='idolAlt') refreshInstagramAltSection(val);
-    else refreshInstagramSection(val);
-  });
+  // Floating prompt-card overlay
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  const scopeLabel = scope==='user' ? '用户 Instagram' : scope==='idolAlt' ? 'Idol 小号' : 'Idol Instagram';
+  card.innerHTML =
+    '<div class="prompt-card-title">刷新 · '+escapeHtml(scopeLabel)+'</div>'
+    + opts.map(o=>`<button class="btn-block secondary" style="margin-bottom:8px;font-size:13.5px;" data-ig-opt="${o.value}">${escapeHtml(o.label)}</button>`).join('')
+    + '<div class="prompt-card-actions" style="margin-top:4px;"><button class="pc-cancel" data-v="__cancel">取消</button></div>';
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn = e.target.closest('[data-ig-opt]');
+    const cancelBtn = e.target.closest('[data-v="__cancel"]');
+    if(btn){
+      const val = btn.getAttribute('data-ig-opt');
+      close();
+      if(scope==='user') refreshUserInstagramSection(val);
+      else if(scope==='idolAlt') refreshInstagramAltSection(val);
+      else refreshInstagramSection(val);
+      return;
+    }
+    if(cancelBtn || e.target===overlay) close();
+  }
+  overlay.addEventListener('click', onClick);
 }
 
 document.getElementById('igRefreshBtn').addEventListener('click', ()=>showIgRefreshMenu('idol'));
@@ -3214,11 +3342,13 @@ document.getElementById('igDmSendBtn').addEventListener('click', ()=>{
   const val = input.value.trim();
   if(!val) return;
   input.value='';
+  autoResizeTextarea(input);
   sendDmReply(val);
 });
 document.getElementById('igDmInput').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter') document.getElementById('igDmSendBtn').click();
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); document.getElementById('igDmSendBtn').click(); }
 });
+document.getElementById('igDmInput').addEventListener('input', ()=>autoResizeTextarea(document.getElementById('igDmInput')));
 document.getElementById('igDmTriggerBtn').addEventListener('click', async ()=>{
   if(!currentDmCtx) return;
   const ch = getCurrentChar();
@@ -3245,7 +3375,7 @@ document.getElementById('igDmTriggerBtn').addEventListener('click', async ()=>{
       const feed = document.getElementById('igDmFeed');
       const existingMsgs = dm.messages.slice(0, dm.messages.length - newMsgs.length);
       feed.innerHTML = renderMsgFeedHtml(existingMsgs, null, false);
-      streamMessages(feed, newMsgs, 1100);
+      streamMessages(feed, newMsgs, 1100, dm.name, 'DM');
     } else if(data && data.text){
       // fallback single message
       const m = {from:'them',text:data.text,id:uid('dm'),ts:Date.now()};
@@ -3327,7 +3457,7 @@ document.getElementById('xDanmakuClose').addEventListener('click', ()=>{
   document.getElementById('xDanmakuPanel').classList.remove('open');
 });
 
-async function refreshX(){
+async function refreshXWithMode(mode, keyword){
   const ch = getCurrentChar();
   if(!ch){ showToast(t('toast.charMissing')); return; }
   if(!normalizeBaseUrl(state.settings.apiUrl) || !state.settings.model){ showToast(t('toast.apiMissing')); return; }
@@ -3336,7 +3466,10 @@ async function refreshX(){
   stopDanmaku();
   showGenerating();
   try{
-    const sys = buildBaseSystemPrompt(ch, '请生成idol正在进行的一场直播的沉浸式现场描写，以及观众发送的弹幕。');
+    const keywordHint = (mode==='keyword' && keyword)
+      ? '\n【直播主题/关键词】'+keyword+'（请围绕这个主题描写直播内容）'
+      : '';
+    const sys = buildBaseSystemPrompt(ch, '请生成idol正在进行的一场直播的沉浸式现场描写，以及观众发送的弹幕。'+keywordHint);
     const usr = '请用第三人称、现场感强烈的笔触描写idol此刻直播间里正在发生的画面与状态（约120到180字，描述idol的动作、表情、说的话、直播间氛围），再生成一个当前在线观看人数（整数），再生成20条观众发送的弹幕（昵称+简短内容，口语化、多样化，包含夸赞、提问、玩笑、刷屏等）。\n输出 JSON：{"scene":"现场描写文字","viewers":12345,"danmaku":[{"name":"昵称","text":"弹幕内容"}, ... 共20条]}';
     const data = await generateJSON(sys, usr);
     if(data && data.scene){
@@ -3356,7 +3489,47 @@ async function refreshX(){
   }
 }
 
-document.getElementById('xRefreshBtn').addEventListener('click', refreshX);
+async function refreshX(){ return refreshXWithMode('random',''); }
+
+document.getElementById('xRefreshBtn').addEventListener('click', ()=>{
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML =
+    '<div class="prompt-card-title">直播内容生成</div>'
+    + '<button class="btn-block" style="margin-bottom:10px;font-size:13.5px;" data-x-mode="random">🎲 随机生成</button>'
+    + '<button class="btn-block secondary" style="margin-bottom:14px;font-size:13.5px;" data-x-mode="keyword">🔑 关键词生成</button>'
+    + '<div id="xKeywordArea" style="display:none;">'
+      + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:5px;">描述直播内容（如：游戏直播、才艺表演、粉丝Q&A）</div>'
+      + '<textarea id="xKeywordInput" class="field-textarea" style="min-height:64px;" placeholder="输入直播描述关键词…"></textarea>'
+    + '</div>'
+    + '<div class="prompt-card-actions"><button class="pc-cancel" data-v="__cancel">取消</button><button class="pc-ok" id="xStartGenBtn" data-v="__gen" style="display:none;">生成</button></div>';
+  overlay.classList.add('open');
+  let chosenMode = null;
+  card.querySelectorAll('[data-x-mode]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      chosenMode = btn.getAttribute('data-x-mode');
+      card.querySelectorAll('[data-x-mode]').forEach(b=>b.style.opacity=b===btn?'1':'0.45');
+      const keyArea = document.getElementById('xKeywordArea');
+      keyArea.style.display = chosenMode==='keyword' ? 'block' : 'none';
+      const genBtn = document.getElementById('xStartGenBtn');
+      if(genBtn){ genBtn.style.display=''; }
+      if(chosenMode==='random'){ close(); refreshXWithMode('random',''); }
+    });
+  });
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v = btn.getAttribute('data-v');
+    if(v==='__cancel'){ close(); return; }
+    if(v==='__gen'){
+      const kw = (document.getElementById('xKeywordInput')||{}).value||'';
+      close();
+      refreshXWithMode(chosenMode||'random', kw.trim());
+    }
+  }
+  overlay.addEventListener('click', onClick);
+});
 
 /* ===================================================================
    PAYPAL
@@ -3549,6 +3722,103 @@ async function refreshNotes(){
 document.getElementById('notesRefreshBtn').addEventListener('click', refreshNotes);
 
 /* ===================================================================
+   NEWS APP — user fills in real news, affects all AI generation
+=================================================================== */
+function renderNewsApp(){
+  const news = ensureNewsData();
+  const body = document.getElementById('newsBody');
+  if(!news.length){
+    body.innerHTML = '<div class="news-empty">📰<br><br>这里还没有新闻<br><span style="font-size:12px;">点击右上角「+ 添加」填写近期大新闻<br>添加后，AI生成的内容将受到这些新闻的影响</span></div>';
+    return;
+  }
+  body.innerHTML = '<div class="news-breaking-banner"><span>BREAKING</span>今日要闻</div>'
+    + news.map((item, i)=>`
+      <div class="news-item" data-news-idx="${i}">
+        <button class="news-delete-btn" data-del-idx="${i}">删除</button>
+        <div class="news-source"><span class="news-source-dot"></span>${escapeHtml(item.source||'综合')}</div>
+        <div class="news-title">${escapeHtml(item.title)}</div>
+        ${item.summary ? '<div class="news-summary">'+escapeHtml(item.summary)+'</div>' : ''}
+        <div class="news-meta">${escapeHtml(item.date||'今日')} · ${escapeHtml(item.category||'新闻')}</div>
+      </div>`).join('');
+
+  body.querySelectorAll('[data-del-idx]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-del-idx'),10);
+      state.newsItems.splice(idx,1);
+      saveState();
+      renderNewsApp();
+      showToast('新闻已删除');
+    });
+  });
+}
+
+function openAddNewsModal(){
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML =
+    '<div class="prompt-card-title">添加新闻</div>'
+    + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">新闻标题 *</div>'
+    + '<input type="text" class="field-input" id="newsTitleInput" placeholder="输入新闻标题…" style="margin-bottom:8px;">'
+    + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">摘要（选填）</div>'
+    + '<textarea class="field-textarea" id="newsSummaryInput" style="min-height:64px;margin-bottom:8px;" placeholder="简短描述新闻内容…"></textarea>'
+    + '<div style="display:flex;gap:8px;margin-bottom:8px;">'
+      + '<div style="flex:1;">'
+        + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">来源</div>'
+        + '<input type="text" class="field-input" id="newsSourceInput" placeholder="如 BBC、微博" style="font-size:13px;">'
+      + '</div>'
+      + '<div style="flex:1;">'
+        + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">分类</div>'
+        + '<input type="text" class="field-input" id="newsCategoryInput" placeholder="如 娱乐、社会" style="font-size:13px;">'
+      + '</div>'
+    + '</div>'
+    + '<div class="prompt-card-actions">'
+      + '<button class="pc-cancel" data-v="__cancel">取消</button>'
+      + '<button class="pc-ok" data-v="__add">添加</button>'
+    + '</div>';
+  overlay.classList.add('open');
+  setTimeout(()=>{ const el=document.getElementById('newsTitleInput'); if(el) el.focus(); },30);
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v = btn.getAttribute('data-v');
+    close();
+    if(v==='__add'){
+      const title = document.getElementById('newsTitleInput').value.trim();
+      if(!title){ showToast('请填写新闻标题'); return; }
+      const summary = document.getElementById('newsSummaryInput').value.trim();
+      const source = document.getElementById('newsSourceInput').value.trim();
+      const category = document.getElementById('newsCategoryInput').value.trim();
+      const now = new Date();
+      ensureNewsData().unshift({
+        id:uid('news'), title, summary, source:source||'综合',
+        category:category||'新闻',
+        date: (now.getMonth()+1)+'月'+now.getDate()+'日'
+      });
+      saveState();
+      renderNewsApp();
+      showToast('新闻已添加，将影响所有AI生成内容');
+    }
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+document.getElementById('newsAddBtn').addEventListener('click', openAddNewsModal);
+
+function getNewsContext(){
+  const news = state.newsItems || [];
+  if(!news.length) return '';
+  const lines = news.slice(0,5).map(n=>{
+    let s = '【'+n.title+'】';
+    if(n.summary) s += ' '+n.summary;
+    if(n.source) s += '（来源：'+n.source+'）';
+    return s;
+  }).join('\n');
+  return '\n【近期重大新闻（生成内容时请自然融入这些新闻的影响和背景）】\n'+lines;
+}
+
+/* ===================================================================
    USER CHAT — direct 1:1 chat between user and idol
    This conversation's recent history is fed into idol-phone generation
    as context, so the two stay consistent with each other.
@@ -3597,6 +3867,9 @@ function addUserChatMessage(text){
   saveState();
   renderUserChatFeed();
   renderChatList();
+  // Auto-scroll to the new message
+  const feed = document.getElementById('userChatFeed');
+  if(feed) feed.scrollTop = feed.scrollHeight;
 }
 
 async function triggerIdolChatReply(){
@@ -3645,7 +3918,7 @@ async function triggerIdolChatReply(){
       const allMsgs = pd.messages;
       const existingMsgs = allMsgs.slice(0, allMsgs.length - newMsgs.length);
       feed.innerHTML = renderMsgFeedHtml(existingMsgs, ch, true) || '<div class="empty-state">'+t('empty.dm')+'</div>';
-      streamMessages(feed, newMsgs, 1200);
+      const idolNameForNotif = ch.idolName||'idol'; streamMessages(feed, newMsgs, 1200, idolNameForNotif, 'Chat');
     } else { throw new Error('Could not parse a reply from the API response'); }
   }catch(err){
     console.warn(err);
@@ -3662,11 +3935,13 @@ document.getElementById('userChatSendBtn').addEventListener('click', ()=>{
   const val = input.value.trim();
   if(!val) return;
   input.value='';
+  autoResizeTextarea(input);
   addUserChatMessage(val);
 });
 document.getElementById('userChatInput').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter') document.getElementById('userChatSendBtn').click();
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); document.getElementById('userChatSendBtn').click(); }
 });
+document.getElementById('userChatInput').addEventListener('input', ()=>autoResizeTextarea(document.getElementById('userChatInput')));
 document.getElementById('userChatTriggerBtn').addEventListener('click', ()=>{
   // If in a contact chat, the onclick handler set by openContactChat takes care of it
   if(_currentContactIdx !== null && _currentContactIdx !== undefined) return;
@@ -3821,6 +4096,13 @@ function renderSettingsHome(){
           + '<span id="phoneSizeLabel" style="font-size:12px;color:var(--text-3);">'+(state.settings.phoneScale||100)+'%</span>'
         + '</div>'
       + '</div>'
+      + '<div class="settings-row single" style="flex-direction:column;align-items:flex-start;gap:10px;">'
+        + '<div class="settings-row-label">圆角大小</div>'
+        + '<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;">'
+          + '<input type="range" id="phoneRadiusSlider" min="0" max="60" step="2" value="'+(state.settings.phoneRadius||46)+'" style="-webkit-appearance:none;appearance:none;width:90%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;cursor:pointer;">'
+          + '<span id="phoneRadiusLabel" style="font-size:12px;color:var(--text-3);">'+(state.settings.phoneRadius||46)+'px</span>'
+        + '</div>'
+      + '</div>'
     + '</div>'
     + '<div class="settings-group">'
       + '<div class="settings-row" data-go="screen-settings-wallpaper"><div class="settings-row-label">'+t('settings.row.wallpaper')+'</div><div class="settings-row-value"><span class="settings-chevron">›</span></div></div>'
@@ -3882,6 +4164,18 @@ function renderSettingsHome(){
     sizeSlider.addEventListener('change', ()=>{
       saveState();
     });
+  }
+  // Phone corner radius slider
+  const radiusSlider = document.getElementById('phoneRadiusSlider');
+  const radiusLabel = document.getElementById('phoneRadiusLabel');
+  if(radiusSlider){
+    radiusSlider.addEventListener('input', ()=>{
+      const v = parseInt(radiusSlider.value,10);
+      radiusLabel.textContent = v+'px';
+      state.settings.phoneRadius = v;
+      document.getElementById('phone').style.setProperty('--phone-radius', v+'px');
+    });
+    radiusSlider.addEventListener('change', ()=>{ saveState(); });
   }
 }
 
@@ -3999,6 +4293,7 @@ function renderCharacterEditForm(){
       + '<input type="text" class="field-input" id="idolNameInput" placeholder="'+t('ph.idolName')+'" value="'+escapeHtml(d.idolName)+'" style="flex:1;">'
     + '</div>'
     + '<textarea class="field-textarea" id="idolBioInput" placeholder="'+t('ph.idolBio')+'">'+escapeHtml(d.idolBio)+'</textarea>'
+    + '<input type="text" class="field-input" id="idolMainIgInput" placeholder="Instagram 大号 ID（如 @idol_official）" value="'+escapeHtml(d.idolMainIgId||'')+'" style="margin-top:6px;">'
     + '<input type="text" class="field-input" id="idolAltNameInput" placeholder="'+t('ph.idolAltName')+'" value="'+escapeHtml(d.idolAltName||'')+'" style="margin-top:6px;">'
 
     + '<div class="field-label">'+t('settings.userSection')+'</div>'
@@ -4015,6 +4310,7 @@ function renderCharacterEditForm(){
 
   document.getElementById('idolNameInput').addEventListener('input', e=>{ d.idolName = e.target.value; });
   document.getElementById('idolBioInput').addEventListener('input', e=>{ d.idolBio = e.target.value; });
+  document.getElementById('idolMainIgInput').addEventListener('input', e=>{ d.idolMainIgId = e.target.value; });
   document.getElementById('idolAltNameInput').addEventListener('input', e=>{ d.idolAltName = e.target.value; });
   document.getElementById('userNameInput').addEventListener('input', e=>{ d.userName = e.target.value; });
   document.getElementById('userBioInput').addEventListener('input', e=>{ d.userBio = e.target.value; });
@@ -4681,7 +4977,7 @@ function updateChatSelBarButtons(){
 }
 
 /* Streamed delivery: append messages one by one with delay */
-function streamMessages(feed, messages, delay){
+function streamMessages(feed, messages, delay, senderName, appName){
   let i=0;
   function next(){
     if(i>=messages.length) return;
@@ -4696,6 +4992,8 @@ function streamMessages(feed, messages, delay){
     if(es) es.remove();
     feed.appendChild(row);
     feed.scrollTop = feed.scrollHeight;
+    // Show notification for each incoming message
+    if(!mine && senderName) showMsgNotification(appName||'Chat', senderName, m.text);
     setTimeout(next, delay||600);
   }
   next();
@@ -5011,8 +5309,72 @@ function saveMemoryEntry(){
 document.getElementById('memSaveBtn').addEventListener('click', saveMemoryEntry);
 
 /* ===================================================================
-   CHAT THREE-DOT MENU — avatar visibility + bubble colors
+   CHAT LIST ADD CONTACT — custom name, identity, background, avatar
 =================================================================== */
+function openAddContactModal(){
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  let pendingAvatar = '';
+  function buildHtml(){
+    return '<div class="prompt-card-title">添加联系人</div>'
+      + '<div style="display:flex;justify-content:center;margin-bottom:12px;">'
+        + '<div class="avatar-upload" id="contactAvatarPick" style="width:60px;height:60px;border-radius:50%;font-size:22px;'+(pendingAvatar?avatarStyle(pendingAvatar)+';background-size:cover;':'')+'">'+(pendingAvatar?'':'＋')+'</div>'
+      + '</div>'
+      + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">姓名 *</div>'
+      + '<input type="text" class="field-input" id="contactNameInput" placeholder="联系人姓名" style="margin-bottom:8px;">'
+      + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">身份标签</div>'
+      + '<input type="text" class="field-input" id="contactTagInput" placeholder="如：同事、朋友、粉丝" style="margin-bottom:8px;">'
+      + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">背景介绍</div>'
+      + '<textarea class="field-textarea" id="contactBioInput" style="min-height:56px;" placeholder="描述这个人的背景、性格等（AI回复时参考）"></textarea>'
+      + '<div class="prompt-card-actions" style="margin-top:12px;">'
+        + '<button class="pc-cancel" data-v="__cancel">取消</button>'
+        + '<button class="pc-ok" data-v="__add">添加</button>'
+      + '</div>';
+  }
+  card.innerHTML = buildHtml();
+  overlay.classList.add('open');
+  function bindAvatar(){
+    const el = document.getElementById('contactAvatarPick');
+    if(el) el.addEventListener('click', ()=>{
+      const input = document.createElement('input'); input.type='file'; input.accept='image/*';
+      input.onchange=async()=>{
+        if(!input.files||!input.files[0]) return;
+        pendingAvatar = await fileToResizedDataUrl(input.files[0],240);
+        card.innerHTML=buildHtml(); bindAvatar();
+      };
+      input.click();
+    });
+  }
+  bindAvatar();
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v=btn.getAttribute('data-v');
+    close();
+    if(v==='__add'){
+      const name=document.getElementById('contactNameInput').value.trim();
+      if(!name){ showToast('请填写联系人姓名'); return; }
+      const tag=document.getElementById('contactTagInput').value.trim();
+      const bio=document.getElementById('contactBioInput').value.trim();
+      const ch=getCurrentChar(); if(!ch){ showToast(t('toast.charMissing')); return; }
+      const pd=ensurePhoneData(ch);
+      if(!pd.userContactChats) pd.userContactChats=[];
+      pd.userContactChats.push({name,tag,bio,avatar:pendingAvatar,messages:[],id:uid('contact')});
+      saveState();
+      renderChatList();
+      showToast('已添加联系人 '+name);
+    }
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{});
+// Wire chatListAddBtn after DOM
+(function(){
+  const btn=document.getElementById('chatListAddBtn');
+  if(btn) btn.addEventListener('click', openAddContactModal);
+})();
 function applyAvatarShape(){
   const shape = state.settings.avatarShape || 'circle';
   const size = state.settings.avatarSize || 32;
@@ -5418,6 +5780,7 @@ function wireOfflineChatBar(){
     const val = input.value.trim();
     if(!val) return;
     input.value='';
+    autoResizeTextarea(input);
     const ch = getCurrentChar();
     if(!ch) return;
     const pd = ensurePhoneData(ch);
@@ -5426,7 +5789,8 @@ function wireOfflineChatBar(){
     saveState();
     renderOfflineChatMsgs();
   };
-  input.onkeydown = (e)=>{ if(e.key==='Enter') sendBtn.click(); };
+  input.onkeydown = (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); } };
+  input.oninput = ()=>autoResizeTextarea(input);
   triggerBtn.onclick = async()=>{
     const ch = getCurrentChar();
     if(!ch){ showToast(t('toast.charMissing')); return; }
@@ -5444,11 +5808,20 @@ function wireOfflineChatBar(){
       const data = await generateJSON(sys,usr);
       if(data&&Array.isArray(data.messages)&&data.messages.length){
         const now=Date.now();
-        data.messages.filter(Boolean).forEach((txt,i)=>{
-          pd.offlineChatMsgs.push({from:'them',text:txt.trim(),id:uid('oc'),ts:now+i*1000});
-        });
+        const newMsgs = data.messages.filter(Boolean).map((txt,i)=>({from:'them',text:txt.trim(),id:uid('oc'),ts:now+i*1000}));
+        newMsgs.forEach(m=>pd.offlineChatMsgs.push(m));
         saveState();
+        // Show notification for first message
+        if(newMsgs.length) showMsgNotification('线下', ch.idolName||'idol', newMsgs[0].text);
+        // Stream messages into feed
+        const body2=document.getElementById('offlineBody');
         renderOfflineChatMsgs();
+        // Re-stream the new messages visually
+        const existingCount = pd.offlineChatMsgs.length - newMsgs.length;
+        const rows = body2.querySelectorAll('.bubble-row');
+        // Remove the newly rendered new rows so we can stream them back
+        Array.from(rows).slice(existingCount).forEach(r=>r.remove());
+        streamMessages(body2, newMsgs, 900, ch.idolName||'idol', '线下');
       }
     }catch(err){ showToast(t('toast.genFailed')); }
     finally{ hidePhoneGenerating(); }
@@ -5464,7 +5837,7 @@ function renderOfflineChatMsgs(){
   let html = '';
   if(scenes.length){
     const s = scenes[0];
-    html += (s.time ? '<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;">'+escapeHtml(s.time)+'</div>' : '')
+    html += (s.time ? '<div style="font-size:11px;color:var(--text-3);margin-bottom:8px;text-align:center;">'+escapeHtml(s.time)+'</div>' : '')
       + '<div class="detail-text" style="line-height:1.9;font-size:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">'+escapeHtml(s.text)+'</div>';
   }
   msgs.forEach(m=>{
@@ -5473,8 +5846,9 @@ function renderOfflineChatMsgs(){
       +'<div class="bubble '+(mine?'sent':'recv')+'">'+escapeHtml(m.text)+'</div>'
       +'</div>';
   });
-  body.innerHTML = html || '<div class="empty-state">点击右上角菜单生成场景内容</div>';
+  body.innerHTML = html || '<div class="empty-state" style="padding:60px 20px;">点击右上角菜单生成场景内容</div>';
   body.scrollTop = body.scrollHeight;
+  wireOfflineChatBar();
 }
 
 function renderOfflineScene(text, time){
@@ -5654,22 +6028,38 @@ function applyChatWallpaper(){
 }
 
 /* ===================================================================
-   MESSAGE NOTIFICATION BANNER
+   MESSAGE NOTIFICATION BANNER — queue, one per message
 =================================================================== */
 let _notifTimer = null;
+let _notifQueue = [];
+let _notifShowing = false;
+
 function showMsgNotification(appName, senderName, text, onClick){
+  _notifQueue.push({appName, senderName, text, onClick});
+  if(!_notifShowing) _processNotifQueue();
+}
+
+function _processNotifQueue(){
+  if(!_notifQueue.length){ _notifShowing=false; return; }
+  _notifShowing = true;
+  const {appName, senderName, text, onClick} = _notifQueue.shift();
   const banner = document.getElementById('msg-notification');
-  if(!banner) return;
+  if(!banner){ _notifShowing=false; return; }
   document.getElementById('notifApp').textContent = appName;
   document.getElementById('notifText').textContent = (senderName ? senderName+': ' : '') + text;
   const now = new Date();
   document.getElementById('notifTime').textContent = (now.getHours()<10?'0':'')+now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
   banner.classList.add('show');
   clearTimeout(_notifTimer);
-  _notifTimer = setTimeout(()=>banner.classList.remove('show'), 3500);
+  _notifTimer = setTimeout(()=>{
+    banner.classList.remove('show');
+    setTimeout(_processNotifQueue, 300);
+  }, 2800);
   banner.onclick = ()=>{
     banner.classList.remove('show');
+    clearTimeout(_notifTimer);
     if(onClick) onClick();
+    setTimeout(_processNotifQueue, 100);
   };
 }
 
@@ -6126,7 +6516,7 @@ function renderChatList(){
   const allChats = [{type:'main', name:mainName, preview:mainPreview, ts:mainTs, avatar:ch.idolAvatar}];
   contacts.forEach((c,i)=>{
     const last = c.messages && c.messages[c.messages.length-1];
-    allChats.push({type:'contact', idx:i, name:c.name||t('contact.default'), preview:last?(last.recalled?t('toast.recalled'):last.text):'', ts:last?(last.ts||0):0, avatar:''});
+    allChats.push({type:'contact', idx:i, name:c.name||t('contact.default'), preview:last?(last.recalled?t('toast.recalled'):last.text):'', ts:last?(last.ts||0):0, avatar:c.avatar||''});
   });
   allChats.sort((a,b)=>b.ts-a.ts);
 
@@ -6136,7 +6526,7 @@ function renderChatList(){
   }
   body.innerHTML = allChats.map(item=>{
     const timeStr = item.ts ? formatMsgDate(item.ts) : '';
-    const avStyle = item.avatar ? avatarStyle(item.avatar) : '';
+    const avStyle = item.avatar ? avatarStyle(item.avatar)+';background-size:cover;' : '';
     const avInit = item.name ? item.name.slice(0,1) : '?';
     return '<div class="dm-list-item chat-list-entry" data-chat-type="'+item.type+'" data-chat-idx="'+(item.idx||0)+'">'
       +'<div class="ig-avatar" style="'+(avStyle||'')+'">'+(avStyle?'':avInit)+'</div>'
@@ -6172,33 +6562,75 @@ function openContactChat(idx){
   goTo('screen-userchat');
   const titleEl = document.getElementById('userChatTitle');
   titleEl.textContent = c.name||'联系人';
-  titleEl.onclick = null;
+  // Allow clicking title to rename contact
+  titleEl.onclick = ()=>{
+    showPromptModal('修改备注名', titleEl.textContent, (v)=>{
+      c.name = v;
+      titleEl.textContent = v;
+      saveState();
+      renderChatList();
+    });
+  };
   const feed = document.getElementById('userChatFeed');
   c.messages = c.messages||[];
   c.messages.forEach(m=>{ if(!m.id) m.id=uid('m'); if(!m.ts) m.ts=0; });
-  feed.innerHTML = renderMsgFeedHtml(c.messages, ch, true);
+  // Use contact avatar in messages - pass a fake "ch" with contact's avatar
+  const contactAsCh = {idolName:c.name, idolAvatar:c.avatar||'', userName:ch.userName, userAvatar:ch.userAvatar};
+  feed.innerHTML = renderMsgFeedHtml(c.messages, contactAsCh, true);
   feed.scrollTop = feed.scrollHeight;
+
+  // Re-attach long press for inline selection including recall
+  if(_chatSel){ _chatSel.exit(); _chatSel=null; }
+  _chatSel = createInlineSel('userChatFeed', 'chatSelBar');
+  attachLongPress(feed, '[data-msg-id]', 600, (el)=>{
+    const id = el.getAttribute('data-msg-id');
+    const msg = c.messages.find(m=>m.id===id);
+    if(msg && msg.recalled) return;
+    _chatSel.enter(id,
+      ()=>c.messages.filter(m=>m.id&&!m.recalled).map(m=>({id:m.id, text:m.text, from:m.from})),
+      (ids)=>{
+        c.messages=c.messages.filter(m=>!ids.includes(m.id));
+        saveState(); _chatSel.exit();
+        c.messages.forEach(msg2=>{if(!msg2.id)msg2.id=uid('m');if(!msg2.ts)msg2.ts=0;});
+        feed.innerHTML=renderMsgFeedHtml(c.messages,contactAsCh,true);
+        feed.scrollTop=feed.scrollHeight;
+        renderChatList(); showToast(t('toast.msgDeleted'));
+      },
+      (id2)=>{
+        const msg2=c.messages.find(m=>m.id===id2);
+        if(!msg2) return;
+        showPromptModal(t('sel.editMsg'),msg2.text,(v)=>{
+          msg2.text=v; saveState(); _chatSel.exit();
+          c.messages.forEach(m3=>{if(!m3.id)m3.id=uid('m');if(!m3.ts)m3.ts=0;});
+          feed.innerHTML=renderMsgFeedHtml(c.messages,contactAsCh,true);
+          feed.scrollTop=feed.scrollHeight; showToast(t('toast.msgEdited'));
+        });
+        setTimeout(()=>{ const ta=document.getElementById('promptCardInput'); if(ta) ta.value=msg2.text; },30);
+      }
+    );
+  });
 
   // Wire input bar to this contact
   const input = document.getElementById('userChatInput');
   const sendBtn = document.getElementById('userChatSendBtn');
   const triggerBtn = document.getElementById('userChatTriggerBtn');
 
-  // Replace send handlers for contact chat
   sendBtn.onclick = ()=>{
     const val = input.value.trim();
     if(!val) return;
     input.value='';
+    autoResizeTextarea(input);
     const m = {from:'me', text:val, id:uid('m'), ts:Date.now()};
     c.messages.push(m);
     saveState();
-    // Re-render feed
     c.messages.forEach(msg=>{ if(!msg.id) msg.id=uid('m'); if(!msg.ts) msg.ts=0; });
-    feed.innerHTML = renderMsgFeedHtml(c.messages, ch, true);
+    feed.innerHTML = renderMsgFeedHtml(c.messages, contactAsCh, true);
     feed.scrollTop = feed.scrollHeight;
     renderChatList();
   };
-  input.onkeydown = (e)=>{ if(e.key==='Enter') sendBtn.onclick(); };
+  input.onkeydown = (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.onclick(); } };
+  input.oninput = ()=>autoResizeTextarea(input);
+
   triggerBtn.onclick = async ()=>{
     const currentCh = getCurrentChar();
     if(!currentCh){ showToast(t('toast.charMissing')); return; }
@@ -6209,18 +6641,31 @@ function openContactChat(idx){
     showPhoneGenerating();
     try{
       const speaker = currentCh.userName||'用户';
-      const history = (currentC.messages||[]).map(m=>(m.from==='me'?speaker:currentC.name)+'：'+m.text).join('\n');
-      const sys = buildBaseSystemPrompt(currentCh, '现在请扮演「'+currentC.name+'」（'+(currentC.tag||'联系人')+'），根据对话历史自然地回复用户。');
-      const usr = '对话历史：\n'+history+'\n\n请生成「'+currentC.name+'」接下来发的消息。\n输出 JSON：{"messages":["消息1","消息2",...]}';
+      const history = (currentC.messages||[]).map(m=>(m.from==='me'?speaker:currentC.name)+'[id:'+m.id+']：'+(m.recalled?'[撤回]':m.text)).join('\n');
+      const bioCtx = currentC.bio ? '人物介绍：'+currentC.bio+'\n' : '';
+      const sys = buildBaseSystemPrompt(currentCh, '现在请扮演「'+currentC.name+'」（'+(currentC.tag||'联系人')+'）。'+bioCtx+'根据对话历史自然地回复用户，可以发1-3条消息。根据剧情需要可以撤回自己之前的消息，在recall_ids填写消息id（不需要则填[]）。');
+      const usr = '对话历史（每条消息有id标记）：\n'+history+'\n\n请生成「'+currentC.name+'」接下来发的消息。\n输出 JSON：{"messages":["消息1","消息2",...],"recall_ids":[]}';
       const data = await generateJSON(sys, usr);
       if(data && Array.isArray(data.messages) && data.messages.length){
+        // Handle recalls
+        if(Array.isArray(data.recall_ids) && data.recall_ids.length){
+          data.recall_ids.forEach(rid=>{
+            const msg=currentC.messages.find(m=>m.id===rid&&m.from==='them'&&!m.recalled);
+            if(msg){ msg.recalledText=msg.text; msg.recalled=true; msg.text='[撤回]'; }
+          });
+        }
         const now=Date.now();
-        const newMsgs=data.messages.filter(t=>t&&t.trim()).map((t,i)=>({from:'them',text:t.trim(),id:uid('m'),ts:now+i*1000}));
+        const newMsgs=data.messages.filter(tx=>tx&&tx.trim()).map((tx,i)=>({from:'them',text:tx.trim(),id:uid('m'),ts:now+i*1000}));
         newMsgs.forEach(m=>currentC.messages.push(m));
         saveState();
-        currentC.messages.forEach(msg=>{ if(!msg.id) msg.id=uid('m'); if(!msg.ts) msg.ts=0; });
-        feed.innerHTML = renderMsgFeedHtml(currentC.messages, currentCh, true);
-        feed.scrollTop = feed.scrollHeight;
+        // Show notification
+        if(newMsgs.length) showMsgNotification('Chat', currentC.name, newMsgs[0].text);
+        // Stream
+        const feed2 = document.getElementById('userChatFeed');
+        const cAsCh2 = {idolName:currentC.name, idolAvatar:currentC.avatar||'', userName:currentCh.userName, userAvatar:currentCh.userAvatar};
+        const existing = currentC.messages.slice(0, currentC.messages.length - newMsgs.length);
+        feed2.innerHTML = renderMsgFeedHtml(existing, cAsCh2, true);
+        streamMessages(feed2, newMsgs, 1100);
         renderChatList();
       }
     }catch(err){ showToast(t('toast.genFailed')); }
@@ -6241,11 +6686,17 @@ function tick(){
   document.getElementById('sbTime').textContent = formatClock();
 }
 
+function applyPhoneRadius(){
+  const r = state.settings.phoneRadius != null ? state.settings.phoneRadius : 46;
+  document.getElementById('phone').style.setProperty('--phone-radius', r+'px');
+}
+
 function init(){
   applyTheme();
   applyLanguage();
   applyFitScreen();
   applyPhoneScale();
+  applyPhoneRadius();
   applyWallpaper();
   applyChatColors();
   applyChatWallpaper();
