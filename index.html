@@ -619,10 +619,12 @@ body.has-fit-screen #app-root{width:100%;height:100vh;display:flex;align-items:c
   border:1px solid var(--border);
   padding:13px 15px;
   font-size:14px;
+  border-radius:13px;
+  margin-bottom:1px;
 }
-.settings-row:first-child{border-radius:13px 13px 0 0;}
-.settings-row:last-child{border-radius:0 0 13px 13px;}
-.settings-row + .settings-row{border-top:none;}
+.settings-row:first-child{border-radius:13px;}
+.settings-row:last-child{border-radius:13px;}
+.settings-row + .settings-row{border-top:1px solid var(--border);margin-top:6px;}
 .settings-row.single{border-radius:13px;}
 .settings-row-label{font-weight:500;}
 .settings-row-value{color:var(--text-3);font-size:13px;}
@@ -891,6 +893,7 @@ body.has-fit-screen #app-root{width:100%;height:100vh;display:flex;align-items:c
 .news-summary{font-size:12.5px;color:var(--text-2);line-height:1.5;margin-bottom:6px;}
 .news-meta{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:8px;}
 .news-delete-btn{position:absolute;top:12px;right:12px;font-size:12px;color:#ff3b30;padding:4px 8px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);}
+.news-edit-btn{position:absolute;top:12px;right:58px;font-size:12px;color:var(--text-2);padding:4px 8px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);}
 .news-empty{text-align:center;padding:60px 24px;font-size:13.5px;color:var(--text-3);line-height:1.7;}
 .news-breaking-banner{background:linear-gradient(90deg,#ff3b30,#ff6b35);color:#fff;padding:8px 16px;font-size:12px;font-weight:700;letter-spacing:.06em;display:flex;align-items:center;gap:8px;}
 .news-breaking-banner span{background:rgba(255,255,255,0.2);padding:2px 7px;border-radius:4px;font-size:10.5px;}
@@ -1237,6 +1240,207 @@ body.has-fit-screen #gen-indicator{
   background:transparent;
 }
 
+
+/* ===== Multi-mode & Group chat & Card push styles ===== */
+.multi-modal-overlay{
+  position:absolute;inset:0;z-index:500;
+  background:rgba(0,0,0,0.38);
+  display:none;align-items:center;justify-content:center;
+  padding:24px;
+}
+.multi-modal-overlay.open{display:flex;}
+.multi-modal-card{
+  width:100%;max-width:320px;
+  background:var(--surface);border-radius:18px;
+  padding:18px 16px;
+  animation:ctxPop .15s ease;
+  box-shadow:0 8px 32px rgba(0,0,0,0.28);
+  max-height:80vh;overflow-y:auto;
+}
+.multi-modal-title{font-size:15px;font-weight:700;text-align:center;margin-bottom:14px;color:var(--text);}
+.multi-idol-card{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:12px;
+  background:var(--surface-2);border:1px solid var(--border);
+  margin-bottom:8px;position:relative;cursor:pointer;
+}
+.multi-idol-card.active-phone{border-color:var(--text);}
+.multi-idol-name{font-size:13.5px;font-weight:600;flex:1;}
+.multi-idol-sub{font-size:11.5px;color:var(--text-3);margin-top:2px;}
+.multi-idol-del{font-size:12px;color:#ff3b30;padding:4px 8px;border-radius:7px;background:var(--surface);border:1px solid var(--border);}
+.card-push-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+}
+.card-push-item:active{background:var(--surface-2);}
+.group-member-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border);
+}
+.group-member-check{
+  width:22px;height:22px;border-radius:50%;
+  border:1.5px solid var(--border);background:var(--surface);
+  flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+}
+.group-member-check.on{background:var(--accent);border-color:var(--accent);}
+.group-member-check.on:after{content:"";width:6px;height:10px;border-right:2px solid var(--accent-text);border-bottom:2px solid var(--accent-text);transform:rotate(45deg) translateY(-1px);}
+.card-bubble{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface-2);border:1px solid var(--border);
+  border-radius:14px;padding:10px 14px;min-width:170px;max-width:220px;
+  cursor:pointer;
+}
+.card-bubble-avatar{width:38px;height:38px;border-radius:10px;background:var(--surface-3);border:1px solid var(--border);flex:0 0 auto;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--text-2);}
+.card-bubble-info{flex:1;min-width:0;}
+.card-bubble-name{font-size:13px;font-weight:600;color:var(--text);}
+.card-bubble-tag{font-size:11px;color:var(--text-3);margin-top:2px;}
+.card-bubble-label{font-size:11px;color:var(--text-3);margin-top:4px;padding-top:4px;border-top:1px solid var(--border);text-align:center;}
+
+/* ===== Album app styles ===== */
+.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.album-thumb{aspect-ratio:1/1;background:var(--surface-2);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;}
+.album-thumb:active{opacity:.75;}
+.album-thumb-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text-3);text-align:center;padding:4px;line-height:1.4;background:var(--surface-2);}
+.album-thumb-inner.has-img{background-size:cover;background-position:center;}
+.album-video-badge{position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;letter-spacing:.03em;}
+.album-detail-overlay{position:absolute;inset:0;z-index:700;background:rgba(0,0,0,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 18px;}
+.album-detail-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;}
+.album-detail-close:before,.album-detail-close:after{content:'';position:absolute;width:14px;height:1.4px;background:#f2f2f3;}
+.album-detail-close:before{transform:rotate(45deg);}
+.album-detail-close:after{transform:rotate(-45deg);}
+.album-detail-visual{width:100%;max-width:260px;aspect-ratio:1/1;background:var(--surface-2);border-radius:14px;border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:14px;overflow:hidden;}
+.album-detail-visual-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:rgba(255,255,255,0.38);text-align:center;padding:14px;background-size:cover;background-position:center;}
+.album-detail-desc{font-size:14px;color:#f0f0f1;line-height:1.7;text-align:center;max-width:260px;}
+.album-video-icon{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.16);border:1.5px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;}
+.album-video-icon:after{content:'';width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:15px solid rgba(255,255,255,0.85);margin-left:3px;}
+
+/* ===== Video bubble ===== */
+.video-bubble{width:170px;border-radius:16px;background:var(--surface-2);border:1px solid var(--border);overflow:hidden;position:relative;}
+.video-bubble-thumb{width:100%;height:100px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;position:relative;}
+.video-bubble-play{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;}
+.video-bubble-play:after{content:'';width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:12px solid rgba(255,255,255,0.88);margin-left:2px;}
+.video-bubble-badge{position:absolute;top:5px;left:6px;background:rgba(0,0,0,0.56);color:#fff;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.03em;}
+.video-bubble-label{padding:7px 10px 5px;font-size:11.5px;color:var(--text-2);line-height:1.4;}
+
+/* ===== IG comment section ===== */
+.ig-comment-section{margin-top:6px;border-top:1px solid var(--border);padding-top:6px;}
+.ig-comment-entry{display:flex;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);}
+.ig-comment-entry:last-child{border-bottom:none;}
+.ig-comment-ava{width:24px;height:24px;border-radius:8px;flex:0 0 24px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--text-3);border:1px solid var(--border);background-size:cover;background-position:center;}
+.ig-comment-body{flex:1;min-width:0;}
+.ig-comment-name{font-size:11.5px;font-weight:700;color:var(--text);}
+.ig-comment-text{font-size:12px;color:var(--text-2);line-height:1.45;margin-top:1px;word-break:break-word;}
+.ig-comment-reply-btn{font-size:10.5px;color:var(--text-3);margin-top:3px;cursor:pointer;}
+.ig-comment-replies{padding-left:12px;margin-top:4px;border-left:1.5px solid var(--border);}
+.ig-comment-expand-btn{font-size:11.5px;color:var(--text-3);padding:4px 0;cursor:pointer;display:block;text-decoration:underline;text-decoration-color:var(--border);}
+.ig-comment-input-row{display:flex;gap:7px;align-items:center;padding:7px 0 4px;border-top:1px solid var(--border);margin-top:6px;}
+.ig-comment-input{flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:6px 12px;font-size:12.5px;color:var(--text);font-family:inherit;resize:none;outline:none;min-height:28px;max-height:70px;line-height:1.4;}
+.ig-comment-send{font-size:12.5px;font-weight:600;color:var(--text-2);padding:5px 8px;flex:0 0 auto;white-space:nowrap;}
+
+/* ===== User IG post composer ===== */
+.ig-post-fab{position:absolute;right:14px;bottom:14px;width:42px;height:42px;border-radius:50%;background:var(--accent);color:var(--accent-text);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.22);z-index:50;border:1px solid var(--border);}
+.ig-post-fab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+.ig-post-composer{position:absolute;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;}
+.ig-composer-header{display:flex;align-items:center;gap:10px;padding:14px 14px;border-bottom:1px solid var(--border);}
+.ig-composer-cancel{font-size:14px;color:var(--text-2);}
+.ig-composer-title{flex:1;text-align:center;font-size:15px;font-weight:600;}
+.ig-composer-post{font-size:14px;font-weight:700;color:var(--text);}
+.ig-composer-body{flex:1;overflow-y:auto;padding:14px;}
+.ig-composer-type-row{display:flex;gap:8px;margin-bottom:12px;}
+.ig-composer-type-btn{flex:1;padding:8px 0;border-radius:10px;border:1.5px solid var(--border);background:var(--surface-2);font-size:12px;font-weight:600;color:var(--text-2);}
+.ig-composer-type-btn.active{border-color:var(--text);color:var(--text);background:var(--surface);}
+.ig-composer-media{width:100%;aspect-ratio:1/1;background:var(--surface-2);border:1px dashed var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;font-size:12.5px;color:var(--text-3);cursor:pointer;margin-bottom:10px;overflow:hidden;}
+.ig-composer-media.has-img{background-size:cover;background-position:center;}
+.ig-composer-desc{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 12px;font-size:13px;color:var(--text);resize:none;font-family:inherit;outline:none;min-height:52px;margin-bottom:8px;}
+.ig-composer-caption{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 12px;font-size:13px;color:var(--text);resize:none;font-family:inherit;outline:none;min-height:72px;}
+
+/* ===== Transfer bubble updated ===== */
+.transfer-bubble{min-height:86px;}
+
+/* ===== Phone app (call log) ===== */
+.call-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  cursor:pointer;position:relative;
+}
+.call-item:active{background:var(--surface-2);}
+.call-icon{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--surface-2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 44px;
+}
+.call-icon svg{width:18px;height:18px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.call-icon.incoming svg{stroke:#34c759;}
+.call-icon.outgoing svg{stroke:var(--text-2);}
+.call-icon.missed svg{stroke:#ff3b30;}
+.call-mid{flex:1;min-width:0;}
+.call-name{font-size:14px;font-weight:600;color:var(--text);}
+.call-detail{font-size:12px;color:var(--text-3);margin-top:2px;}
+.call-time{font-size:12px;color:var(--text-3);flex:0 0 auto;}
+.call-transcript{
+  white-space:pre-wrap;line-height:1.85;font-size:14px;color:var(--text);
+}
+.call-transcript-line{
+  padding:4px 0;
+  border-bottom:1px solid var(--border);
+  display:block;
+  font-size:13.5px;line-height:1.7;
+}
+.call-transcript-line:last-child{border-bottom:none;}
+.call-speaker{font-weight:700;color:var(--text);margin-right:6px;}
+.call-speaker.them{color:var(--text);}
+.call-speaker.me{color:var(--text-2);}
+
+/* ===== Forward card ===== */
+.forward-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px 16px 14px;
+  min-width:210px;max-width:270px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.forward-card-source{
+  font-size:10.5px;color:var(--text-3);
+  text-transform:uppercase;letter-spacing:.06em;
+  display:flex;align-items:center;gap:5px;
+  border-bottom:1px solid var(--border);padding-bottom:8px;
+}
+.forward-card-source-dot{width:5px;height:5px;border-radius:50%;background:var(--text-3);flex:0 0 auto;}
+.forward-card-preview{
+  display:flex;gap:11px;align-items:flex-start;
+}
+.forward-card-thumb{
+  width:52px;height:52px;border-radius:10px;
+  background:var(--surface-2);border:1px solid var(--border);
+  flex:0 0 52px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--text-3);text-align:center;line-height:1.4;
+  background-size:cover;background-position:center;overflow:hidden;
+}
+.forward-card-info{flex:1;min-width:0;}
+.forward-card-author{font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.forward-card-text{
+  font-size:12px;color:var(--text-2);line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.forward-card-label{
+  font-size:10.5px;color:var(--text-3);
+  text-align:center;padding-top:6px;border-top:1px solid var(--border);
+}
+
+
+.transfer-reply{display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;padding:14px 18px;min-width:200px;max-width:250px;}
+.transfer-reply-icon{display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto;}
+.transfer-reply-icon svg{width:28px;height:28px;stroke:#8a8a8e;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+.transfer-reply-label{font-size:10.5px;color:#8a8a8e;}
+.transfer-reply-text{font-size:14px;font-weight:600;color:#34c759;}
+#phone[data-theme="light"] .transfer-reply-text{color:#28a745;}
+.transfer-reply-note{font-size:12px;color:#8a8a8e;margin-top:2px;}
+
 </style>
 </head>
 <body>
@@ -1371,7 +1575,7 @@ body.has-fit-screen #gen-indicator{
     <div id="screen-x" class="screen app-screen x-screen">
       <div class="app-header x-header">
         <button class="hdr-btn back-btn" data-action="back">Back</button>
-        <div class="hdr-title">X</div>
+        <div class="hdr-title">Live</div>
         <button class="hdr-btn icon-btn refresh-btn" id="xRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
       </div>
       <div class="x-live-stage" id="xLiveStage">
@@ -1464,15 +1668,43 @@ body.has-fit-screen #gen-indicator{
     <div id="screen-user-instagram" class="screen app-screen">
       <div class="app-header">
         <button class="hdr-btn back-btn" data-action="back">Back</button>
-        <div class="hdr-title">Instagram</div>
+        <div class="hdr-title">Instagram<span class="ig-alt-trigger-wrap"><span class="ig-alt-trigger" id="userIgAltTrigger"></span></span></div>
         <button class="hdr-btn icon-btn refresh-btn" id="userIgRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
       </div>
       <div class="ig-tabs" id="userIgTabs">
         <button class="ig-tab active" data-tab="feed" data-i18n="tab.feed">动态</button>
+        <button class="ig-tab" data-tab="myposts" data-i18n="tab.myPosts">我的帖子</button>
         <button class="ig-tab" data-tab="explore" data-i18n="tab.trending">热搜</button>
         <button class="ig-tab" data-tab="dm" data-i18n="tab.dm">私信</button>
       </div>
-      <div class="ig-body" id="userIgBody"></div>
+      <div class="ig-body" id="userIgBody" style="position:relative;"></div>
+    </div>
+
+    <!-- ---------- USER ALT INSTAGRAM ---------- -->
+    <div id="screen-user-instagram-alt" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="userAltIgTitle" data-i18n="ig.userAltTitle">我的小号</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="ig-tabs" id="userAltIgTabs">
+        <button class="ig-tab active" data-tab="posts" data-i18n="tab.posts">帖子</button>
+        <button class="ig-tab" data-tab="dm" data-i18n="tab.dm">私信</button>
+      </div>
+      <div class="ig-body" id="userAltIgBody" style="position:relative;"></div>
+    </div>
+
+    <!-- ---------- ALBUM SCREEN (idol phone) ---------- -->
+    <div id="screen-album" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="album.title">相册</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="albumRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div style="flex:1 1 auto;overflow-y:auto;position:relative;" id="albumBody">
+        <div class="empty-state" data-i18n="album.empty">暂无照片</div>
+      </div>
+      <div id="albumDetailOverlay" class="album-detail-overlay" style="display:none;"></div>
     </div>
 
     <!-- ---------- SETTINGS APP ---------- -->
@@ -1633,19 +1865,49 @@ body.has-fit-screen #gen-indicator{
       <div class="app-header">
         <button class="hdr-btn back-btn" data-action="back">Back</button>
         <div class="hdr-title">Chat</div>
-        <button class="hdr-btn icon-btn" id="chatListAddBtn" aria-label="Add contact" style="position:relative;z-index:1;">
-          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text-2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 5v14M5 12h14"/></svg>
-        </button>
+        <div style="display:flex;gap:6px;align-items:center;position:relative;z-index:1;">
+          <button class="hdr-btn icon-btn" id="chatListGroupBtn" aria-label="New group chat" title="New group">
+            <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text-2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M19 8v6M22 11h-6"/></svg>
+          </button>
+          <button class="hdr-btn icon-btn" id="chatListAddBtn" aria-label="Add contact" style="">
+            <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:var(--text-2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
       </div>
       <div class="ig-body" id="chatListBody" style="overflow-y:auto;flex:1;"></div>
+    </div>
+
+    <!-- ---------- MULTI-MODE OVERLAY ---------- -->
+    <div class="multi-modal-overlay" id="multiModeOverlay">
+      <div class="multi-modal-card" id="multiModeCard"></div>
+    </div>
+
+    <!-- ---------- PHONE APP ---------- -->
+    <div id="screen-phone" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" data-i18n="phone.appTitle">电话</div>
+        <button class="hdr-btn icon-btn refresh-btn" id="phoneRefreshBtn" aria-label="Refresh"><svg viewBox="0 0 24 24"><path d="M20 11A8 8 0 1 0 18 16"/><path d="M20 5v6h-6"/></svg></button>
+      </div>
+      <div style="flex:1 1 auto;overflow-y:auto;" id="phoneBody"></div>
+    </div>
+
+    <!-- ---------- PHONE CALL DETAIL ---------- -->
+    <div id="screen-phone-call" class="screen app-screen">
+      <div class="app-header">
+        <button class="hdr-btn back-btn" data-action="back">Back</button>
+        <div class="hdr-title" id="phoneCallTitle" data-i18n="phone.transcript">通话记录</div>
+        <span class="hdr-spacer"></span>
+      </div>
+      <div class="detail-body" id="phoneCallBody"></div>
     </div>
 
     <!-- ---------- NEWS APP (idol phone) ---------- -->
     <div id="screen-news" class="screen app-screen">
       <div class="app-header">
         <button class="hdr-btn back-btn" data-action="back">Back</button>
-        <div class="hdr-title">新闻</div>
-        <button class="hdr-btn" id="newsAddBtn" style="font-size:13px;font-weight:600;color:var(--text-2);">+ 添加</button>
+        <div class="hdr-title" data-i18n="news.appTitle">新闻</div>
+        <button class="hdr-btn" id="newsAddBtn" style="font-size:13px;font-weight:600;color:var(--text-2);" data-i18n="news.addBtn">+ 添加</button>
       </div>
       <div style="flex:1 1 auto;overflow-y:auto;" id="newsBody"></div>
     </div>
@@ -1654,20 +1916,17 @@ body.has-fit-screen #gen-indicator{
     <div id="offlineSettingsOverlay" style="display:none;position:absolute;inset:0;z-index:400;background:rgba(0,0,0,0.42);align-items:center;justify-content:center;">
       <div id="offlineSettingsPanel" style="width:calc(100% - 40px);max-width:340px;background:var(--surface);border-radius:18px;padding:18px 16px;animation:ctxPop .14s ease;box-shadow:0 8px 32px rgba(0,0,0,0.28);">
         <div style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text);text-align:center;" data-i18n="offline.title">线下内容设置</div>
-        <div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:5px;">文风预设（选填，描述文风与描写要求）</div>
-        <textarea id="offlinePromptInput" class="field-textarea" style="min-height:72px;max-height:120px;font-size:13px;" placeholder="描述文风要求、写作风格等…"></textarea>
+        <div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:5px;" data-i18n="offline.label">文风预设（选填，描述文风与描写要求）</div>
+        <textarea id="offlinePromptInput" class="field-textarea" style="min-height:72px;max-height:120px;font-size:13px;" data-i18n-placeholder="offline.placeholder" placeholder="描述文风要求、写作风格等…"></textarea>
         <div style="display:flex;gap:8px;margin-top:8px;align-items:center;justify-content:space-between;">
-          <span style="font-size:12.5px;color:var(--text-2);" data-i18n="offline.savePreset">保存为预设</span>
-          <div id="offlinePresetToggle" class="ios-toggle" onclick="toggleOfflinePreset()"></div>
-        </div>
-        <div style="margin-top:8px;display:flex;gap:8px;align-items:center;justify-content:space-between;">
           <span style="font-size:12.5px;color:var(--text-2);" data-i18n="offline.applyPrompt">应用此要求</span>
           <div id="offlineApplyToggle" class="ios-toggle on" onclick="toggleOfflineApply()"></div>
         </div>
         <div id="offlinePresetsList" style="margin-top:8px;max-height:90px;overflow-y:auto;"></div>
         <div style="display:flex;gap:8px;margin-top:14px;">
           <button class="btn-block secondary" style="flex:1;font-size:13px;padding:9px 0;" onclick="closeOfflineSettings()" data-i18n="btn.cancel">取消</button>
-          <button class="btn-block" style="flex:1;font-size:13px;padding:9px 0;" onclick="generateOffline()" data-i18n="offline.generate">生成内容</button>
+          <button class="btn-block secondary" style="flex:1;font-size:13px;padding:9px 0;" onclick="saveOfflinePreset()" data-i18n="offline.savePreset">保存为预设</button>
+          <button class="btn-block" style="flex:1;font-size:13px;padding:9px 0;" onclick="generateOffline()" data-i18n="offline.generate">保存</button>
         </div>
       </div>
     </div>
@@ -1713,6 +1972,8 @@ const I18N = {
     'ph.idolBio':'idol 的身份、人设、性格、风格…',
     'ph.userName':'例如：阿岚',
     'ph.userBio':'用户的身份、与idol的关系背景…',
+    'ph.userIgId':'用户 Instagram 大号 ID（如 @user_official）',
+    'ph.userAltIgId':'用户 Instagram 小号 ID（如 @my_secret_acc）',
     'ph.worldBookEntry':'写下这一条世界观设定或生成要求…',
     'ph.apiUrl':'https://api.example.com/v1',
     'ph.apiKey':'sk-••••••••',
@@ -1730,6 +1991,8 @@ const I18N = {
     'settings.row.wallpaper':'手机壁纸',
     'settings.row.fitscreen':'屏幕尺寸',
     'settings.row.phoneSize':'手机大小',
+    'settings.row.cornerRadius':'圆角大小',
+    'ig.refreshLabel':'刷新',
     'settings.lang.zh':'中文','settings.lang.en':'English',
     'settings.theme.dark':'深色','settings.theme.light':'浅色',
     'settings.fitscreen.fixed':'固定尺寸','settings.fitscreen.fit':'自适应设备',
@@ -1745,7 +2008,7 @@ const I18N = {
     'settings.iconHint':'点击任意图标可自定义名称与图片。',
     'settings.wallpaperHint':'壁纸只会显示在主屏幕上，软件内部界面不受影响。',
     'settings.entryTitlePrefix':'条目',
-    'app.bubble':'Bubble','app.instagram':'Instagram','app.x':'X','app.paypal':'PayPal',
+    'app.bubble':'Bubble','app.instagram':'Instagram','app.x':'X','app.live':'Live','app.paypal':'PayPal',
     'app.maps':'Maps','app.notes':'Notes','app.settings':'Settings','app.chat':'Chat',
     'x.live':'直播中','x.comments':'弹幕',
     'ig.altTitle':'Secret Account',
@@ -1821,7 +2084,49 @@ const I18N = {
     'offline.placeholder':'描述线下场景、氛围、特殊要求等…',
     'offline.savePreset':'保存为预设',
     'offline.applyPrompt':'应用此要求',
-    'offline.generate':'生成内容',
+    'offline.generate':'保存',
+    'offline.presetListLabel':'已保存的预设',
+    'offline.savedPresets':'保存过的预设',
+    'news.empty':'这里还没有新闻\n点击右上角「+ 添加」填写近期大新闻\n添加后，AI生成的内容将受到这些新闻的影响',
+    'news.breakingTitle':'今日要闻',
+    'news.sourceDefault':'综合',
+    'news.today':'今日',
+    'news.category':'新闻',
+    'news.titleLabel':'新闻标题',
+    'news.summaryLabel':'摘要（选填）',
+    'news.sourceLabel':'来源',
+    'news.categoryLabel':'分类',
+    'news.editTitle':'编辑新闻',
+    'news.needTitle':'请填写新闻标题',
+    'news.appTitle':'新闻',
+    'news.addBtn':'+ 添加',
+    'app.live':'Live',
+    'settings.row.multimode':'多人模式',
+    'multimode.title':'多人模式',
+    'multimode.enable':'开启多人模式',
+    'multimode.singleMode':'单人模式（新建角色）',
+    'multimode.multiMode':'多人模式（多个 Idol）',
+    'multimode.chooseMode':'选择模式',
+    'multimode.addIdol':'添加 Idol',
+    'multimode.syncFrom':'同步自单人模式',
+    'multimode.deleteIdol':'删除此 Idol',
+    'multimode.switchPhone':'切换手机',
+    'multimode.selectPhone':'选择要切换到哪位的手机',
+    'multimode.knowEachOther':'互相认识',
+    'multimode.notKnow':'不认识',
+    'multimode.relation':'Idol 间关系',
+    'multimode.syncTitle':'同步单人存档',
+    'multimode.syncHint':'选择要同步的单人模式角色',
+    'multimode.idolName':'Idol 名字',
+    'multimode.groupChat':'新建群聊',
+    'multimode.selectMembers':'选择群成员',
+    'multimode.groupName':'群聊名称',
+    'card.push':'名片推送',
+    'card.pushTitle':'推送名片',
+    'card.selectContact':'选择要推送的联系人',
+    'card.addToContacts':'添加到通讯录',
+    'card.received':'收到一张名片',
+    'card.added':'已添加到通讯录',
     'memory.hint':'角色记忆 — 记录每次生成内容带来的重要事件，会自动注入上下文。',
     'memory.empty':'还没有记忆条目，点击下方按钮添加。',
     'memory.add':'+ 添加记忆',
@@ -1841,6 +2146,56 @@ const I18N = {
     'preview.theirMsg':'对方的回复',
     'wallpaper.opacity':'透明度（深色=越黑）',
     'wallpaper.blur':'模糊度',
+    // New features
+    'album.title':'相册',
+    'album.empty':'暂无照片',
+    'album.viewDesc':'查看描述',
+    'album.photo':'照片',
+    'album.video':'视频',
+    'album.refresh':'刷新相册',
+    'ig.commentPlaceholder':'发表评论…',
+    'ig.commentSend':'发送',
+    'ig.commentExpand':'展开全部评论',
+    'ig.commentCollapse':'收起',
+    'ig.viewMoreReplies':'查看更多回复',
+    'ig.userPost':'发布',
+    'ig.userPostText':'发纯文字',
+    'ig.userPostImage':'发图片',
+    'ig.userPostVideo':'发视频',
+    'ig.postCaption':'写点什么…',
+    'ig.imageDesc':'图片描述…',
+    'ig.videoDesc':'视频描述…',
+    'ig.commentTitle':'评论',
+    'ig.replyTo':'回复',
+    'ig.replyComment':'回复此评论…',
+    'toast.commentSent':'评论已发送',
+    'toast.replySent':'回复已发送',
+    'toast.postPublished':'帖子已发布',
+    'news.autoAdded':'根据剧情走向，新增了一条新闻',
+    'video.label':'视频',
+    'video.duration':'时长',
+    'transfer.received':'已收款',
+    'transfer.refunded':'已退款',
+    'album.fromLibrary':'从相册选择',
+    'ig.altAccountLabel':'小号',
+    'ig.mainAccountLabel':'大号',
+    'ig.userAltTitle':'我的小号',
+    'ig.altNeedId':'请先在设置中填写小号 ID',
+    'tab.myPosts':'我的帖子',
+    'forward.title':'转发帖子',
+    'forward.selectContact':'选择转发对象',
+    'forward.sent':'已转发',
+    'forward.label':'转发自 Instagram',
+    'phone.appTitle':'电话',
+    'phone.callLog':'通话记录',
+    'phone.incoming':'来电',
+    'phone.outgoing':'去电',
+    'phone.missed':'未接',
+    'phone.duration':'通话时长',
+    'phone.viewRecord':'查看通话内容',
+    'phone.transcript':'通话记录',
+    'phone.refresh':'刷新',
+    'phone.empty':'暂无通话记录，点击右上角刷新生成',
   },
   en:{
     'hint.tapToSwitch':'Tap to switch phone',
@@ -1862,6 +2217,8 @@ const I18N = {
     'ph.idolBio':"Idol's identity, persona, personality, style…",
     'ph.userName':'e.g. Lan',
     'ph.userBio':"User's identity and relationship to the idol…",
+    'ph.userIgId':'User Instagram main account ID (e.g. @user_official)',
+    'ph.userAltIgId':'User Instagram secret account ID (e.g. @my_secret_acc)',
     'ph.worldBookEntry':'Write this world-setting or generation rule entry…',
     'ph.apiUrl':'https://api.example.com/v1',
     'ph.apiKey':'sk-••••••••',
@@ -1879,6 +2236,8 @@ const I18N = {
     'settings.row.wallpaper':'Wallpaper',
     'settings.row.fitscreen':'Screen size',
     'settings.row.phoneSize':'Phone size',
+    'settings.row.cornerRadius':'Corner radius',
+    'ig.refreshLabel':'Refresh',
     'settings.lang.zh':'中文','settings.lang.en':'English',
     'settings.theme.dark':'Dark','settings.theme.light':'Light',
     'settings.fitscreen.fixed':'Fixed','settings.fitscreen.fit':'Fit device',
@@ -1894,7 +2253,7 @@ const I18N = {
     'settings.iconHint':'Tap any icon to customize its name and image.',
     'settings.wallpaperHint':'The wallpaper only shows on the home screen — app interiors are unaffected.',
     'settings.entryTitlePrefix':'Entry',
-    'app.bubble':'Bubble','app.instagram':'Instagram','app.x':'X','app.paypal':'PayPal',
+    'app.bubble':'Bubble','app.instagram':'Instagram','app.x':'X','app.live':'Live','app.paypal':'PayPal',
     'app.maps':'Maps','app.notes':'Notes','app.settings':'Settings','app.chat':'Chat',
     'x.live':'LIVE','x.comments':'Comments',
     'ig.altTitle':'Secret Account',
@@ -1970,7 +2329,49 @@ const I18N = {
     'offline.placeholder':'Describe the setting, mood, special requirements…',
     'offline.savePreset':'Save as preset',
     'offline.applyPrompt':'Apply this prompt',
-    'offline.generate':'Generate',
+    'offline.generate':'Save',
+    'offline.presetListLabel':'Saved presets',
+    'offline.savedPresets':'Saved presets',
+    'news.empty':'No news yet\nTap "+ Add" in the top right to add recent news\nAdded news will influence all AI-generated content',
+    'news.breakingTitle':'Today\'s News',
+    'news.sourceDefault':'General',
+    'news.today':'Today',
+    'news.category':'News',
+    'news.titleLabel':'News title',
+    'news.summaryLabel':'Summary (optional)',
+    'news.sourceLabel':'Source',
+    'news.categoryLabel':'Category',
+    'news.editTitle':'Edit news',
+    'news.needTitle':'Please enter a news title',
+    'news.appTitle':'News',
+    'news.addBtn':'+ Add',
+    'app.live':'Live',
+    'settings.row.multimode':'Multi-character mode',
+    'multimode.title':'Multi-character Mode',
+    'multimode.enable':'Enable multi-character mode',
+    'multimode.singleMode':'Single mode (new character)',
+    'multimode.multiMode':'Multi mode (multiple Idols)',
+    'multimode.chooseMode':'Choose mode',
+    'multimode.addIdol':'Add Idol',
+    'multimode.syncFrom':'Sync from single mode',
+    'multimode.deleteIdol':'Delete this Idol',
+    'multimode.switchPhone':'Switch phone',
+    'multimode.selectPhone':'Select whose phone to switch to',
+    'multimode.knowEachOther':'Know each other',
+    'multimode.notKnow':'Don\'t know each other',
+    'multimode.relation':'Idol relationship',
+    'multimode.syncTitle':'Sync single-mode save',
+    'multimode.syncHint':'Choose a single-mode character to sync',
+    'multimode.idolName':'Idol name',
+    'multimode.groupChat':'New group chat',
+    'multimode.selectMembers':'Select group members',
+    'multimode.groupName':'Group name',
+    'card.push':'Business card push',
+    'card.pushTitle':'Push contact card',
+    'card.selectContact':'Select contact to push',
+    'card.addToContacts':'Add to contacts',
+    'card.received':'A contact card received',
+    'card.added':'Added to contacts',
     'memory.hint':'Character memories — record key events from generated content. Injected automatically into context.',
     'memory.empty':'No memories yet. Tap the button below to add one.',
     'memory.add':'+ Add memory',
@@ -1990,6 +2391,56 @@ const I18N = {
     'preview.theirMsg':'Their reply',
     'wallpaper.opacity':'Opacity (dark = darker)',
     'wallpaper.blur':'Blur',
+    // New features
+    'album.title':'Photos',
+    'album.empty':'No photos yet',
+    'album.viewDesc':'View description',
+    'album.photo':'Photo',
+    'album.video':'Video',
+    'album.refresh':'Refresh album',
+    'ig.commentPlaceholder':'Add a comment…',
+    'ig.commentSend':'Post',
+    'ig.commentExpand':'View all comments',
+    'ig.commentCollapse':'Collapse',
+    'ig.viewMoreReplies':'View more replies',
+    'ig.userPost':'Post',
+    'ig.userPostText':'Text only',
+    'ig.userPostImage':'With photo',
+    'ig.userPostVideo':'With video',
+    'ig.postCaption':'Write something…',
+    'ig.imageDesc':'Photo description…',
+    'ig.videoDesc':'Video description…',
+    'ig.commentTitle':'Comments',
+    'ig.replyTo':'Reply to',
+    'ig.replyComment':'Reply to this comment…',
+    'toast.commentSent':'Comment posted',
+    'toast.replySent':'Reply posted',
+    'toast.postPublished':'Post published',
+    'news.autoAdded':'A news event was added based on plot developments',
+    'video.label':'Video',
+    'video.duration':'Duration',
+    'transfer.received':'Payment received',
+    'transfer.refunded':'Refunded',
+    'album.fromLibrary':'Choose from album',
+    'ig.altAccountLabel':'Secret account',
+    'ig.mainAccountLabel':'Main account',
+    'ig.userAltTitle':'My secret account',
+    'ig.altNeedId':'Please enter a secret account ID in Settings first',
+    'tab.myPosts':'My posts',
+    'forward.title':'Forward post',
+    'forward.selectContact':'Select recipient',
+    'forward.sent':'Forwarded',
+    'forward.label':'Shared from Instagram',
+    'phone.appTitle':'Phone',
+    'phone.callLog':'Call log',
+    'phone.incoming':'Incoming',
+    'phone.outgoing':'Outgoing',
+    'phone.missed':'Missed',
+    'phone.duration':'Duration',
+    'phone.viewRecord':'View call',
+    'phone.transcript':'Call transcript',
+    'phone.refresh':'Refresh',
+    'phone.empty':'No calls yet — tap Refresh to generate',
   }
 };
 function t(key){
@@ -2025,7 +2476,12 @@ function defaultState(){
     },
     characters:[],
     currentCharacterId:null,
-    currentOwner:'idol' // 'idol' | 'user'
+    currentOwner:'idol', // 'idol' | 'user'
+    multiMode:{
+      enabled:false,
+      idols:[], // [{id, idolName, idolBio, idolAvatar, idolAltName, idolMainIgId, userName, userBio, userAvatar, secretRelationship, worldBookEntries, memoryEntries, phoneData, knowsOthers:true}]
+      activeIdolId:null // which idol's phone is being viewed in multi mode
+    }
   };
 }
 
@@ -2039,6 +2495,7 @@ function loadState(){
     const base = defaultState();
     return Object.assign(base, parsed, {
       settings:Object.assign(base.settings, parsed.settings||{}),
+      multiMode:Object.assign(base.multiMode||{}, parsed.multiMode||{})
     });
   }catch(e){
     console.warn('loadState failed', e);
@@ -2070,7 +2527,10 @@ function ensurePhoneData(ch){
   if(!pd.maps) pd.maps = {stops:[]};
   if(!pd.notes) pd.notes = {items:[]};
   if(!pd.userChat) pd.userChat = {messages:[], idolNickname:''};
-  if(!pd.userInstagram) pd.userInstagram = {feed:[], trending:[], dms:[], topicCache:{}};
+  if(!pd.userInstagram) pd.userInstagram = {feed:[], myPosts:[], trending:[], dms:[], topicCache:{}};
+  if(!pd.userInstagram.myPosts) pd.userInstagram.myPosts = [];
+  if(!pd.album) pd.album = {items:[]};
+  if(!pd.callLog) pd.callLog = {calls:[]};
   return pd;
 }
 
@@ -2152,10 +2612,12 @@ function showToast(msg, duration){
   clearTimeout(_pillToastTimer);
   pill.innerHTML = escapeHtml(msg);
   pill.classList.add('visible');
-  _pillToastTimer = setTimeout(()=>{ if(_pillGenCount===0) pill.classList.remove('visible'); }, duration||2400);
+  pill.style.transform = '';
+  pill.style.opacity = '';
+  _pillToastTimer = setTimeout(()=>{ if(_pillGenCount===0) pill.classList.remove('visible'); }, duration||2000);
   // legacy fallback
   const el = document.getElementById('toast');
-  if(el){ el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'), duration||2400); }
+  if(el){ el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'), duration||2000); }
 }
 
 let _genCount = 0;
@@ -2201,7 +2663,33 @@ function hidePhoneGenerating(){
   if(pill) pill.classList.remove('visible');
 }
 
-/* Generic bottom action sheet. options: [{label, value}], callback(value) */
+/* Swipe-up to dismiss the pill toast */
+(function(){
+  let _sy=0, _dragging=false;
+  function onStart(e){
+    const pill=_getPill(); if(!pill||!pill.classList.contains('visible')) return;
+    _sy = (e.touches?e.touches[0]:e).clientY; _dragging=true;
+  }
+  function onMove(e){
+    if(!_dragging) return;
+    const pill=_getPill(); if(!pill) return;
+    const dy = (e.touches?e.touches[0]:e).clientY - _sy;
+    if(dy<0){ pill.style.transform='translateX(-50%) translateY('+dy+'px)'; pill.style.opacity=String(Math.max(0,1+dy/60)); }
+  }
+  function onEnd(e){
+    if(!_dragging) return; _dragging=false;
+    const pill=_getPill(); if(!pill) return;
+    const dy = (e.changedTouches?e.changedTouches[0]:e).clientY - _sy;
+    if(dy < -30){ clearTimeout(_pillToastTimer); pill.classList.remove('visible'); }
+    pill.style.transform=''; pill.style.opacity='';
+  }
+  window.addEventListener('touchstart', onStart, {passive:true});
+  window.addEventListener('touchmove', onMove, {passive:true});
+  window.addEventListener('touchend', onEnd, {passive:true});
+  window.addEventListener('mousedown', onStart);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onEnd);
+})();
 function showActionSheet(title, options, callback){
   const overlay = document.getElementById('sheetOverlay');
   const sheet = document.getElementById('actionSheet');
@@ -2238,6 +2726,11 @@ function formatClock(){
   const d = new Date();
   let h = d.getHours(); let m = d.getMinutes();
   return (h<10?'0'+h:h)+':'+(m<10?'0'+m:m);
+}
+
+function tick(){
+  const el = document.getElementById('sbTime');
+  if(el) el.textContent = formatClock();
 }
 
 /* Resize an image file to a small square dataURL to keep localStorage light */
@@ -2311,17 +2804,20 @@ function goBack(){
 const ICONS = {
   bubble:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/><circle cx="9" cy="10" r="0.6" fill="currentColor" stroke="none"/><circle cx="13" cy="10" r="0.6" fill="currentColor" stroke="none"/><circle cx="17" cy="10" r="0.6" fill="currentColor" stroke="none"/></svg>',
   instagram:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3.4"/><circle cx="16.2" cy="7.8" r="0.6" fill="currentColor" stroke="none"/></svg>',
-  x:'<svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg>',
+  live:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4"/><path d="M3.5 3.5a13 13 0 0 0 0 17M20.5 3.5a13 13 0 0 1 0 17"/></svg>',
+  x:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4"/></svg>',
   paypal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12" rx="2.4"/><path d="M3.5 10h17"/></svg>',
   maps:'<svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.3A7 7 0 0 0 5 9.7C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.6" r="2.2"/></svg>',
   notes:'<svg viewBox="0 0 24 24"><path d="M6 4h9l4 4v11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M14.5 4.2V8a1 1 0 0 0 1 1h3.8"/><path d="M8 12h8M8 15.5h8M8 8.5h4"/></svg>',
-  settings:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1h-.2a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.5 7.6a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5v-.2a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  settings:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2a1.6 1.6 0 0 1 1.6 1.6v.6a1.6 1.6 0 0 0 2.7 1.1l.4-.4a1.6 1.6 0 0 1 2.3 2.3l-.4.4A1.6 1.6 0 0 0 19.8 10h.6a1.6 1.6 0 0 1 0 3.2h-.6a1.6 1.6 0 0 0-1.2 2.7l.4.4a1.6 1.6 0 0 1-2.3 2.3l-.4-.4A1.6 1.6 0 0 0 13.6 19.4v.6a1.6 1.6 0 0 1-3.2 0v-.6a1.6 1.6 0 0 0-2.7-1.1l-.4.4a1.6 1.6 0 0 1-2.3-2.3l.4-.4A1.6 1.6 0 0 0 4.2 13.6H3.6a1.6 1.6 0 0 1 0-3.2h.6A1.6 1.6 0 0 0 5.5 7.7l-.4-.4A1.6 1.6 0 0 1 7.4 5l.4.4A1.6 1.6 0 0 0 10.4 4.2V3.6A1.6 1.6 0 0 1 12 2z"/></svg>',
   chat:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg>',
   heart:'<svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.8-9.4A5 5 0 0 1 12 6a5 5 0 0 1 9.8 4.6C19.5 15.4 12 20 12 20z"/></svg>',
   commentIcon:'<svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-4 4v-4H4z" stroke-linejoin="round"/></svg>',
   share:'<svg viewBox="0 0 24 24"><path d="M7 7h8a3 3 0 0 1 3 3v2M17 17H9a3 3 0 0 1-3-3v-2"/><path d="M5 9l2-2-2-2M19 15l-2 2 2 2"/></svg>',
   offline:'<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linejoin="round"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-  news:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 8h10M7 12h7M7 16h5"/><path d="M14 12h3v4h-3z"/></svg>'
+  news:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 8h10M7 12h7M7 16h5"/><path d="M14 12h3v4h-3z"/></svg>',
+  album:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="11.5" r="1.5"/><path d="M3 16l4.5-5 4 4.5 3-3 5 5.5"/><rect x="7" y="2" width="10" height="3" rx="1.5"/></svg>',
+  phone:'<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81 19.79 19.79 0 0 1 .00 1.18 2 2 0 0 1 2 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 };
 
 function iconMarkup(appKey){
@@ -2340,10 +2836,12 @@ function appDisplayName(appKey, fallback){
 const APP_DEFS_IDOL = [
   {key:'bubble', name:'Bubble', screen:'screen-bubble'},
   {key:'instagram', name:'Instagram', screen:'screen-instagram'},
-  {key:'x', name:'X', screen:'screen-x'},
+  {key:'live', name:'Live', screen:'screen-x'},
+  {key:'phone', name:'Phone', screen:'screen-phone'},
   {key:'paypal', name:'PayPal', screen:'screen-paypal'},
   {key:'maps', name:'Maps', screen:'screen-maps'},
   {key:'notes', name:'Notes', screen:'screen-notes'},
+  {key:'album', name:'Photos', screen:'screen-album'},
   {key:'news', name:'新闻', screen:'screen-news'},
   {key:'settings', name:'Settings', screen:'screen-settings'},
 ];
@@ -2351,6 +2849,7 @@ const APP_DEFS_USER = [
   {key:'chat', name:'Chat', screen:'screen-chat-list'},
   {key:'offline', name:'线下', screen:'screen-offline'},
   {key:'instagram_user', name:'Instagram', screen:'screen-user-instagram'},
+  {key:'phone', name:'Phone', screen:'screen-phone'},
   {key:'news', name:'新闻', screen:'screen-news'},
   {key:'settings', name:'Settings', screen:'screen-settings'},
 ];
@@ -2433,16 +2932,26 @@ function renderHome(){
   const ownerName = document.getElementById('ownerName');
   const ownerHint = document.getElementById('ownerHint');
 
+  const mm = ensureMultiMode();
   if(state.currentOwner==='idol'){
-    if(ch && ch.idolAvatar){ ownerAvatar.style = avatarStyle(ch.idolAvatar); ownerAvatar.textContent=''; }
-    else { ownerAvatar.style=''; ownerAvatar.textContent = ch? avatarInitial(ch.idolName) : '?'; }
-    ownerName.textContent = ch ? (ch.idolName || t('owner.idol')) : t('owner.idol');
-    ownerHint.textContent = t('hint.tapToSwitch');
+    // In multi-mode, show the active multi-idol info
+    if(mm.enabled && mm.idols.length && mm.activeIdolId){
+      const activeIdol = mm.idols.find(i=>i.id===mm.activeIdolId) || mm.idols[0];
+      if(activeIdol.idolAvatar){ ownerAvatar.style = avatarStyle(activeIdol.idolAvatar); ownerAvatar.textContent=''; }
+      else { ownerAvatar.style=''; ownerAvatar.textContent = avatarInitial(activeIdol.idolName); }
+      ownerName.textContent = activeIdol.idolName || t('owner.idol');
+      ownerHint.textContent = t('multimode.switchPhone');
+    } else {
+      if(ch && ch.idolAvatar){ ownerAvatar.style = avatarStyle(ch.idolAvatar); ownerAvatar.textContent=''; }
+      else { ownerAvatar.style=''; ownerAvatar.textContent = ch? avatarInitial(ch.idolName) : '?'; }
+      ownerName.textContent = ch ? (ch.idolName || t('owner.idol')) : t('owner.idol');
+      ownerHint.textContent = t('hint.tapToSwitch');
+    }
   } else {
     if(ch && ch.userAvatar){ ownerAvatar.style = avatarStyle(ch.userAvatar); ownerAvatar.textContent=''; }
     else { ownerAvatar.style=''; ownerAvatar.textContent = ch? avatarInitial(ch.userName) : '?'; }
     ownerName.textContent = ch ? (ch.userName || t('owner.user')) : t('owner.user');
-    ownerHint.textContent = t('hint.tapToSwitch');
+    ownerHint.textContent = mm.enabled && mm.idols.length ? t('multimode.switchPhone') : t('hint.tapToSwitch');
   }
 
   const grid = document.getElementById('appGrid');
@@ -2477,17 +2986,26 @@ function openApp(appkey, screen){
   goTo(screen);
   if(appkey==='bubble') renderBubble();
   else if(appkey==='instagram') renderInstagram();
-  else if(appkey==='x') renderX();
+  else if(appkey==='live' || appkey==='x') renderX();
+  else if(appkey==='phone') renderPhoneApp();
   else if(appkey==='paypal') renderPaypal();
   else if(appkey==='maps') renderMaps();
   else if(appkey==='notes') renderNotes();
   else if(appkey==='news') renderNewsApp();
+  else if(appkey==='album') renderAlbum();
   else if(appkey==='chat'){ goTo('screen-chat-list'); renderChatList(); return; }
   else if(appkey==='instagram_user') renderUserInstagram();
   else if(appkey==='offline') renderOfflineBody();
 }
 
 document.getElementById('ownerSwitch').addEventListener('click', ()=>{
+  const mm = ensureMultiMode();
+  if(mm.enabled && mm.idols.length > 0){
+    // In multi-mode: show idol picker instead of simple toggle
+    openMultiPhoneSwitchModal();
+    return;
+  }
+  // Normal single-mode toggle
   state.currentOwner = state.currentOwner==='idol' ? 'user' : 'idol';
   saveState();
   renderHome();
@@ -2842,11 +3360,7 @@ function showPromptModal(title, placeholder, callback){
   overlay.addEventListener('click', onClick);
 }
 
-document.getElementById('bubblePhotoBtn').addEventListener('click', ()=>{
-  showPromptModal(t('btn.sendPhoto'), t('ph.photoDesc'), (desc)=>{
-    sendBubbleMessage(desc, true);
-  });
-});
+/* bubblePhotoBtn wired in openPhotoPicker block above */
 
 /* ===================================================================
    INSTAGRAM — shared helpers across idol main / idol alt / user
@@ -2858,6 +3372,11 @@ function resolveIgPd(scope){
   if(scope==='idol') return pd.instagram;
   if(scope==='idolAlt') return pd.instagramAlt;
   if(scope==='user') return pd.userInstagram;
+  if(scope==='userAlt'){
+    if(!pd.userInstagram.altPosts) pd.userInstagram.altPosts=[];
+    if(!pd.userInstagram.altDms) pd.userInstagram.altDms=[];
+    return { posts:pd.userInstagram.altPosts, dms:pd.userInstagram.altDms };
+  }
   return null;
 }
 
@@ -2874,18 +3393,47 @@ function igStatsHtml(p){
 
 function igPostHtml(ch, p, overrideName){
   const displayName = overrideName || ch.idolName || 'idol';
-  // For main account, show idolMainIgId if set
+  const isAltAccount = !!overrideName;
+  // For main account: show large ID (white) + small name (grey)
+  // For alt account: show only the alt ID, no secondary grey ID
   const igId = (!overrideName && ch.idolMainIgId && ch.idolMainIgId.trim())
     ? ch.idolMainIgId.trim()
     : (overrideName && ch.idolAltName && ch.idolAltName.trim() ? ch.idolAltName.trim() : null);
   let html = '<div class="ig-post">';
-  html += '<div class="ig-post-head"><div class="ig-avatar" style="'+avatarStyle(ch.idolAvatar)+'"></div><div><div class="ig-post-name">'+escapeHtml(displayName)+(igId ? ' <span style="font-size:11px;color:var(--text-3);">'+escapeHtml(igId)+'</span>':'')+'</div><div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
+  if(isAltAccount){
+    // Alt account: just show the alt name/id, no secondary label
+    const altDisplay = igId || displayName;
+    html += '<div class="ig-post-head"><div class="ig-avatar" style="'+avatarStyle(ch.idolAvatar)+'"></div><div>'
+      + '<div class="ig-post-name" style="font-size:14px;font-weight:700;color:var(--text);">'+escapeHtml(altDisplay)+'</div>'
+      + '<div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
+  } else {
+    // Main account: large ID in white (primary), name in small grey (secondary)
+    const primaryDisplay = igId || displayName;
+    const secondaryDisplay = igId ? displayName : null;
+    html += '<div class="ig-post-head"><div class="ig-avatar" style="'+avatarStyle(ch.idolAvatar)+'"></div><div>'
+      + '<div class="ig-post-name" style="font-size:14px;font-weight:700;color:var(--text);">'+escapeHtml(primaryDisplay)
+      + (secondaryDisplay ? ' <span style="font-size:11.5px;color:var(--text-3);font-weight:400;">'+escapeHtml(secondaryDisplay)+'</span>' : '')
+      +'</div><div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
+  }
   if(p.hasImage){ html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+'</div>'; }
   html += '<div class="ig-caption">'+escapeHtml(p.caption||'')+'</div>';
   html += igStatsHtml(p);
-  (p.comments||[]).forEach(c=>{
-    html += '<div class="ig-comment"><b>'+escapeHtml(c.name)+'</b>'+escapeHtml(c.text)+'</div>';
+  // Show first 3 comments collapsed, all 8 when expanded
+  const comments = p.comments||[];
+  const expanded = !!p._commentsExpanded;
+  const shown = expanded ? comments : comments.slice(0,3);
+  shown.forEach(c=>{
+    html += '<div class="ig-comment"><b>'+escapeHtml(c.name||c.author||'')+'</b>'+escapeHtml(c.text||'')+'</div>';
   });
+  if(comments.length > 3){
+    html += '<div class="ig-comment-expand-btn" data-post-expand="1">'+(expanded ? t('ig.commentCollapse') : t('ig.commentExpand')+' ('+comments.length+')')+'</div>';
+  }
+  // Comment input section
+  const postId = p.id||'';
+  html += '<div class="ig-comment-input-row">'
+    + '<input class="ig-comment-input" data-post-id="'+escapeHtml(postId)+'" placeholder="'+t('ig.commentPlaceholder')+'">'
+    + '<button class="ig-comment-send" data-post-id="'+escapeHtml(postId)+'">'+t('ig.commentSend')+'</button>'
+  + '</div>';
   html += '</div>';
   return html;
 }
@@ -2959,6 +3507,40 @@ function renderIgBody(){
   }
   body.innerHTML = html;
   bindIgBodyEvents('idol');
+  // Bind comment expand toggles and send buttons for idol posts
+  if(igActiveTab==='posts'){
+    const pd2=resolveIgPd('idol');
+    body.querySelectorAll('[data-post-expand]').forEach(btn=>{
+      const postEl=btn.closest('.ig-post');
+      if(!postEl) return;
+      const postIdx=Array.from(body.querySelectorAll('.ig-post')).indexOf(postEl);
+      if(postIdx<0||!pd2.posts[postIdx]) return;
+      btn.addEventListener('click', ()=>{
+        pd2.posts[postIdx]._commentsExpanded=!pd2.posts[postIdx]._commentsExpanded;
+        saveState(); renderIgBody();
+      });
+    });
+    body.querySelectorAll('.ig-comment-send').forEach(btn=>{
+      const postId=btn.getAttribute('data-post-id');
+      const post=pd2.posts.find(p=>p.id===postId);
+      if(!post) return;
+      const inp=btn.previousElementSibling;
+      btn.addEventListener('click', ()=>{
+        const val=inp?inp.value.trim():''; if(!val) return;
+        if(!post.comments) post.comments=[];
+        const ch=getCurrentChar();
+        post.comments.push({name:ch?(ch.userName||'用户'):'用户',text:val});
+        inp.value='';
+        saveState();
+        showToast(t('toast.commentSent'));
+        // Auto-generate follow-up comments
+        const ch2=getCurrentChar();
+        if(ch2) autoGenerateIgComments(post,'idol',pd2.posts.indexOf(post),ch2);
+        renderIgBody();
+      });
+      if(inp) inp.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); btn.click(); } });
+    });
+  }
 
   // Long-press on posts (posts tab)
   if(igActiveTab==='posts'){
@@ -3012,10 +3594,192 @@ document.getElementById('igAltTrigger').addEventListener('click', (e)=>{
   renderInstagramAlt();
 });
 
+/* ---- User alt IG trigger ---- */
+document.getElementById('userIgAltTrigger').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  const altId = ch.userAltIgId && ch.userAltIgId.trim();
+  if(!altId){ showToast(t('ig.altNeedId')); return; }
+  ensurePhoneData(ch);
+  // update title
+  const titleEl = document.getElementById('userAltIgTitle');
+  if(titleEl) titleEl.textContent = altId;
+  goTo('screen-user-instagram-alt');
+  renderUserInstagramAlt();
+});
+
+let userAltIgActiveTab = 'posts';
+
+document.getElementById('userAltIgTabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.ig-tab');
+  if(!btn) return;
+  userAltIgActiveTab = btn.getAttribute('data-tab');
+  renderUserInstagramAlt();
+});
+
+function renderUserInstagramAlt(){
+  const ch = getCurrentChar();
+  if(!ch) return;
+  const pd = ensurePhoneData(ch);
+  const body = document.getElementById('userAltIgBody');
+  const tabs = document.getElementById('userAltIgTabs');
+  if(tabs) tabs.querySelectorAll('.ig-tab').forEach(b=>b.classList.toggle('active', b.getAttribute('data-tab')===userAltIgActiveTab));
+
+  if(userAltIgActiveTab==='posts'){
+    // User alt posts — secret account, posts carefully
+    const altPosts = pd.userInstagram.altPosts || [];
+    let html = '<div class="ig-pane active" style="padding-bottom:60px;">';
+    if(!altPosts.length){
+      html += '<div class="empty-state">'+t('empty.ig')+'</div>';
+    } else {
+      const altId = ch.userAltIgId||t('ig.altAccountLabel');
+      altPosts.slice().reverse().forEach((p,ri)=>{
+        const idx = altPosts.length-1-ri;
+        html += renderUserAltPostHtml(p, idx, ch, altId);
+      });
+    }
+    html += '</div>'
+      + '<button class="ig-post-fab" id="userAltPostFab" style="position:absolute;right:14px;bottom:14px;">'
+        + '<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;"><path d="M12 5v14M5 12h14"/></svg>'
+      + '</button>';
+    body.innerHTML = html;
+    body.style.position='relative';
+    const fab = document.getElementById('userAltPostFab');
+    if(fab) fab.addEventListener('click', ()=>{
+      if(!pd.userInstagram.altPosts) pd.userInstagram.altPosts=[];
+      openUserAltPostComposer(pd, ch);
+    });
+  } else if(userAltIgActiveTab==='dm'){
+    const altDms = pd.userInstagram.altDms || [];
+    let html = '<div class="ig-pane active">';
+    if(!altDms.length){ html += '<div class="empty-state">'+t('empty.dm')+'</div>'; }
+    else { html += dmListHtml(altDms, 'userAlt'); }
+    html += '</div>';
+    body.innerHTML = html;
+    // Bind DM list clicks
+    body.querySelectorAll('.dm-list-item').forEach((el,i)=>{
+      el.addEventListener('click', ()=>{
+        currentDmCtx = {scope:'userAlt', idx:i};
+        goTo('screen-ig-dm');
+        renderDmFeed();
+      });
+    });
+  }
+}
+
+function renderUserAltPostHtml(post, idx, ch, altId){
+  const avStyle = ch&&ch.userAvatar ? avatarStyle(ch.userAvatar)+';background-size:cover;' : '';
+  const avInit = ch ? avatarInitial(ch.userName) : '?';
+  let html = '<div class="ig-post" data-user-alt-post-idx="'+idx+'">';
+  html += '<div class="ig-post-head">'
+    + '<div class="ig-avatar" style="'+(avStyle||'')+'">'+( avStyle?'':avInit)+'</div>'
+    + '<div>'
+      + '<div class="ig-post-name" style="font-size:14px;font-weight:700;color:var(--text);">'+escapeHtml(altId)+'</div>'
+      + '<div class="ig-post-time">'+escapeHtml(post.time||'')+'</div>'
+    + '</div></div>';
+  if(post.hasImage){
+    if(post.isVideo){
+      html += '<div class="video-bubble" style="width:100%;margin-bottom:8px;"><div class="video-bubble-thumb">'
+        +(post.mediaUrl?'<div style="width:100%;height:100%;background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;"></div>':'')
+        +'<div class="video-bubble-play"></div><span class="video-bubble-badge">VIDEO</span></div>'
+        +'<div class="video-bubble-label">'+escapeHtml(post.imageDesc||'')+'</div></div>';
+    } else {
+      const imgStyle = post.mediaUrl ? 'background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;' : '';
+      html += '<div class="ig-image-block" style="'+(imgStyle||'')+'">'+( imgStyle?'':escapeHtml(post.imageDesc||'') )+'</div>';
+    }
+  }
+  html += '<div class="ig-caption">'+escapeHtml(post.caption||'')+'</div>';
+  html += '<div class="ig-likes">'+escapeHtml(String(post.likes||0))+' '+t('label.likes')+'</div>';
+  const comments = post.comments||[];
+  const expanded = !!post._commentsExpanded;
+  const shown = expanded ? comments : comments.slice(0,3);
+  if(shown.length){
+    html += '<div class="ig-comment-section">';
+    shown.forEach((c,i)=>{
+      html += '<div class="ig-comment-entry"><div class="ig-comment-ava">'+escapeHtml((c.author||'?').slice(0,1))+'</div>'
+        +'<div class="ig-comment-body"><span class="ig-comment-name">'+escapeHtml(c.author||'')+'</span>'
+        +' <span class="ig-comment-text">'+escapeHtml(c.text||'')+'</span></div></div>';
+    });
+    if(comments.length>3) html+='<span class="ig-comment-expand-btn" data-alt-expand="'+idx+'">'+(expanded?t('ig.commentCollapse'):t('ig.commentExpand')+' ('+comments.length+')')+'</span>';
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function openUserAltPostComposer(pd, ch){
+  // Reuse the same composer UI as main account
+  if(!pd.userInstagram.altPosts) pd.userInstagram.altPosts=[];
+  const altPd = {myPosts: pd.userInstagram.altPosts};
+  const altCh = Object.assign({}, ch, {userMainIgId: ch.userAltIgId||t('ig.altAccountLabel'), userName: ch.userAltIgId||ch.userName});
+  const composerEl = document.createElement('div');
+  composerEl.className = 'ig-post-composer';
+  let postType='text', pendingMediaUrl='', pendingIsVideo=false;
+  function build(){
+    composerEl.innerHTML = '<div class="ig-composer-header">'
+      +'<button class="ig-composer-cancel" id="altComposerCancel">'+t('btn.cancel')+'</button>'
+      +'<div class="ig-composer-title">'+t('ig.userPost')+'</div>'
+      +'<button class="ig-composer-post" id="altComposerPost">'+t('ig.commentSend')+'</button>'
+    +'</div><div class="ig-composer-body">'
+      +'<div class="ig-composer-type-row">'
+        +'<button class="ig-composer-type-btn'+(postType==='text'?' active':'')+'" data-type="text">'+t('ig.userPostText')+'</button>'
+        +'<button class="ig-composer-type-btn'+(postType==='image'?' active':'')+'" data-type="image">'+t('ig.userPostImage')+'</button>'
+        +'<button class="ig-composer-type-btn'+(postType==='video'?' active':'')+'" data-type="video">'+t('ig.userPostVideo')+'</button>'
+      +'</div>'
+      +(postType!=='text'?'<div class="ig-composer-media'+(pendingMediaUrl?' has-img':'')+'" id="altComposerMedia" style="'+(pendingMediaUrl?'background-image:url('+pendingMediaUrl+');':'')+'">'+( pendingMediaUrl?'':'<svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--text-3);fill:none;stroke-width:1.4;"><rect x="3" y="5" width="18" height="14" rx="2.5"/></svg><div>'+t('btn.uploadImage')+'</div>')+'</div>':'')
+      +(postType!=='text'?'<textarea class="ig-composer-desc" id="altComposerDesc" placeholder="'+t(postType==='video'?'ig.videoDesc':'ig.imageDesc')+'"></textarea>':'')
+      +'<textarea class="ig-composer-caption" id="altComposerCaption" placeholder="'+t('ig.postCaption')+'"></textarea>'
+    +'</div>';
+    composerEl.querySelectorAll('[data-type]').forEach(b=>b.addEventListener('click',()=>{postType=b.getAttribute('data-type');pendingMediaUrl='';pendingIsVideo=postType==='video';build();}));
+    const med=composerEl.querySelector('#altComposerMedia');
+    if(med) med.addEventListener('click',()=>{ const inp=document.createElement('input');inp.type='file';inp.accept=pendingIsVideo?'video/*':'image/*';inp.onchange=async()=>{if(!inp.files||!inp.files[0])return;if(!pendingIsVideo){try{pendingMediaUrl=await fileToResizedDataUrl(inp.files[0],600);}catch(e){}}build();};inp.click();});
+    composerEl.querySelector('#altComposerCancel').addEventListener('click',()=>composerEl.remove());
+    composerEl.querySelector('#altComposerPost').addEventListener('click',()=>{
+      const caption=(composerEl.querySelector('#altComposerCaption')||{}).value||'';
+      const desc=(composerEl.querySelector('#altComposerDesc')||{}).value||'';
+      if(!caption.trim()&&!desc.trim()){ showToast(t('ig.postCaption')); return; }
+      const now=new Date();
+      const post={id:uid('ap'),hasImage:postType!=='text',isVideo:pendingIsVideo,mediaUrl:pendingMediaUrl,imageDesc:desc,caption,time:now.getFullYear()+'/'+(now.getMonth()+1)+'/'+now.getDate(),likes:0,comments:[],ts:Date.now()};
+      pd.userInstagram.altPosts.push(post);
+      saveState();
+      composerEl.remove();
+      showToast(t('toast.postPublished'));
+      renderUserInstagramAlt();
+      // Auto-generate comments (on secret account, very few — idol might reply with alt)
+      autoGenerateAltPostComments(post, ch);
+    });
+  }
+  build();
+  const screen=document.getElementById('screen-user-instagram-alt');
+  if(screen) screen.appendChild(composerEl);
+}
+
+async function autoGenerateAltPostComments(post, ch){
+  if(!ch||!normalizeBaseUrl(state.settings.apiUrl)||!state.settings.model) return;
+  try{
+    const pd=ensurePhoneData(ch);
+    const sys=buildBaseSystemPrompt(ch,'用户发了一条小号帖子。小号身份保密，知道的人极少。请生成少量真实评论（2-4条），可能没有人评论，也可能idol用小号偷偷点赞或留隐晦评论——注意绝对不能暴露idol真实身份。');
+    const usr='帖子：「'+post.caption+(post.imageDesc?' [配图：'+post.imageDesc+']':'')+' 」\n输出JSON：{"comments":[{"author":"用户名","text":"内容","isIdolAlt":false}],"likes":数字}（评论可为空数组）';
+    const data=await generateJSON(sys,usr);
+    if(data){
+      if(Array.isArray(data.comments)) post.comments=data.comments.map(c=>({author:c.author,text:c.text,replies:[]}));
+      if(data.likes) post.likes=data.likes;
+      pd.userInstagram.altPosts[pd.userInstagram.altPosts.length-1]=post;
+      saveState();
+      const vis=document.querySelector('#screen-user-instagram-alt.visible');
+      if(vis) renderUserInstagramAlt();
+    }
+  }catch(e){}
+}
+
+// Wire userAlt in resolveIgPd
+
+
 /* ---- generation: idol main ---- */
 async function generateIgPosts(ch){
   const sys = buildBaseSystemPrompt(ch, '请生成idol在 Instagram 上发布的帖子。');
-  const usr = '生成 5 篇idol发布的 Instagram 帖子，部分帖子配图、部分不配图。每篇帖子配 2 到 4 条粉丝评论，并附点赞数、评论总数、转发数（评论总数应大于等于实际展示的评论条数）。\n输出 JSON：{"posts":[{"hasImage":true,"imageDesc":"图片内容的文字描述（若hasImage为false则留空字符串）","caption":"配文","time":"如 3小时前","likes":12000,"commentCount":340,"shareCount":58,"comments":[{"name":"评论者昵称","text":"评论内容"}]}, ... 共5篇]}';
+  const usr = '生成 5 篇idol发布的 Instagram 帖子，部分帖子配图、部分不配图。每篇帖子配 8 条粉丝评论（评论者各不相同），并附点赞数、评论总数、转发数。\n输出 JSON：{"posts":[{"hasImage":true,"imageDesc":"图片内容的文字描述（若hasImage为false则留空字符串）","caption":"配文","time":"如 3小时前","likes":12000,"commentCount":340,"shareCount":58,"comments":[{"name":"评论者昵称","text":"评论内容"}，共8条]}, ... 共5篇]}';
   const data = await generateJSON(sys, usr);
   return (data && Array.isArray(data.posts)) ? data.posts.slice(0,5) : null;
 }
@@ -3086,7 +3850,7 @@ async function refreshInstagramSection(section){
 function showIgRefreshMenu(scope){
   let opts;
   if(scope==='user'){
-    opts = [{value:'feed', label:t('btn.refreshPosts')}, {value:'trending', label:t('btn.refreshTrending')}, {value:'dm', label:t('btn.refreshDm')}, {value:'all', label:t('btn.refreshAll')}];
+    opts = [{value:'trending', label:t('btn.refreshTrending')}, {value:'dm', label:t('btn.refreshDm')}, {value:'all', label:t('btn.refreshAll')}];
   } else if(scope==='idolAlt'){
     opts = [{value:'posts', label:t('btn.refreshPosts')}, {value:'search', label:t('btn.refreshSearch')}, {value:'dm', label:t('btn.refreshDm')}, {value:'all', label:t('btn.refreshAll')}];
   } else {
@@ -3163,6 +3927,32 @@ function renderIgAltBody(){
   }
   body.innerHTML = html;
   bindIgBodyEvents('idolAlt');
+
+  // Bind comment expand and send for alt posts
+  if(igAltActiveTab==='posts'){
+    const pd3=resolveIgPd('idolAlt');
+    body.querySelectorAll('[data-post-expand]').forEach(btn=>{
+      const postEl=btn.closest('.ig-post'); if(!postEl) return;
+      const postIdx=Array.from(body.querySelectorAll('.ig-post')).indexOf(postEl);
+      if(postIdx<0||!pd3.posts[postIdx]) return;
+      btn.addEventListener('click',()=>{ pd3.posts[postIdx]._commentsExpanded=!pd3.posts[postIdx]._commentsExpanded; saveState(); renderIgAltBody(); });
+    });
+    body.querySelectorAll('.ig-comment-send').forEach(btn=>{
+      const postId=btn.getAttribute('data-post-id');
+      const post=pd3.posts.find(p=>p.id===postId); if(!post) return;
+      const inp=btn.previousElementSibling;
+      btn.addEventListener('click',()=>{
+        const val=inp?inp.value.trim():''; if(!val) return;
+        if(!post.comments) post.comments=[];
+        const ch2=getCurrentChar();
+        post.comments.push({name:ch2?(ch2.userName||'用户'):'用户',text:val});
+        inp.value=''; saveState(); showToast(t('toast.commentSent'));
+        if(ch2) autoGenerateIgComments(post,'idolAlt',pd3.posts.indexOf(post),ch2);
+        renderIgAltBody();
+      });
+      if(inp) inp.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); btn.click(); } });
+    });
+  }
 
   // Long-press on posts
   if(igAltActiveTab==='posts'){
@@ -3728,17 +4518,18 @@ function renderNewsApp(){
   const news = ensureNewsData();
   const body = document.getElementById('newsBody');
   if(!news.length){
-    body.innerHTML = '<div class="news-empty">📰<br><br>这里还没有新闻<br><span style="font-size:12px;">点击右上角「+ 添加」填写近期大新闻<br>添加后，AI生成的内容将受到这些新闻的影响</span></div>';
+    body.innerHTML = '<div class="news-empty">'+t('news.empty')+'</div>';
     return;
   }
-  body.innerHTML = '<div class="news-breaking-banner"><span>BREAKING</span>今日要闻</div>'
+  body.innerHTML = '<div class="news-breaking-banner"><span>BREAKING</span>'+t('news.breakingTitle')+'</div>'
     + news.map((item, i)=>`
       <div class="news-item" data-news-idx="${i}">
-        <button class="news-delete-btn" data-del-idx="${i}">删除</button>
-        <div class="news-source"><span class="news-source-dot"></span>${escapeHtml(item.source||'综合')}</div>
+        <button class="news-edit-btn" data-edit-idx="${i}">${t('btn.edit')}</button>
+        <button class="news-delete-btn" data-del-idx="${i}">${t('btn.delete')}</button>
+        <div class="news-source"><span class="news-source-dot"></span>${escapeHtml(item.source||t('news.sourceDefault'))}</div>
         <div class="news-title">${escapeHtml(item.title)}</div>
         ${item.summary ? '<div class="news-summary">'+escapeHtml(item.summary)+'</div>' : ''}
-        <div class="news-meta">${escapeHtml(item.date||'今日')} · ${escapeHtml(item.category||'新闻')}</div>
+        <div class="news-meta">${escapeHtml(item.date||t('news.today'))} · ${escapeHtml(item.category||t('news.category'))}</div>
       </div>`).join('');
 
   body.querySelectorAll('[data-del-idx]').forEach(btn=>{
@@ -3748,7 +4539,14 @@ function renderNewsApp(){
       state.newsItems.splice(idx,1);
       saveState();
       renderNewsApp();
-      showToast('新闻已删除');
+      showToast(t('toast.entryDeleted'));
+    });
+  });
+  body.querySelectorAll('[data-edit-idx]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-edit-idx'),10);
+      openEditNewsModal(idx);
     });
   });
 }
@@ -3805,6 +4603,54 @@ function openAddNewsModal(){
 }
 
 document.getElementById('newsAddBtn').addEventListener('click', openAddNewsModal);
+
+function openEditNewsModal(idx){
+  const item = (state.newsItems||[])[idx];
+  if(!item) return;
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML =
+    '<div class="prompt-card-title">'+t('news.editTitle')+'</div>'
+    + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">'+t('news.titleLabel')+' *</div>'
+    + '<input type="text" class="field-input" id="editNewsTitleInput" value="'+escapeHtml(item.title)+'" style="margin-bottom:8px;">'
+    + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">'+t('news.summaryLabel')+'</div>'
+    + '<textarea class="field-textarea" id="editNewsSummaryInput" style="min-height:64px;margin-bottom:8px;">'+escapeHtml(item.summary||'')+'</textarea>'
+    + '<div style="display:flex;gap:8px;margin-bottom:8px;">'
+      + '<div style="flex:1;">'
+        + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">'+t('news.sourceLabel')+'</div>'
+        + '<input type="text" class="field-input" id="editNewsSourceInput" value="'+escapeHtml(item.source||'')+'" style="font-size:13px;">'
+      + '</div>'
+      + '<div style="flex:1;">'
+        + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">'+t('news.categoryLabel')+'</div>'
+        + '<input type="text" class="field-input" id="editNewsCategoryInput" value="'+escapeHtml(item.category||'')+'" style="font-size:13px;">'
+      + '</div>'
+    + '</div>'
+    + '<div class="prompt-card-actions">'
+      + '<button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button>'
+      + '<button class="pc-ok" data-v="__save">'+t('btn.save')+'</button>'
+    + '</div>';
+  overlay.classList.add('open');
+  setTimeout(()=>{ const el=document.getElementById('editNewsTitleInput'); if(el) el.focus(); },30);
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn = e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v = btn.getAttribute('data-v');
+    close();
+    if(v==='__save'){
+      const title = (document.getElementById('editNewsTitleInput')||{}).value||'';
+      if(!title.trim()){ showToast(t('news.needTitle')); return; }
+      item.title = title.trim();
+      item.summary = ((document.getElementById('editNewsSummaryInput')||{}).value||'').trim();
+      item.source = ((document.getElementById('editNewsSourceInput')||{}).value||'').trim() || t('news.sourceDefault');
+      item.category = ((document.getElementById('editNewsCategoryInput')||{}).value||'').trim() || t('news.category');
+      saveState();
+      renderNewsApp();
+      showToast(t('toast.saved'));
+    }
+  }
+  overlay.addEventListener('click', onClick);
+}
 
 function getNewsContext(){
   const news = state.newsItems || [];
@@ -3962,12 +4808,17 @@ function renderUserInstagram(){
 
 function renderUserIgBody(){
   const pd = resolveIgPd('user');
+  const ch = getCurrentChar();
   const body = document.getElementById('userIgBody');
   let html = '';
   if(userIgActiveTab==='feed'){
     html = !pd.feed.length
       ? '<div class="ig-pane active"><div class="empty-state">'+t('empty.ig')+'</div></div>'
       : '<div class="ig-pane active">' + pd.feed.map(p=>userFeedPostHtml(p)).join('') + '</div>';
+  } else if(userIgActiveTab==='myposts'){
+    body.style.position='relative';
+    renderUserIgMyPosts(pd, body, ch);
+    return;
   } else if(userIgActiveTab==='explore'){
     html = '<div class="ig-pane active"><div class="section-label">'+t('label.trending')+'</div>';
     if(!pd.trending.length){ html += '<div class="empty-state">'+t('empty.ig')+'</div>'; }
@@ -4054,6 +4905,7 @@ async function refreshUserInstagramSection(section){
   if(errors.length) showToast(t('toast.genFailed')+': '+errors.join('、'));
 }
 
+// User IG refresh: trending/dm/all (no posts refresh — user posts are self-authored)
 document.getElementById('userIgRefreshBtn').addEventListener('click', ()=>showIgRefreshMenu('user'));
 
 /* ===================================================================
@@ -4097,7 +4949,7 @@ function renderSettingsHome(){
         + '</div>'
       + '</div>'
       + '<div class="settings-row single" style="flex-direction:column;align-items:flex-start;gap:10px;">'
-        + '<div class="settings-row-label">圆角大小</div>'
+        + '<div class="settings-row-label">'+t('settings.row.cornerRadius')+'</div>'
         + '<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;">'
           + '<input type="range" id="phoneRadiusSlider" min="0" max="60" step="2" value="'+(state.settings.phoneRadius||46)+'" style="-webkit-appearance:none;appearance:none;width:90%;height:4px;border-radius:2px;background:var(--surface-3);outline:none;cursor:pointer;">'
           + '<span id="phoneRadiusLabel" style="font-size:12px;color:var(--text-3);">'+(state.settings.phoneRadius||46)+'px</span>'
@@ -4229,7 +5081,21 @@ function renderSettingsApi(){
 =================================================================== */
 function renderSettingsCharacters(){
   const body = document.getElementById('settingsCharactersBody');
+  const mm = ensureMultiMode();
   let html = '';
+
+  // Multi-mode status banner
+  if(mm.enabled && mm.idols.length){
+    html += '<div style="background:var(--surface-2);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">'
+      +'<div>'
+        +'<div style="font-size:13.5px;font-weight:700;color:var(--text);">'+t('multimode.title')+'</div>'
+        +'<div style="font-size:12px;color:var(--text-3);margin-top:2px;">'+mm.idols.length+' Idols</div>'
+      +'</div>'
+      +'<button class="hdr-btn" id="openMultiModeSettingsBtn" style="font-size:12.5px;color:var(--text-2);padding:6px 12px;border:1px solid var(--border);border-radius:9px;">'+t('btn.edit')+'</button>'
+    +'</div>';
+  }
+
+  // Single-mode characters
   if(!state.characters.length){
     html += '<div class="empty-state">'+t('settings.noCharacters')+'</div>';
   } else {
@@ -4265,12 +5131,493 @@ function renderSettingsCharacters(){
       openCharacterEdit(btn.getAttribute('data-edit-id'));
     });
   });
-  document.getElementById('newCharBtn').addEventListener('click', ()=>openCharacterEdit(null));
+
+  // NEW: mode-choice modal on "新建" button
+  document.getElementById('newCharBtn').addEventListener('click', ()=>openNewCharModeModal());
+
+  const editMM = document.getElementById('openMultiModeSettingsBtn');
+  if(editMM) editMM.addEventListener('click', ()=>openMultiModeModal());
+}
+
+/* Show a small modal: 单人模式 or 多人模式 */
+function openNewCharModeModal(){
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML = '<div class="prompt-card-title">'+t('btn.newCharacter')+'</div>'
+    +'<div style="font-size:12.5px;color:var(--text-2);margin-bottom:14px;text-align:center;">'+t('multimode.chooseMode')+'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:4px;">'
+      +'<button class="btn-block" data-mode="single" style="padding:12px 0;font-size:14px;font-weight:600;">'+t('multimode.singleMode')+'</button>'
+      +'<button class="btn-block secondary" data-mode="multi" style="padding:12px 0;font-size:14px;">'+t('multimode.multiMode')+'</button>'
+    +'</div>'
+    +'<div class="prompt-card-actions"><button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button></div>';
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click',onClick); }
+  function onClick(e){
+    const modeBtn=e.target.closest('[data-mode]');
+    if(modeBtn){
+      const mode=modeBtn.getAttribute('data-mode');
+      close(); // always close promptOverlay first
+      if(mode==='single'){
+        openCharacterEdit(null);
+      } else {
+        // Small delay so promptOverlay is fully gone before multiModeOverlay opens
+        setTimeout(()=>openMultiModeModal(), 50);
+      }
+      return;
+    }
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    close();
+  }
+  overlay.addEventListener('click',onClick);
 }
 
 /* ===================================================================
-   SETTINGS > CHARACTER EDIT (create or edit)
+   SETTINGS > CHARACTERS — three-dot menu removed; mode choice handled by openNewCharModeModal
 =================================================================== */
+function initCharsMenu(){
+  // No-op: three-dot menu replaced by mode-choice modal on "新建" button
+}
+
+/* ===================================================================
+   MULTI-MODE SYSTEM
+=================================================================== */
+function ensureMultiMode(){
+  if(!state.multiMode) state.multiMode = {enabled:false, idols:[], activeIdolId:null};
+  if(!Array.isArray(state.multiMode.idols)) state.multiMode.idols = [];
+  return state.multiMode;
+}
+
+function openMultiModeModal(){
+  const mm = ensureMultiMode();
+  const overlay = document.getElementById('multiModeOverlay');
+  const card = document.getElementById('multiModeCard');
+  overlay.classList.add('open');
+
+  function render(){
+    const isEnabled = mm.enabled;
+    let html = '<div class="multi-modal-title">'+t('multimode.title')+'</div>';
+
+    // Enable / Disable toggle row
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:10px 12px;background:var(--surface-2);border-radius:12px;">'
+      + '<span style="font-size:13.5px;font-weight:600;color:var(--text);">'+t('multimode.enable')+'</span>'
+      + '<div class="ios-toggle'+(isEnabled?' on':'')+'" id="mmEnableToggle"></div>'
+    + '</div>';
+
+    if(isEnabled){
+      // List of multi idols
+      if(mm.idols.length){
+        html += '<div style="margin-bottom:10px;">';
+        mm.idols.forEach((idol,i)=>{
+          html += '<div class="multi-idol-card'+(mm.activeIdolId===idol.id?' active-phone':'')+'" data-mm-idx="'+i+'">'
+            + '<div class="ig-avatar" style="'+(idol.idolAvatar?avatarStyle(idol.idolAvatar):'')+'">'+(idol.idolAvatar?'':avatarInitial(idol.idolName))+'</div>'
+            + '<div style="flex:1;min-width:0;">'
+              + '<div class="multi-idol-name">'+escapeHtml(idol.idolName||'—')+'</div>'
+              + '<div class="multi-idol-sub">'+(idol.knowsOthers ? t('multimode.knowEachOther') : t('multimode.notKnow'))+'</div>'
+            + '</div>'
+            + '<button class="multi-idol-del" data-mm-del="'+i+'">'+t('multimode.deleteIdol')+'</button>'
+          + '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div class="empty-state" style="padding:20px 0;">'+t('settings.noCharacters')+'</div>';
+      }
+
+      // Relationship toggle for each idol
+      if(mm.idols.length > 1){
+        html += '<div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">'+t('multimode.relation')+'</div>';
+        mm.idols.forEach((idol,i)=>{
+          html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">'
+            + '<span style="font-size:13px;color:var(--text);">'+escapeHtml(idol.idolName||'—')+'</span>'
+            + '<div class="ios-toggle'+(idol.knowsOthers!==false?' on':'')+'" data-mm-know="'+i+'"></div>'
+          + '</div>';
+        });
+        html += '<div style="height:10px;"></div>';
+      }
+
+      // Add idol / sync buttons
+      html += '<button class="btn-block secondary" id="mmAddIdolBtn" style="margin-bottom:8px;font-size:13px;padding:10px 0;">'+t('multimode.addIdol')+'</button>';
+      if(state.characters && state.characters.length){
+        html += '<button class="btn-block secondary" id="mmSyncBtn" style="margin-bottom:8px;font-size:13px;padding:10px 0;">'+t('multimode.syncFrom')+'</button>';
+      }
+    }
+
+    html += '<button class="btn-block secondary" style="font-size:13px;padding:10px 0;margin-top:4px;" id="mmCloseBtn">'+t('btn.done')+'</button>';
+    card.innerHTML = html;
+
+    // Bind enable toggle
+    const tog = document.getElementById('mmEnableToggle');
+    if(tog) tog.addEventListener('click', ()=>{
+      mm.enabled = !mm.enabled;
+      saveState();
+      render();
+    });
+
+    // Bind delete buttons
+    card.querySelectorAll('[data-mm-del]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const idx = parseInt(btn.getAttribute('data-mm-del'),10);
+        mm.idols.splice(idx,1);
+        if(mm.activeIdolId === (mm.idols[idx]||{}).id) mm.activeIdolId = mm.idols.length ? mm.idols[0].id : null;
+        saveState();
+        render();
+      });
+    });
+
+    // Bind know-each-other toggles
+    card.querySelectorAll('[data-mm-know]').forEach(tog=>{
+      tog.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const idx = parseInt(tog.getAttribute('data-mm-know'),10);
+        mm.idols[idx].knowsOthers = !(mm.idols[idx].knowsOthers !== false);
+        saveState();
+        render();
+      });
+    });
+
+    // Bind card clicks to set active
+    card.querySelectorAll('[data-mm-idx]').forEach(el=>{
+      el.addEventListener('click', (e)=>{
+        if(e.target.closest('[data-mm-del]')) return;
+        const idx = parseInt(el.getAttribute('data-mm-idx'),10);
+        mm.activeIdolId = mm.idols[idx].id;
+        saveState();
+        render();
+      });
+    });
+
+    const addBtn = document.getElementById('mmAddIdolBtn');
+    if(addBtn) addBtn.addEventListener('click', ()=>openMultiAddIdolModal(render));
+    const syncBtn = document.getElementById('mmSyncBtn');
+    if(syncBtn) syncBtn.addEventListener('click', ()=>openMultiSyncModal(render));
+    const closeBtn = document.getElementById('mmCloseBtn');
+    if(closeBtn) closeBtn.addEventListener('click', ()=>{
+      overlay.classList.remove('open');
+      renderSettingsCharacters();
+    });
+  }
+
+  render();
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay){ overlay.classList.remove('open'); renderSettingsCharacters(); } });
+}
+
+function openMultiAddIdolModal(onDone){
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  let pendingAvatar = '';
+  function buildHtml(){
+    return '<div class="prompt-card-title">'+t('multimode.addIdol')+'</div>'
+      + '<div style="display:flex;justify-content:center;margin-bottom:10px;">'
+        + '<div class="avatar-upload" id="mmAvatarPick" style="width:56px;height:56px;border-radius:50%;font-size:20px;'+(pendingAvatar?avatarStyle(pendingAvatar)+';background-size:cover;':'')+'">'+(pendingAvatar?'':'＋')+'</div>'
+      + '</div>'
+      + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">'+t('multimode.idolName')+' *</div>'
+      + '<input type="text" class="field-input" id="mmIdolNameInput" placeholder="'+t('ph.idolName')+'" style="margin-bottom:8px;">'
+      + '<textarea class="field-textarea" id="mmIdolBioInput" placeholder="'+t('ph.idolBio')+'" style="min-height:56px;margin-bottom:8px;"></textarea>'
+      + '<div class="prompt-card-actions">'
+        + '<button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button>'
+        + '<button class="pc-ok" data-v="__add">'+t('multimode.addIdol')+'</button>'
+      + '</div>';
+  }
+  card.innerHTML = buildHtml();
+  overlay.classList.add('open');
+  function bindAvatar(){
+    const el = document.getElementById('mmAvatarPick');
+    if(el) el.addEventListener('click', ()=>{
+      const inp = document.createElement('input'); inp.type='file'; inp.accept='image/*';
+      inp.onchange=async()=>{ if(!inp.files||!inp.files[0]) return; pendingAvatar=await fileToResizedDataUrl(inp.files[0],240); card.innerHTML=buildHtml(); bindAvatar(); };
+      inp.click();
+    });
+  }
+  bindAvatar();
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v=btn.getAttribute('data-v');
+    close();
+    if(v==='__add'){
+      const name=(document.getElementById('mmIdolNameInput')||{}).value||'';
+      if(!name.trim()){ showToast(t('toast.needName')); return; }
+      const bio=(document.getElementById('mmIdolBioInput')||{}).value||'';
+      const mm=ensureMultiMode();
+      const newIdol={id:'mm'+uid('i'), idolName:name.trim(), idolBio:bio.trim(), idolAvatar:pendingAvatar, idolAltName:'', idolMainIgId:'', userName:'', userBio:'', userAvatar:'', secretRelationship:false, worldBookEntries:[], memoryEntries:[], phoneData:null, knowsOthers:true};
+      mm.idols.push(newIdol);
+      if(!mm.activeIdolId) mm.activeIdolId=newIdol.id;
+      saveState();
+      if(typeof onDone==='function') onDone();
+    }
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+function openMultiSyncModal(onDone){
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML = '<div class="prompt-card-title">'+t('multimode.syncTitle')+'</div>'
+    + '<div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px;">'+t('multimode.syncHint')+'</div>'
+    + state.characters.map((ch,i)=>'<div class="card-push-item" data-sync-idx="'+i+'"><div class="ig-avatar" style="'+(ch.idolAvatar?avatarStyle(ch.idolAvatar)+'background-size:cover;':'')+'">'+avatarInitial(ch.idolName)+'</div><div><div style="font-size:13.5px;font-weight:600;">'+escapeHtml(ch.idolName||'—')+'</div><div style="font-size:11.5px;color:var(--text-3);">'+escapeHtml(ch.userName||'')+'</div></div></div>').join('')
+    + '<div class="prompt-card-actions"><button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button></div>';
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const syncEl=e.target.closest('[data-sync-idx]');
+    if(syncEl){
+      const idx=parseInt(syncEl.getAttribute('data-sync-idx'),10);
+      const ch=state.characters[idx];
+      const mm=ensureMultiMode();
+      // Find existing or create
+      let existing = mm.idols.find(idol=>idol._syncedFrom===ch.id);
+      if(!existing){
+        existing = {id:'mm'+uid('s'), _syncedFrom:ch.id, idolName:ch.idolName, idolBio:ch.idolBio, idolAvatar:ch.idolAvatar, idolAltName:ch.idolAltName||'', idolMainIgId:ch.idolMainIgId||'', userName:ch.userName, userBio:ch.userBio, userAvatar:ch.userAvatar, secretRelationship:ch.secretRelationship, worldBookEntries:JSON.parse(JSON.stringify(ch.worldBookEntries||[])), memoryEntries:JSON.parse(JSON.stringify(ch.memoryEntries||[])), phoneData:ch.phoneData ? JSON.parse(JSON.stringify(ch.phoneData)) : null, knowsOthers:true};
+        mm.idols.push(existing);
+        if(!mm.activeIdolId) mm.activeIdolId=existing.id;
+      } else {
+        // Re-sync
+        existing.idolName=ch.idolName; existing.idolBio=ch.idolBio; existing.idolAvatar=ch.idolAvatar;
+        existing.userName=ch.userName; existing.userBio=ch.userBio; existing.userAvatar=ch.userAvatar;
+        existing.phoneData=ch.phoneData ? JSON.parse(JSON.stringify(ch.phoneData)) : null;
+      }
+      saveState();
+      close();
+      if(typeof onDone==='function') onDone();
+      showToast(t('toast.saved'));
+      return;
+    }
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    close();
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+/* Multi-mode phone switch popup */
+function openMultiPhoneSwitchModal(){
+  const mm = ensureMultiMode();
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+
+  // Build list: each multi-mode idol + "我的手机" (user phone)
+  const idolItems = mm.idols.map((idol,i)=>({
+    type:'idol', idx:i, id:idol.id,
+    name: idol.idolName||'—',
+    avatar: idol.idolAvatar||'',
+    active: mm.activeIdolId===idol.id && state.currentOwner==='idol'
+  }));
+  const userItem = { type:'user', name: t('owner.user'), active: state.currentOwner==='user' };
+  const allItems = idolItems.concat([userItem]);
+
+  card.innerHTML = '<div class="prompt-card-title">'+t('multimode.switchPhone')+'</div>'
+    +'<div style="font-size:12.5px;color:var(--text-2);margin-bottom:12px;text-align:center;">'+t('multimode.selectPhone')+'</div>'
+    + allItems.map((item,i)=>'<div class="multi-idol-card'+(item.active?' active-phone':'')+'" data-phone-idx="'+i+'" style="margin-bottom:8px;cursor:pointer;">'
+        +'<div class="ig-avatar" style="'+(item.avatar?avatarStyle(item.avatar)+';background-size:cover;':'')+'">'+avatarInitial(item.name)+'</div>'
+        +'<div style="flex:1;min-width:0;"><div class="multi-idol-name">'+escapeHtml(item.name)+'</div>'
+          +(item.type==='user'?'<div style="font-size:11px;color:var(--text-3);">'+t('owner.user')+'</div>':'')
+        +'</div>'
+        +(item.active?'<span style="width:8px;height:8px;border-radius:50%;background:var(--text);flex:0 0 auto;"></span>':'')
+      +'</div>').join('')
+    +'<div class="prompt-card-actions"><button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button></div>';
+
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const el=e.target.closest('[data-phone-idx]');
+    if(el){
+      const idx=parseInt(el.getAttribute('data-phone-idx'),10);
+      const item=allItems[idx];
+      close();
+      if(item.type==='user'){
+        state.currentOwner='user';
+      } else {
+        state.currentOwner='idol';
+        mm.activeIdolId=item.id;
+        // Also set currentCharacterId if this idol maps to a single-mode char
+        const synced = state.characters.find(c=>c.id===mm.idols[item.idx]._syncedFrom);
+        if(synced) state.currentCharacterId=synced.id;
+      }
+      saveState();
+      renderHome();
+      return;
+    }
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    close();
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+/* ===================================================================
+   GROUP CHAT — create group from contacts
+=================================================================== */
+function openGroupChatModal(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  const pd = ensurePhoneData(ch);
+  const contacts = getUserContactChats(ch);
+  // Include main idol chat as possible member
+  const allContacts = [{name: pd.userChat.idolNickname||ch.idolName||'Idol', type:'idol'}].concat(contacts.map((c,i)=>({name:c.name||t('contact.default'), type:'contact', idx:i})));
+  const checked = new Set();
+
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+
+  function buildHtml(){
+    return '<div class="prompt-card-title">'+t('multimode.groupChat')+'</div>'
+      + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px;">'+t('multimode.groupName')+'</div>'
+      + '<input type="text" class="field-input" id="groupNameInput" placeholder="'+t('multimode.groupName')+'" style="margin-bottom:10px;">'
+      + '<div class="field-label" style="font-size:11.5px;color:var(--text-3);margin-bottom:6px;">'+t('multimode.selectMembers')+'</div>'
+      + '<div style="max-height:160px;overflow-y:auto;margin-bottom:10px;">'
+        + allContacts.map((c,i)=>'<div class="group-member-item" data-gmember="'+i+'">'
+          + '<div class="group-member-check'+(checked.has(i)?' on':'')+'"></div>'
+          + '<span style="font-size:13.5px;font-weight:500;flex:1;">'+escapeHtml(c.name)+'</span>'
+        + '</div>').join('')
+      + '</div>'
+      + '<div class="prompt-card-actions">'
+        + '<button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button>'
+        + '<button class="pc-ok" data-v="__create">'+t('btn.save')+'</button>'
+      + '</div>';
+  }
+  card.innerHTML = buildHtml();
+  overlay.classList.add('open');
+
+  function bindMembers(){
+    card.querySelectorAll('[data-gmember]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const idx=parseInt(el.getAttribute('data-gmember'),10);
+        if(checked.has(idx)) checked.delete(idx); else checked.add(idx);
+        card.innerHTML=buildHtml(); bindMembers();
+      });
+    });
+  }
+  bindMembers();
+
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    const v=btn.getAttribute('data-v');
+    close();
+    if(v==='__create'){
+      const groupName=(document.getElementById('groupNameInput')||{}).value||'';
+      if(!groupName.trim()){ showToast(t('multimode.groupName')); return; }
+      const members=[...checked].map(i=>allContacts[i]);
+      if(!members.length){ showToast(t('sel.selectFirst')); return; }
+      // Create as a group contact chat
+      if(!pd.userContactChats) pd.userContactChats=[];
+      const memberNames = members.map(m=>m.name).join(', ');
+      pd.userContactChats.push({
+        name: groupName.trim(),
+        tag: t('multimode.groupChat'),
+        bio: t('multimode.groupChat')+': '+memberNames,
+        avatar:'',
+        messages:[],
+        id:uid('group'),
+        isGroup:true,
+        members: members
+      });
+      saveState();
+      renderChatList();
+      showToast(t('toast.saved'));
+    }
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+/* ===================================================================
+   CONTACT CARD PUSH — idol pushes a contact card to user
+=================================================================== */
+function openCardPushModal(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  const pd = ensurePhoneData(ch);
+  const contacts = getUserContactChats(ch);
+  // Multi-mode idols can also be pushed
+  const mm = ensureMultiMode();
+  const multiContacts = (mm.enabled ? mm.idols.filter(idol=>idol.id!==mm.activeIdolId) : []).map(idol=>({name:idol.idolName, avatar:idol.idolAvatar, tag:'Idol', bio:idol.idolBio, isMulti:true, multiId:idol.id}));
+  const allPushable = contacts.map((c,i)=>({name:c.name||t('contact.default'), avatar:c.avatar||'', tag:c.tag||'', bio:c.bio||'', contactIdx:i})).concat(multiContacts);
+
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML = '<div class="prompt-card-title">'+t('card.pushTitle')+'</div>'
+    + '<div style="font-size:12.5px;color:var(--text-2);margin-bottom:10px;">'+t('card.selectContact')+'</div>'
+    + (allPushable.length ? allPushable.map((c,i)=>'<div class="card-push-item" data-push-idx="'+i+'">'
+        + '<div class="ig-avatar" style="'+(c.avatar?avatarStyle(c.avatar)+'background-size:cover;':'')+'">'+avatarInitial(c.name)+'</div>'
+        + '<div><div style="font-size:13.5px;font-weight:600;">'+escapeHtml(c.name)+'</div><div style="font-size:11.5px;color:var(--text-3);">'+escapeHtml(c.tag||'')+'</div></div>'
+      + '</div>').join('') : '<div class="empty-state" style="padding:20px 0;">'+t('empty.noChar')+'</div>')
+    + '<div class="prompt-card-actions"><button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button></div>';
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const pushEl=e.target.closest('[data-push-idx]');
+    if(pushEl){
+      const idx=parseInt(pushEl.getAttribute('data-push-idx'),10);
+      const contact=allPushable[idx];
+      close();
+      sendCardBubble(ch, pd, contact);
+      return;
+    }
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    close();
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+function sendCardBubble(ch, pd, contact){
+  // Send as special message in user chat
+  const cardMsg = {
+    from:'them', text:'[CARD]', id:uid('card'), ts:Date.now(),
+    isCard:true,
+    cardData:{name:contact.name, avatar:contact.avatar||'', tag:contact.tag||'', bio:contact.bio||'', contactIdx:contact.contactIdx}
+  };
+  pd.userChat.messages.push(cardMsg);
+  saveState();
+  renderUserChatFeed();
+  renderChatList();
+}
+
+function renderCardBubbleHtml(m, ch){
+  const cd = m.cardData||{};
+  const avStyle = cd.avatar ? avatarStyle(cd.avatar)+';background-size:cover;' : '';
+  const avInit = avatarInitial(cd.name||'?');
+  const alreadyAdded = getUserContactChats(ch).some(c=>c.name===cd.name);
+  return '<div class="card-bubble" data-card-msg-id="'+m.id+'">'
+    + '<div class="card-bubble-avatar" style="'+(avStyle||'')+'">'+( avStyle ? '' : avInit)+'</div>'
+    + '<div class="card-bubble-info">'
+      + '<div class="card-bubble-name">'+escapeHtml(cd.name||'')+'</div>'
+      + '<div class="card-bubble-tag">'+escapeHtml(cd.tag||'')+'</div>'
+    + '</div>'
+    + '</div>'
+    + '<div class="card-bubble-label">'+(alreadyAdded ? t('menu.alreadyContact') : t('card.addToContacts'))+'</div>';
+}
+
+/* Intercept card message clicks in user chat feed */
+function bindCardBubbleClicks(feedEl, ch, pd){
+  if(!feedEl) return;
+  feedEl.querySelectorAll('[data-card-msg-id]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const msgId = el.getAttribute('data-card-msg-id');
+      const msg = pd.userChat.messages.find(m=>m.id===msgId && m.isCard);
+      if(!msg) return;
+      const cd = msg.cardData||{};
+      // Check if already in contacts
+      if(!pd.userContactChats) pd.userContactChats=[];
+      const already = pd.userContactChats.some(c=>c.name===cd.name);
+      if(already){ showToast(t('menu.alreadyContact')); return; }
+      showActionSheet(t('card.received')+': '+cd.name, [{value:'add', label:t('card.addToContacts')}], (val)=>{
+        if(val==='add'){
+          pd.userContactChats.push({name:cd.name, tag:cd.tag||'', bio:cd.bio||'', avatar:cd.avatar||'', messages:[], id:uid('contact')});
+          saveState();
+          renderChatList();
+          showToast(t('card.added'));
+          renderUserChatFeed();
+        }
+      });
+    });
+  });
+}
+
+
 let editingCharId = null; // null = creating new
 let editingCharDraft = null;
 
@@ -4302,6 +5649,8 @@ function renderCharacterEditForm(){
       + '<input type="text" class="field-input" id="userNameInput" placeholder="'+t('ph.userName')+'" value="'+escapeHtml(d.userName)+'" style="flex:1;">'
     + '</div>'
     + '<textarea class="field-textarea" id="userBioInput" placeholder="'+t('ph.userBio')+'">'+escapeHtml(d.userBio)+'</textarea>'
+    + '<input type="text" class="field-input" id="userMainIgIdInput" placeholder="'+t('ph.userIgId')+'" value="'+escapeHtml(d.userMainIgId||'')+'" style="margin-top:6px;">'
+    + '<input type="text" class="field-input" id="userAltIgIdInput" placeholder="'+t('ph.userAltIgId')+'" value="'+escapeHtml(d.userAltIgId||'')+'" style="margin-top:6px;">'
 
     + '<div class="field-label">&nbsp;</div>'
     + '<div class="field-row-check" id="relationCheckRow"><div class="checkbox'+(d.secretRelationship?' checked':'')+'" id="relationCheckbox"></div><div>'+t('settings.relationLabel')+'</div></div>'
@@ -4314,6 +5663,10 @@ function renderCharacterEditForm(){
   document.getElementById('idolAltNameInput').addEventListener('input', e=>{ d.idolAltName = e.target.value; });
   document.getElementById('userNameInput').addEventListener('input', e=>{ d.userName = e.target.value; });
   document.getElementById('userBioInput').addEventListener('input', e=>{ d.userBio = e.target.value; });
+  const userIgMain = document.getElementById('userMainIgIdInput');
+  if(userIgMain) userIgMain.addEventListener('input', e=>{ d.userMainIgId = e.target.value; });
+  const userIgAlt = document.getElementById('userAltIgIdInput');
+  if(userIgAlt) userIgAlt.addEventListener('input', e=>{ d.userAltIgId = e.target.value; });
 
   document.getElementById('relationCheckRow').addEventListener('click', ()=>{
     d.secretRelationship = !d.secretRelationship;
@@ -4374,10 +5727,11 @@ document.getElementById('charSaveBtn').addEventListener('click', saveCharacterDr
 const ICON_CUSTOMIZABLE = [
   {key:'bubble', name:'Bubble'},
   {key:'instagram', name:'Instagram'},
-  {key:'x', name:'X'},
+  {key:'live', name:'Live'},
   {key:'paypal', name:'PayPal'},
   {key:'maps', name:'Maps'},
   {key:'notes', name:'Notes'},
+  {key:'album', name:'Photos'},
   {key:'chat', name:'Chat'},
   {key:'settings', name:'Settings'},
 ];
@@ -4441,6 +5795,15 @@ function openIconEditor(appKey){
       showToast(t('toast.iconSaved'));
       renderSettingsIcons();
       renderHome();
+      // Update app header title if visible
+      const visibleScreen = document.querySelector('.screen.visible');
+      if(visibleScreen){
+        const titleEl = visibleScreen.querySelector('.hdr-title:not([style*="cursor"])');
+        const screenForKey = (APP_DEFS_IDOL.concat(APP_DEFS_USER)).find(d=>d.key===appKey);
+        if(screenForKey && visibleScreen.id===screenForKey.screen && titleEl && name){
+          titleEl.textContent = name;
+        }
+      }
     } else if(v==='__reset'){
       delete state.settings.customIcons[appKey];
       saveState();
@@ -5132,16 +6495,15 @@ function getOrCreateIgSel(scope){
 function renderIgBodyWithLongPress(scope){
   const bodyId = scope==='idol' ? 'igBody' : scope==='idolAlt' ? 'igAltBody' : 'userIgBody';
   const body = document.getElementById(bodyId);
+  if(!body) return;
   const pane = body.querySelector('.ig-pane.active');
   if(!pane) return;
   const posts = pane.querySelectorAll('.ig-post');
   if(!posts.length) return;
   const pd = resolveIgPd(scope);
-  const postList = pd.posts || pd.feed || [];
-
+  const postList = pd ? (pd.posts || pd.feed || []) : [];
   const sel = getOrCreateIgSel(scope);
 
-  // Give each post a data-msg-id if missing
   posts.forEach((el,i)=>{
     const p = postList[i];
     if(p && !p.id) p.id = uid('p');
@@ -5150,20 +6512,30 @@ function renderIgBodyWithLongPress(scope){
 
   attachLongPress(pane, '.ig-post', 600, (el)=>{
     const id = el.getAttribute('data-msg-id');
-    sel.enter(id,
-      ()=>postList.map((p,i)=>({id:p.id||String(i), label:(p.caption||p.imageDesc||'').slice(0,80)})),
-      (ids)=>{
-        if(pd.posts) pd.posts = pd.posts.filter((p,i)=>!ids.includes(p.id||String(i)));
-        else if(pd.feed) pd.feed = pd.feed.filter((p,i)=>!ids.includes(p.id||String(i)));
-        saveState();
-        sel.exit();
-        if(scope==='idol') renderInstagram();
-        else if(scope==='idolAlt') renderInstagramAlt();
-        else renderUserInstagram();
-        showToast(t('toast.postDeleted'));
-      },
-      null // no edit for posts
-    );
+    const postIdx = postList.findIndex(p=>(p.id||String(postList.indexOf(p)))=== id);
+    const post = postList[postIdx>=0?postIdx:0];
+    showActionSheet('', [
+      {value:'forward', label:t('forward.title')},
+      {value:'delete', label:t('btn.delete')}
+    ], (val)=>{
+      if(val==='forward'){
+        if(post) openForwardModal(post, scope);
+      } else if(val==='delete'){
+        sel.enter(id,
+          ()=>postList.map((p,i)=>({id:p.id||String(i), label:(p.caption||p.imageDesc||'').slice(0,80)})),
+          (ids)=>{
+            if(pd.posts) pd.posts = pd.posts.filter((p,i)=>!ids.includes(p.id||String(i)));
+            else if(pd.feed) pd.feed = pd.feed.filter((p,i)=>!ids.includes(p.id||String(i)));
+            saveState(); sel.exit();
+            if(scope==='idol') renderInstagram();
+            else if(scope==='idolAlt') renderInstagramAlt();
+            else renderUserInstagram();
+            showToast(t('toast.postDeleted'));
+          },
+          null
+        );
+      }
+    });
   });
 }
 
@@ -5614,6 +6986,8 @@ function chatMsgHtml(m, ch, opts){
       + (m.recalledText ? '<span style="color:var(--text-3);font-size:11px;"> ('+escapeHtml(m.recalledText)+')</span>' : '')
     + '</div>';
   }
+  // Transfer reply (received/refunded)
+  if(m.type==='transfer') return transferMsgHtml(m, ch);
   const showSentAv = state.settings.chatShowSentAvatar !== false;
   const showRecvAv = state.settings.chatShowRecvAvatar !== false;
   const sentColor = (state.settings.chatColors||{}).sent;
@@ -5621,13 +6995,38 @@ function chatMsgHtml(m, ch, opts){
   const sentStyle = sentColor ? 'background:'+sentColor+' !important;' : '';
   const recvStyle = recvColor ? 'background:'+recvColor+' !important;' : '';
 
+  // Card bubble
+  if(m.isCard) return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'">'
+    + renderCardBubbleHtml(m, ch) + '</div>';
+
   let html = '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'">';
   if(!mine && showRecvAv){
     const av = ch && ch.idolAvatar ? avatarStyle(ch.idolAvatar) : '';
     const init = ch ? avatarInitial(ch.idolName) : '?';
     html += '<div class="chat-avatar" style="'+(av||'')+'">'+(av?'':init)+'</div>';
   }
-  html += '<div class="bubble '+(mine?'sent':'recv')+'" style="'+(mine?sentStyle:recvStyle)+'">'+escapeHtml(m.text)+'</div>';
+
+  // Media bubble (photo or video)
+  if(m.isMedia){
+    if(m.isVideo){
+      html += '<div class="video-bubble" style="'+(mine?sentStyle:recvStyle)+'">'
+        + '<div class="video-bubble-thumb">'
+          + (m.mediaUrl ? '<div style="width:100%;height:100%;background-image:url('+m.mediaUrl+');background-size:cover;background-position:center;"></div>' : '')
+          + '<div class="video-bubble-play"></div>'
+          + '<span class="video-bubble-badge">'+t('video.label')+'</span>'
+        + '</div>'
+        + '<div class="video-bubble-label">'+escapeHtml(m.mediaDesc||'')+'</div>'
+      + '</div>';
+    } else {
+      const imgStyle = m.mediaUrl ? ('background-image:url('+m.mediaUrl+');background-size:cover;background-position:center;') : '';
+      html += '<div class="bubble-photo" style="'+(imgStyle||'')+'">'
+        + (imgStyle ? '' : escapeHtml(m.mediaDesc||''))
+      + '</div>';
+    }
+  } else {
+    html += '<div class="bubble '+(mine?'sent':'recv')+'" style="'+(mine?sentStyle:recvStyle)+'">'+escapeHtml(m.text)+'</div>';
+  }
+
   if(mine && showSentAv){
     const av = ch && ch.userAvatar ? avatarStyle(ch.userAvatar) : '';
     const init = ch ? avatarInitial(ch.userName) : '我';
@@ -5645,6 +7044,26 @@ function initOfflineApp(){
     e.stopPropagation();
     openOfflineSettings();
   });
+  // Wire send button directly on init so it always works
+  const sendBtn = document.getElementById('offlineSendBtn');
+  const input = document.getElementById('offlineChatInput');
+  if(sendBtn && input){
+    sendBtn.addEventListener('click', ()=>{
+      const val = input.value.trim();
+      if(!val) return;
+      input.value='';
+      autoResizeTextarea(input);
+      const ch = getCurrentChar();
+      if(!ch) return;
+      const pd = ensurePhoneData(ch);
+      if(!pd.offlineChatMsgs) pd.offlineChatMsgs = [];
+      pd.offlineChatMsgs.push({from:'me', text:val, id:uid('oc'), ts:Date.now()});
+      saveState();
+      renderOfflineChatMsgs();
+    });
+    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); } });
+    input.addEventListener('input', ()=>autoResizeTextarea(input));
+  }
 }
 
 function openOfflineSettings(){
@@ -5653,11 +7072,8 @@ function openOfflineSettings(){
   // Load saved preset if any
   const preset = state.settings.offlinePromptPreset || '';
   const applyOn = state.settings.offlineApplyPrompt !== false;
-  const presetActive = state.settings.offlineSavePreset || false;
   const input = document.getElementById('offlinePromptInput');
   if(input) input.value = preset;
-  const presetToggle = document.getElementById('offlinePresetToggle');
-  if(presetToggle) presetToggle.className = 'ios-toggle'+(presetActive?' on':'');
   const applyToggle = document.getElementById('offlineApplyToggle');
   if(applyToggle) applyToggle.className = 'ios-toggle'+(applyOn?' on':'');
   renderOfflinePresets();
@@ -5667,11 +7083,22 @@ function closeOfflineSettings(){
   document.getElementById('offlineSettingsOverlay').style.display='none';
 }
 
+function saveOfflinePreset(){
+  const promptInput = document.getElementById('offlinePromptInput');
+  const extraPrompt = promptInput ? promptInput.value.trim() : '';
+  if(!extraPrompt){ showToast(t('offline.savePreset')); return; }
+  if(!state.settings.offlinePresets) state.settings.offlinePresets = [];
+  if(!state.settings.offlinePresets.includes(extraPrompt)){
+    state.settings.offlinePresets.push(extraPrompt);
+    saveState();
+    showToast(t('toast.saved'));
+  }
+  renderOfflinePresets();
+}
+
 function toggleOfflinePreset(){
   state.settings.offlineSavePreset = !(state.settings.offlineSavePreset||false);
   saveState();
-  const tog = document.getElementById('offlinePresetToggle');
-  if(tog) tog.className = 'ios-toggle'+(state.settings.offlineSavePreset?' on':'');
 }
 
 function toggleOfflineApply(){
@@ -5686,10 +7113,10 @@ function renderOfflinePresets(){
   const container = document.getElementById('offlinePresetsList');
   if(!container) return;
   if(!presets.length){ container.innerHTML=''; return; }
-  container.innerHTML = '<div style="font-size:12px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">已保存的预设</div>'
+  container.innerHTML = '<div style="font-size:12px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">'+t('offline.presetListLabel')+'</div>'
     + presets.map((p,i)=>'<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">'
-      + '<div style="flex:1;font-size:13px;color:var(--text);cursor:pointer;" onclick="loadOfflinePreset('+i+')" >'+escapeHtml(p.slice(0,40))+'…</div>'
-      + '<button style="font-size:12px;color:#ff3b30;padding:4px 8px;" onclick="deleteOfflinePreset('+i+')">删除</button>'
+      + '<div style="flex:1;font-size:13px;color:var(--text);cursor:pointer;" onclick="loadOfflinePreset('+i+')" >'+escapeHtml(p.slice(0,40))+(p.length>40?'…':'')+'</div>'
+      + '<button style="font-size:12px;color:#ff3b30;padding:4px 8px;" onclick="deleteOfflinePreset('+i+')">'+t('btn.delete')+'</button>'
     + '</div>').join('');
 }
 
@@ -5713,14 +7140,8 @@ async function generateOffline(){
   const promptInput = document.getElementById('offlinePromptInput');
   const extraPrompt = promptInput ? promptInput.value.trim() : '';
 
-  // Save preset if toggle on
-  if(state.settings.offlineSavePreset && extraPrompt){
-    if(!state.settings.offlinePresets) state.settings.offlinePresets = [];
-    if(!state.settings.offlinePresets.includes(extraPrompt)){
-      state.settings.offlinePresets.push(extraPrompt);
-    }
-    saveState();
-  }
+  // Save prompt as current preset
+  if(extraPrompt) state.settings.offlinePromptPreset = extraPrompt;
 
   const useExtra = state.settings.offlineApplyPrompt !== false;
 
@@ -6167,8 +7588,28 @@ function showTransferModal(onSend){
   setTimeout(()=>{ const a=document.getElementById('transferAmount'); if(a) a.focus(); }, 30);
 }
 
+function formatTransferAmount(amt){
+  const n = parseFloat(String(amt).replace(/,/g,''))||0;
+  const parts = n.toFixed(2).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return parts.join('.');
+}
+
 function transferMsgHtml(m, ch){
   const mine = m.from==='me';
+  if(m.isTransferReply){
+    const label = m.replyType==='refund' ? t('transfer.refunded') : t('transfer.received');
+    const icon = '<svg viewBox="0 0 24 24" style="width:26px;height:26px;stroke:#34c759;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>';
+    return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'">'
+      + '<div class="transfer-reply">'
+        + '<div class="transfer-reply-icon">'+icon+'</div>'
+        + '<div>'
+          + '<div class="transfer-reply-text">'+escapeHtml(label)+'</div>'
+          + '<div class="transfer-reply-note">'+escapeHtml(m.note||'')+'</div>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }
   return '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'">'
     + '<div class="transfer-bubble">'
       + '<div class="transfer-bubble-icon">'
@@ -6176,7 +7617,7 @@ function transferMsgHtml(m, ch){
         + '<span>转账</span>'
       + '</div>'
       + '<div class="transfer-bubble-main">'
-        + '<div class="transfer-bubble-amount">¥'+escapeHtml(m.amount||'0')+'</div>'
+        + '<div class="transfer-bubble-amount">¥'+formatTransferAmount(m.amount||'0')+'</div>'
         + (m.note ? '<div class="transfer-bubble-note">'+escapeHtml(m.note)+'</div>' : '<div class="transfer-bubble-note">'+(mine?'转给对方':'收到转账')+'</div>')
       + '</div>'
     + '</div>'
@@ -6186,20 +7627,36 @@ function transferMsgHtml(m, ch){
 /* Wire photo/transfer buttons */
 document.getElementById('userChatPhotoBtn').addEventListener('click', ()=>{
   showPhotoTransferModal(
-    ()=>{ showPromptModal(t('btn.sendPhoto'), t('ph.photoDesc'), (desc)=>{ addUserChatMessage('[图片] '+desc); }); },
+    ()=>{
+      // Let user choose to upload or pick from album
+      openPhotoPicker((dataUrl, desc, isVideo)=>{
+        const ch=getCurrentChar(); if(!ch) return;
+        const pd=ensurePhoneData(ch).userChat;
+        const m={from:'me', text:'[图片] '+desc, isMedia:true, mediaUrl:dataUrl||'', mediaDesc:desc, isVideo:!!isVideo, id:uid('m'), ts:Date.now()};
+        pd.messages.push(m); saveState(); renderUserChatFeed();
+        const feed=document.getElementById('userChatFeed'); if(feed) feed.scrollTop=feed.scrollHeight;
+        renderChatList();
+      });
+    },
     ()=>{ showTransferModal((amt,note)=>{
       const ch=getCurrentChar(); if(!ch) return;
       const pd=ensurePhoneData(ch).userChat;
       const m={from:'me',text:'[转账] ¥'+amt+(note?' '+note:''),amount:amt,note:note,type:'transfer',id:uid('m'),ts:Date.now()};
       pd.messages.push(m); saveState(); renderUserChatFeed();
       showMsgNotification('Chat','你','已发送转账');
+      renderChatList();
     }); }
   );
 });
 
 document.getElementById('igDmPhotoBtn').addEventListener('click', ()=>{
   showPhotoTransferModal(
-    ()=>{ showPromptModal(t('btn.sendPhoto'), t('ph.photoDesc'), (desc)=>{ sendDmReply('[图片] '+desc); }); },
+    ()=>{
+      openPhotoPicker((dataUrl, desc, isVideo)=>{
+        const m={from:'me', text:'[图片] '+desc, isMedia:true, mediaUrl:dataUrl||'', mediaDesc:desc, isVideo:!!isVideo, id:uid('dm'), ts:Date.now()};
+        sendDmMediaMsg(m);
+      });
+    },
     ()=>{ showTransferModal((amt,note)=>{
       if(!currentDmCtx) return;
       const ch=getCurrentChar(); const {scope,idx}=currentDmCtx;
@@ -6469,6 +7926,9 @@ function renderMsgFeedHtml(messages, ch, isChat){
     }
     if(m.type==='transfer'){
       html += transferMsgHtml(m, ch);
+    } else if(m.isForward){
+      const mine = m.from==='me';
+      html += '<div class="bubble-row '+(mine?'sent':'recv')+'" data-msg-id="'+m.id+'">'+forwardCardHtml(m)+'</div>';
     } else {
       const mine = m.from==='me';
       if(isChat){
@@ -6682,9 +8142,647 @@ function addRecallOptionToChat(){
   // This is integrated into the existing long-press through chatMsgHtml recall button
 }
 
-function tick(){
-  document.getElementById('sbTime').textContent = formatClock();
+/* ===================================================================
+   PHOTO PICKER — upload or choose from album
+=================================================================== */
+function openPhotoPicker(callback){
+  const ch = getCurrentChar();
+  const pd = ch ? ensurePhoneData(ch) : null;
+  const albumItems = (pd && pd.album && pd.album.items) ? pd.album.items : [];
+
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML = '<div class="prompt-card-title">'+t('btn.sendPhoto')+'</div>'
+    + '<div style="display:flex;gap:8px;margin-bottom:12px;">'
+      + '<button class="btn-block secondary" id="ppUploadBtn" style="flex:1;padding:9px 0;font-size:13px;">上传图片</button>'
+      + '<button class="btn-block secondary" id="ppVideoBtn" style="flex:1;padding:9px 0;font-size:13px;">上传视频</button>'
+    + '</div>'
+    + (albumItems.length ? '<div style="font-size:11.5px;color:var(--text-3);margin-bottom:6px;">'+t('album.fromLibrary')+'</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:120px;overflow-y:auto;margin-bottom:10px;">'
+          + albumItems.map((item,i)=>'<div data-album-pick="'+i+'" style="aspect-ratio:1/1;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-size:10px;color:var(--text-3);'+(item.mediaUrl?'background-image:url('+item.mediaUrl+');background-size:cover;background-position:center;':'')+'">'+(item.mediaUrl?'':(item.isVideo?'VID':'IMG'))+'</div>').join('')
+        + '</div>' : '')
+    + '<div class="prompt-card-actions">'
+      + '<button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button>'
+    + '</div>';
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const btn=e.target.closest('[data-v]');
+    if(btn){ if(btn.getAttribute('data-v')==='__cancel') close(); return; }
+    if(e.target===overlay){ close(); return; }
+    const albumPick=e.target.closest('[data-album-pick]');
+    if(albumPick){
+      const idx=parseInt(albumPick.getAttribute('data-album-pick'),10);
+      const item=albumItems[idx]; if(!item) return;
+      close(); callback(item.mediaUrl||'', item.desc||'', item.isVideo);
+      return;
+    }
+    const up=e.target.closest('#ppUploadBtn, #ppVideoBtn');
+    if(up){
+      const isVid=up.id==='ppVideoBtn';
+      const inp=document.createElement('input'); inp.type='file'; inp.accept=isVid?'video/*':'image/*';
+      inp.onchange=async()=>{
+        if(!inp.files||!inp.files[0]) return;
+        close();
+        let dataUrl='';
+        if(!isVid){ try{ dataUrl=await fileToResizedDataUrl(inp.files[0],480); }catch(e){} }
+        // Ask for description
+        showPromptModal(isVid?t('ig.videoDesc'):t('ig.imageDesc'), '', (desc)=>{
+          callback(dataUrl, desc, isVid);
+        });
+      };
+      inp.click();
+    }
+  }
+  overlay.addEventListener('click', onClick);
 }
+
+function sendDmMediaMsg(m){
+  if(!currentDmCtx) return;
+  const {scope,idx}=currentDmCtx;
+  const pd=resolveIgPd(scope); const dm=pd.dms[idx]; if(!dm) return;
+  dm.messages.push(m); saveState(); renderDmFeed();
+}
+
+/* ===================================================================
+   ALBUM RENDERING — idol phone gallery
+=================================================================== */
+function renderAlbum(){
+  const ch = getCurrentChar();
+  if(!ch) return;
+  const pd = ensurePhoneData(ch);
+  const body = document.getElementById('albumBody');
+  const items = pd.album.items;
+  if(!items.length){
+    body.innerHTML = '<div class="empty-state" data-i18n="album.empty">'+t('album.empty')+'</div>';
+    return;
+  }
+  body.innerHTML = '<div class="album-grid">'
+    + items.map((item,i)=>{
+      const isVideo = !!item.isVideo;
+      const hasImg = !!item.mediaUrl;
+      return '<div class="album-thumb" data-album-idx="'+i+'">'
+        + '<div class="album-thumb-inner'+(hasImg?' has-img':'')+'" style="'+(hasImg?'background-image:url('+item.mediaUrl+');background-size:cover;background-position:center;':'')+'">'+( hasImg?'': escapeHtml((item.desc||'').slice(0,20)) )+'</div>'
+        + (isVideo ? '<span class="album-video-badge">VIDEO</span>' : '')
+      + '</div>';
+    }).join('')
+  + '</div>';
+  body.querySelectorAll('[data-album-idx]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const idx=parseInt(el.getAttribute('data-album-idx'),10);
+      showAlbumDetail(items[idx]);
+    });
+  });
+}
+
+function showAlbumDetail(item){
+  const overlay = document.getElementById('albumDetailOverlay');
+  overlay.style.display='flex';
+  const hasImg = !!item.mediaUrl;
+  const isVideo = !!item.isVideo;
+  overlay.innerHTML = '<button class="album-detail-close" id="albumDetailCloseBtn"></button>'
+    + '<div class="album-detail-visual">'
+      + '<div class="album-detail-visual-inner" style="'+(hasImg?'background-image:url('+item.mediaUrl+');background-size:cover;background-position:center;background-color:transparent;':'')+'">'
+        + (hasImg ? '' : (isVideo ? '<div class="album-video-icon"></div>' : ''))
+      + '</div>'
+    + '</div>'
+    + '<div class="album-detail-desc">'+escapeHtml(item.desc||t('album.empty'))+'</div>';
+  overlay.querySelector('#albumDetailCloseBtn').addEventListener('click', ()=>{ overlay.style.display='none'; });
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.style.display='none'; });
+}
+
+async function refreshAlbum(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl)||!state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  const pd = ensurePhoneData(ch);
+  showGenerating();
+  try{
+    const sys = buildBaseSystemPrompt(ch, '现在请为idol的手机相册生成最新的6张照片或视频的描述。相册内容应该真实反映idol的日常生活、工作、私下时光，不应该有任何idol手机相册不该有的内容。每项都有详细的描述（58-100字），生动描述画面内容、光线、氛围、细节。');
+    const usr = '请生成6个相册条目，每条包括：是否为视频（isVideo）、描述（desc，58-100字中文），可以包含部分来自idol生活场景或工作现场的内容。\n严格输出 JSON：{"items":[{"isVideo":false,"desc":"详细描述..."},{"isVideo":true,"desc":"视频描述..."},...]共6条}';
+    const data = await generateJSON(sys, usr);
+    if(data && Array.isArray(data.items) && data.items.length){
+      const newItems = data.items.slice(0,6).map(item=>({id:uid('alb'), isVideo:!!item.isVideo, desc:item.desc||'', mediaUrl:'', ts:Date.now()}));
+      pd.album.items = newItems.concat(pd.album.items).slice(0,36);
+      saveState();
+      renderAlbum();
+    }
+  }catch(e){ showToast(t('toast.genFailed')); }
+  finally{ hideGenerating(); }
+}
+
+document.getElementById('albumRefreshBtn').addEventListener('click', ()=>refreshAlbum());
+
+/* ===================================================================
+   BUBBLE — add photo/video support to bubble photo button
+=================================================================== */
+document.getElementById('bubblePhotoBtn').addEventListener('click', ()=>{
+  openPhotoPicker((dataUrl, desc, isVideo)=>{
+    const ch=getCurrentChar(); if(!ch) return;
+    const pd=ensurePhoneData(ch);
+    const round={id:uid('r'), photo:true, isVideo:!!isVideo, text:desc, mediaUrl:dataUrl||'', replies:[], expanded:false};
+    pd.bubble.rounds.push(round);
+    saveState();
+    renderBubble();
+    // Auto-generate fan replies
+    (async()=>{
+      try{
+        const replies = await bubbleGenerateFanReplies(ch, desc);
+        round.replies = replies;
+        saveState();
+        renderBubble();
+      }catch(e){}
+    })();
+  });
+});
+
+/* ===================================================================
+   IG COMMENT SYSTEM — for idol's Instagram posts
+=================================================================== */
+let _igCommentPostIdx = null; // {scope, postIdx, isAlt}
+let _igReplyToCommentIdx = null;
+
+function renderIgPostComments(postEl, post, scope, postIdx, isAlt){
+  // Build comment HTML below the post stats
+  const comments = post.comments || [];
+  const expanded = !!post._commentsExpanded;
+  let html = '<div class="ig-comment-section" data-comment-scope="'+scope+'" data-comment-post="'+postIdx+'">';
+  const showCount = expanded ? comments.length : Math.min(3, comments.length);
+  for(let i=0;i<showCount;i++){
+    const c=comments[i];
+    const replies=c.replies||[];
+    const expandedReplies=!!c._repliesExpanded;
+    html += '<div class="ig-comment-entry">'
+      + '<div class="ig-comment-ava">'+escapeHtml((c.author||'?').slice(0,1))+'</div>'
+      + '<div class="ig-comment-body">'
+        + '<span class="ig-comment-name">'+escapeHtml(c.author||'')+'</span>'
+        + ' <span class="ig-comment-text">'+escapeHtml(c.text||'')+'</span>'
+        + '<div class="ig-comment-reply-btn" data-reply-idx="'+i+'">'+t('ig.replyTo')+'</div>'
+        + (replies.length ? '<div class="ig-comment-replies">'
+            + (expandedReplies?replies:replies.slice(0,2)).map(r=>'<div class="ig-comment-entry" style="border-bottom:none;padding:3px 0;">'
+              + '<div class="ig-comment-ava">'+escapeHtml((r.author||'?').slice(0,1))+'</div>'
+              + '<div class="ig-comment-body"><span class="ig-comment-name">'+escapeHtml(r.author||'')+'</span> <span class="ig-comment-text">'+escapeHtml(r.text||'')+'</span></div>'
+            + '</div>').join('')
+            + (replies.length>2 && !expandedReplies ? '<span class="ig-comment-expand-btn" data-expand-replies="'+i+'">'+t('ig.viewMoreReplies')+'</span>' : '')
+          + '</div>' : '')
+      + '</div>'
+    + '</div>';
+  }
+  if(comments.length > 3){
+    html += '<span class="ig-comment-expand-btn" id="igCommentExpandBtn">'+(expanded?t('ig.commentCollapse'):''+t('ig.commentExpand')+' ('+comments.length+')')+'</span>';
+  }
+  html += '<div class="ig-comment-input-row">'
+    + '<input class="ig-comment-input" id="igCommentInput_'+postIdx+'" placeholder="'+t('ig.commentPlaceholder')+'">'
+    + '<button class="ig-comment-send" id="igCommentSendBtn_'+postIdx+'">'+t('ig.commentSend')+'</button>'
+  + '</div>';
+  html += '</div>';
+  return html;
+}
+
+function bindIgCommentEvents(container, post, scope, postIdx){
+  // Expand/collapse
+  const expandBtn = container.querySelector('#igCommentExpandBtn');
+  if(expandBtn) expandBtn.addEventListener('click', ()=>{
+    post._commentsExpanded = !post._commentsExpanded;
+    saveState();
+    // Re-render the section
+    const sec = container.querySelector('.ig-comment-section');
+    if(sec) sec.outerHTML = renderIgPostComments(container, post, scope, postIdx);
+    bindIgCommentEvents(container, post, scope, postIdx);
+  });
+  // Reply-to buttons
+  container.querySelectorAll('[data-reply-idx]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const idx=parseInt(btn.getAttribute('data-reply-idx'),10);
+      const inp=container.querySelector('#igCommentInput_'+postIdx);
+      if(inp){ inp.placeholder='@'+((post.comments||[])[idx]||{}).author+' '+t('ig.replyComment'); inp.focus(); inp.setAttribute('data-reply-to', idx); }
+    });
+  });
+  // Expand replies
+  container.querySelectorAll('[data-expand-replies]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const idx=parseInt(btn.getAttribute('data-expand-replies'),10);
+      if(post.comments && post.comments[idx]) post.comments[idx]._repliesExpanded=true;
+      saveState();
+      const sec=container.querySelector('.ig-comment-section');
+      if(sec){ sec.outerHTML=renderIgPostComments(container, post, scope, postIdx); }
+      bindIgCommentEvents(container, post, scope, postIdx);
+    });
+  });
+  // Send comment
+  const sendBtn=container.querySelector('#igCommentSendBtn_'+postIdx);
+  const inp=container.querySelector('#igCommentInput_'+postIdx);
+  if(sendBtn && inp){
+    sendBtn.addEventListener('click', ()=>{
+      const val=inp.value.trim(); if(!val) return;
+      const replyTo=inp.getAttribute('data-reply-to');
+      const ch=getCurrentChar();
+      if(!post.comments) post.comments=[];
+      const userName=ch?(ch.userName||'用户'):'用户';
+      if(replyTo!==null && replyTo!==''){
+        const rIdx=parseInt(replyTo,10);
+        if(post.comments[rIdx]){
+          if(!post.comments[rIdx].replies) post.comments[rIdx].replies=[];
+          post.comments[rIdx].replies.push({author:userName, text:val});
+        }
+      } else {
+        post.comments.push({author:userName, text:val, replies:[]});
+      }
+      inp.value=''; inp.removeAttribute('data-reply-to');
+      inp.placeholder=t('ig.commentPlaceholder');
+      saveState();
+      showToast(t('toast.commentSent'));
+      // Auto-generate 5 follow-up comments via API
+      autoGenerateIgComments(post, scope, postIdx, ch);
+      // Re-render
+      const sec=container.querySelector('.ig-comment-section');
+      if(sec){ const newHtml=renderIgPostComments(container, post, scope, postIdx); sec.outerHTML=newHtml; }
+      bindIgCommentEvents(container, post, scope, postIdx);
+    });
+    inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendBtn.click(); } });
+  }
+}
+
+async function autoGenerateIgComments(post, scope, postIdx, ch){
+  if(!ch || !normalizeBaseUrl(state.settings.apiUrl)||!state.settings.model) return;
+  try{
+    const isSecret = ch.secretRelationship;
+    const altName = ch.idolAltName || '';
+    const existingComments=(post.comments||[]).map(c=>c.author+'：'+c.text).join('\n');
+    const sys=buildBaseSystemPrompt(ch,'请为idol的这篇Instagram帖子生成真实的后续评论互动。'+(isSecret?'注意：如果idol用小号回复评论，小号是「'+altName+'」，绝对不能暴露idol的真实身份，回复要非常隐晦、自然。':'idol一般只用小号回复粉丝评论，且很少回复。'));
+    const usr='帖子内容：「'+post.caption+'」\n已有评论：\n'+existingComments+'\n\n请生成5条后续评论（可能是其他用户的、可能是回复某条评论的、极少数情况下可能是idol用小号「'+(altName||'小号')+'」回复的但非常隐晦）。\n严格输出JSON：{"comments":[{"author":"用户名","text":"评论内容","replyTo":null或者被回复用户名,"isIdolAlt":false或者true}]}';
+    const data=await generateJSON(sys, usr);
+    if(data && Array.isArray(data.comments)){
+      data.comments.forEach(c=>{
+        if(!post.comments) post.comments=[];
+        if(c.replyTo){
+          const target=post.comments.find(pc=>pc.author===c.replyTo);
+          if(target){ if(!target.replies) target.replies=[]; target.replies.push({author:c.author, text:c.text, isIdolAlt:!!c.isIdolAlt}); return; }
+        }
+        post.comments.push({author:c.author, text:c.text, replies:[], isIdolAlt:!!c.isIdolAlt});
+      });
+      saveState();
+      // Refresh the instagram view
+      const visibleIg=document.querySelector('#screen-instagram.visible,#screen-instagram-alt.visible');
+      if(visibleIg){
+        if(visibleIg.id==='screen-instagram') renderInstagram();
+        else renderInstagramAlt();
+      }
+    }
+  }catch(e){}
+}
+
+/* ===================================================================
+   USER INSTAGRAM — my posts with comment support + user alt account
+=================================================================== */
+function renderUserIgMyPosts(pd, body, ch){
+  const myPosts = pd.myPosts || [];
+  const userIgId = ch ? (ch.userMainIgId||ch.userName||'User') : 'User';
+  const userAltId = ch ? (ch.userAltIgId||'') : '';
+  // FAB to create post
+  let html = '<div class="ig-pane active" id="userMyPostsPane" style="padding-bottom:60px;">';
+  if(!myPosts.length){
+    html += '<div class="empty-state">'+t('empty.ig')+'</div>';
+  } else {
+    myPosts.slice().reverse().forEach((p,i)=>{
+      const idx = myPosts.length-1-i;
+      html += renderUserPostHtml(p, idx, ch);
+    });
+  }
+  html += '</div>'
+    // FAB button to open composer
+    + '<button class="ig-post-fab" id="userPostFab" style="position:absolute;right:14px;bottom:14px;">'
+      + '<svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;"><path d="M12 5v14M5 12h14"/></svg>'
+    + '</button>';
+  body.innerHTML = html;
+  document.getElementById('userPostFab').addEventListener('click', ()=>openUserPostComposer(pd, ch));
+  // Bind comment events on each post
+  body.querySelectorAll('[data-user-post-idx]').forEach(el=>{
+    const idx=parseInt(el.getAttribute('data-user-post-idx'),10);
+    const post=myPosts[idx];
+    if(post) bindIgCommentEvents(el, post, 'user_my_'+idx, idx);
+  });
+}
+
+function renderUserPostHtml(post, idx, ch){
+  const userName = ch?(ch.userMainIgId||ch.userName||'User'):'User';
+  const avStyle = ch&&ch.userAvatar ? avatarStyle(ch.userAvatar)+';background-size:cover;' : '';
+  const avInit = ch ? avatarInitial(ch.userName) : '?';
+  let html = '<div class="ig-post" data-user-post-idx="'+idx+'">';
+  html += '<div class="ig-post-head"><div class="ig-avatar" style="'+(avStyle||'')+'">'+( avStyle?'':avInit)+'</div>'
+    + '<div><div class="ig-post-name" style="font-size:14px;font-weight:700;color:var(--text);">'+escapeHtml(userName)+'</div><div class="ig-post-time">'+escapeHtml(post.time||'')+'</div></div></div>';
+  // Image or video block
+  if(post.hasImage||post.imageDesc){
+    if(post.isVideo){
+      html += '<div class="video-bubble" style="width:100%;margin-bottom:8px;">'
+        + '<div class="video-bubble-thumb">'
+          + (post.mediaUrl?'<div style="width:100%;height:100%;background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;"></div>':'')
+          + '<div class="video-bubble-play"></div>'
+          + '<span class="video-bubble-badge">VIDEO</span>'
+        + '</div>'
+        + '<div class="video-bubble-label">'+escapeHtml(post.imageDesc||'')+'</div>'
+      + '</div>';
+    } else {
+      const imgStyle = post.mediaUrl ? ('background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;') : '';
+      html += '<div class="ig-image-block" style="'+(imgStyle||'')+'">'+( imgStyle?'':escapeHtml(post.imageDesc||'') )+'</div>';
+    }
+  }
+  html += '<div class="ig-caption">'+escapeHtml(post.caption||'')+'</div>';
+  html += '<div class="ig-likes">'+escapeHtml(String(post.likes||0))+' '+t('label.likes')+'</div>';
+  html += renderIgPostComments(null, post, 'user_my_'+idx, idx);
+  html += '</div>';
+  return html;
+}
+
+function openUserPostComposer(pd, ch){
+  const composerEl = document.createElement('div');
+  composerEl.className = 'ig-post-composer';
+  let postType = 'text'; // text | image | video
+  let pendingMediaUrl = '';
+  let pendingIsVideo = false;
+
+  function build(){
+    composerEl.innerHTML = '<div class="ig-composer-header">'
+      + '<button class="ig-composer-cancel" id="composerCancelBtn">'+t('btn.cancel')+'</button>'
+      + '<div class="ig-composer-title">'+t('ig.userPost')+'</div>'
+      + '<button class="ig-composer-post" id="composerPostBtn">'+t('ig.commentSend')+'</button>'
+    + '</div>'
+    + '<div class="ig-composer-body">'
+      + '<div class="ig-composer-type-row">'
+        + '<button class="ig-composer-type-btn'+(postType==='text'?' active':'')+'" data-type="text">'+t('ig.userPostText')+'</button>'
+        + '<button class="ig-composer-type-btn'+(postType==='image'?' active':'')+'" data-type="image">'+t('ig.userPostImage')+'</button>'
+        + '<button class="ig-composer-type-btn'+(postType==='video'?' active':'')+'" data-type="video">'+t('ig.userPostVideo')+'</button>'
+      + '</div>'
+      + (postType!=='text' ? '<div class="ig-composer-media'+(pendingMediaUrl?' has-img':'')+'" id="composerMedia" style="'+(pendingMediaUrl?'background-image:url('+pendingMediaUrl+');':'')+'">'+( pendingMediaUrl?'':'<svg viewBox="0 0 24 24" style="width:28px;height:28px;stroke:var(--text-3);fill:none;stroke-width:1.4;"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.5"/><path d="M3 15l4.5-5 4 4.5 3-3 5 5.5"/></svg><div>'+t('btn.uploadImage')+'</div>' )+'</div>' : '')
+      + (postType!=='text' ? '<textarea class="ig-composer-desc" id="composerDesc" placeholder="'+t(postType==='video'?'ig.videoDesc':'ig.imageDesc')+'"></textarea>' : '')
+      + '<textarea class="ig-composer-caption" id="composerCaption" placeholder="'+t('ig.postCaption')+'"></textarea>'
+    + '</div>';
+    composerEl.querySelectorAll('[data-type]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ postType=btn.getAttribute('data-type'); pendingMediaUrl=''; pendingIsVideo=postType==='video'; build(); });
+    });
+    const mediaEl=composerEl.querySelector('#composerMedia');
+    if(mediaEl){
+      mediaEl.addEventListener('click', ()=>{
+        const inp=document.createElement('input'); inp.type='file'; inp.accept=pendingIsVideo?'video/*':'image/*';
+        inp.onchange=async()=>{
+          if(!inp.files||!inp.files[0]) return;
+          if(!pendingIsVideo){ try{ pendingMediaUrl=await fileToResizedDataUrl(inp.files[0],600); }catch(e){} }
+          build();
+        };
+        inp.click();
+      });
+    }
+    const cancelBtn=composerEl.querySelector('#composerCancelBtn');
+    if(cancelBtn) cancelBtn.addEventListener('click', ()=>composerEl.remove());
+    const postBtn=composerEl.querySelector('#composerPostBtn');
+    if(postBtn) postBtn.addEventListener('click', ()=>{
+      const caption=(composerEl.querySelector('#composerCaption')||{}).value||'';
+      const desc=(composerEl.querySelector('#composerDesc')||{}).value||'';
+      if(!caption.trim()&&!desc.trim()){ showToast(t('ig.postCaption')); return; }
+      const now=new Date();
+      const post={
+        id:uid('up'),
+        hasImage:postType!=='text',
+        isVideo:pendingIsVideo,
+        mediaUrl:pendingMediaUrl,
+        imageDesc:desc,
+        caption:caption,
+        time:now.getFullYear()+'/'+(now.getMonth()+1)+'/'+now.getDate(),
+        likes:0,
+        comments:[],
+        ts:Date.now()
+      };
+      if(!pd.myPosts) pd.myPosts=[];
+      pd.myPosts.push(post);
+      saveState();
+      composerEl.remove();
+      showToast(t('toast.postPublished'));
+      renderUserInstagram();
+      // Auto-generate 10 comments on the new post
+      autoGenerateInitialComments(post, ch);
+    });
+  }
+  build();
+  // Attach to the user IG screen
+  const screen=document.getElementById('screen-user-instagram');
+  if(screen) screen.appendChild(composerEl);
+}
+
+async function autoGenerateInitialComments(post, ch){
+  if(!ch||!normalizeBaseUrl(state.settings.apiUrl)||!state.settings.model) return;
+  try{
+    const sys=buildBaseSystemPrompt(ch,'用户刚刚在Instagram上发布了一篇帖子，请为这篇帖子生成来自其他用户的评论（注意：这是用户自己的帖子，idol可能会用小号评论，但要非常隐晦）。');
+    const usr='帖子内容：「'+post.caption+(post.imageDesc?' [配图：'+post.imageDesc+']':post.isVideo?' [视频：'+post.imageDesc+']':'')+' 」\n请生成10条评论（来自不同用户，口语化，有互动感；如果是地下恋剧情，idol可能用小号偷偷点赞评论但非常隐晦不暴露身份；私信相关的帖子也会影响私信内容）。\n严格输出JSON：{"comments":[{"author":"用户名","text":"评论内容","isIdolAlt":false},...共10条],"likes":数字}';
+    const data=await generateJSON(sys,usr);
+    if(data){
+      if(Array.isArray(data.comments)) post.comments=(data.comments||[]).map(c=>({author:c.author,text:c.text,replies:[],isIdolAlt:!!c.isIdolAlt}));
+      if(data.likes) post.likes=data.likes;
+      saveState();
+      const visibleEl=document.querySelector('#screen-user-instagram.visible');
+      if(visibleEl && userIgActiveTab==='myposts') renderUserInstagram();
+    }
+  }catch(e){}
+}
+
+/* ===================================================================
+   NEWS — auto-generate news from plot developments during API calls
+=================================================================== */
+async function maybeAutoGenerateNews(ch){
+  // 30% chance to try generating news after major content generation
+  if(Math.random()>0.3) return;
+  if(!ch||!normalizeBaseUrl(state.settings.apiUrl)||!state.settings.model) return;
+  try{
+    const pd=ensurePhoneData(ch);
+    const chatHistory=recentUserChatContext(ch,6);
+    const bubbleContext=(pd.bubble&&pd.bubble.rounds)?pd.bubble.rounds.slice(-2).map(r=>r.text).join('；'):'';
+    const sys=buildBaseSystemPrompt(ch,'你是一个判断剧情是否有重大新闻价值事件的引擎。根据目前的剧情走向，判断是否发生了值得上新闻头条的大事件（例如：恋情曝光、重大表演、意外事故、争议事件等）。如果没有明显大事件，输出{"hasEvent":false}。');
+    const usr='最近聊天内容摘要：'+chatHistory+'\nBubble内容摘要：'+bubbleContext+'\n已有新闻：'+(state.newsItems||[]).slice(0,3).map(n=>n.title).join('；')+'\n\n如果当前剧情发生了重大事件值得上新闻，输出一条新闻。否则输出{"hasEvent":false}。\n输出JSON：{"hasEvent":true,"title":"新闻标题","summary":"简要摘要，30字内","source":"新闻来源","category":"娱乐/体育/社会等"}或{"hasEvent":false}';
+    const data=await generateJSON(sys,usr);
+    if(data&&data.hasEvent&&data.title){
+      const now=new Date();
+      ensureNewsData().unshift({
+        id:uid('anews'), title:data.title, summary:data.summary||'', source:data.source||'综合',
+        category:data.category||'娱乐', date:(now.getMonth()+1)+'月'+now.getDate()+'日',
+        isAuto:true
+      });
+      saveState();
+      showToast(t('news.autoAdded'));
+      const visibleNews=document.querySelector('#screen-news.visible');
+      if(visibleNews) renderNewsApp();
+    }
+  }catch(e){}
+}
+
+/* ===================================================================
+   PHONE APP — call log with transcript detail
+=================================================================== */
+function renderPhoneApp(){
+  const ch = getCurrentChar();
+  if(!ch) return;
+  const pd = ensurePhoneData(ch);
+  const body = document.getElementById('phoneBody');
+  const calls = pd.callLog.calls;
+  if(!calls.length){
+    body.innerHTML = '<div class="empty-state">'+t('phone.empty')+'</div>';
+    return;
+  }
+  body.innerHTML = calls.map((call,i)=>{
+    const typeLabel = call.type==='incoming' ? t('phone.incoming') : call.type==='missed' ? t('phone.missed') : t('phone.outgoing');
+    const dirClass = call.type==='incoming' ? 'incoming' : call.type==='missed' ? 'missed' : 'outgoing';
+    const iconSvg = call.type==='missed'
+      ? '<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81 19.79 19.79 0 0 1 0 1.18 2 2 0 0 1 2 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
+      : '<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81 19.79 19.79 0 0 1 0 1.18 2 2 0 0 1 2 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+    return '<div class="call-item" data-call-idx="'+i+'">'
+      + '<div class="call-icon '+dirClass+'">'+iconSvg+'</div>'
+      + '<div class="call-mid">'
+        + '<div class="call-name">'+escapeHtml(call.name||'—')+'</div>'
+        + '<div class="call-detail">'+escapeHtml(typeLabel)+(call.duration ? ' · '+escapeHtml(call.duration) : '')+'</div>'
+      + '</div>'
+      + '<div class="call-time">'+escapeHtml(call.time||'')+'</div>'
+    + '</div>';
+  }).join('');
+
+  body.querySelectorAll('[data-call-idx]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const idx=parseInt(el.getAttribute('data-call-idx'),10);
+      openCallDetail(calls[idx]);
+    });
+  });
+}
+
+function openCallDetail(call){
+  goTo('screen-phone-call');
+  document.getElementById('phoneCallTitle').textContent = call.name || t('phone.transcript');
+  const body = document.getElementById('phoneCallBody');
+  if(!call.transcript || !call.transcript.length){
+    body.innerHTML = '<div class="empty-state">'+t('toast.generating')+'</div>';
+    return;
+  }
+  body.innerHTML = '<div style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">'
+    + '<div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">'+t('phone.transcript')+'</div>'
+    + '<div style="font-size:13px;color:var(--text-2);">'
+      + (call.time||'') + (call.duration?' · '+call.duration:'')
+    + '</div>'
+  + '</div>'
+  + call.transcript.map(line=>{
+    const ch2=getCurrentChar();
+    const isMe = line.speaker==='me';
+    const speakerName = isMe ? (ch2?(ch2.userName||'我'):'我') : (call.name||'对方');
+    return '<div class="call-transcript-line">'
+      + '<span class="call-speaker '+(isMe?'me':'them')+'">'+escapeHtml(speakerName)+'：</span>'
+      + escapeHtml(line.text||'')
+    + '</div>';
+  }).join('');
+}
+
+async function generatePhoneCalls(ch){
+  const sys = buildBaseSystemPrompt(ch,
+    '请生成idol手机上最近的通话记录（5条），通话对象可能是工作人员、家人、朋友、经纪人、陌生人等，不包括用户。每条通话都包含详细的对话内容转录，长度视情况而定（可能3句也可能十几句），换行即换人说话，语气和内容符合双方关系与通话情境。'
+  );
+  const usr = '生成5条通话记录。\n输出JSON：{"calls":[{"name":"对方名字","type":"incoming或outgoing或missed","time":"如 今天 14:32","duration":"如 3分25秒","transcript":[{"speaker":"them","text":"对方说的话"},{"speaker":"me","text":"idol说的话"},...]},... 共5条]}\n注意：missed类型的通话没有transcript（传空数组），通话内容要真实自然。';
+  const data = await generateJSON(sys, usr);
+  return (data && Array.isArray(data.calls)) ? data.calls.slice(0,5) : null;
+}
+
+async function refreshPhoneApp(){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  if(!normalizeBaseUrl(state.settings.apiUrl)||!state.settings.model){ showToast(t('toast.apiMissing')); return; }
+  const pd = ensurePhoneData(ch);
+  showGenerating();
+  try{
+    const data = await generatePhoneCalls(ch);
+    if(data){
+      pd.callLog.calls = data;
+      saveState();
+      renderPhoneApp();
+    }
+  }catch(e){ showToast(t('toast.genFailed')); }
+  finally{ hideGenerating(); }
+}
+
+document.getElementById('phoneRefreshBtn').addEventListener('click', ()=>refreshPhoneApp());
+
+/* ===================================================================
+   FORWARD / SHARE — forward IG post to a chat contact
+=================================================================== */
+function openForwardModal(post, scope){
+  const ch = getCurrentChar();
+  if(!ch){ showToast(t('toast.charMissing')); return; }
+  const pd = ensurePhoneData(ch);
+  const contacts = getUserContactChats(ch);
+  // Build list: main chat + contacts
+  const allTargets = [{type:'main', name:pd.userChat.idolNickname||ch.idolName||'Chat'}]
+    .concat(contacts.map((c,i)=>({type:'contact', idx:i, name:c.name||t('contact.default')})));
+
+  const overlay = document.getElementById('promptOverlay');
+  const card = document.getElementById('promptCard');
+  card.innerHTML = '<div class="prompt-card-title">'+t('forward.title')+'</div>'
+    + '<div style="font-size:12px;color:var(--text-2);margin-bottom:10px;">'+t('forward.selectContact')+'</div>'
+    + allTargets.map((tgt,i)=>'<div class="card-push-item" data-fwd-idx="'+i+'">'
+        + '<div class="ig-avatar">'+escapeHtml(tgt.name.slice(0,1))+'</div>'
+        + '<div style="font-size:13.5px;font-weight:600;">'+escapeHtml(tgt.name)+'</div>'
+      + '</div>').join('')
+    + '<div class="prompt-card-actions"><button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button></div>';
+  overlay.classList.add('open');
+  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
+  function onClick(e){
+    const fwd=e.target.closest('[data-fwd-idx]');
+    if(fwd){
+      const idx=parseInt(fwd.getAttribute('data-fwd-idx'),10);
+      const tgt=allTargets[idx];
+      close();
+      sendForwardCard(pd, tgt, post, ch);
+      return;
+    }
+    const btn=e.target.closest('[data-v]');
+    if(!btn){ if(e.target===overlay) close(); return; }
+    close();
+  }
+  overlay.addEventListener('click', onClick);
+}
+
+function sendForwardCard(pd, tgt, post, ch){
+  const fwdMsg = {
+    from:'me', text:'[转发]', id:uid('fwd'), ts:Date.now(),
+    isForward:true,
+    forwardData:{
+      caption:post.caption||'',
+      imageDesc:post.imageDesc||'',
+      hasImage:!!post.hasImage,
+      author:ch.idolName||'',
+      time:post.time||''
+    }
+  };
+  if(tgt.type==='main'){
+    pd.userChat.messages.push(fwdMsg);
+    saveState(); renderUserChatFeed(); renderChatList();
+  } else {
+    const contacts=getUserContactChats(ch);
+    const c=contacts[tgt.idx];
+    if(c){ if(!c.messages)c.messages=[]; c.messages.push(fwdMsg); saveState(); renderChatList(); }
+  }
+  showToast(t('forward.sent'));
+}
+
+function forwardCardHtml(m){
+  const fd = m.forwardData||{};
+  return '<div class="forward-card">'
+    + '<div class="forward-card-source"><span class="forward-card-source-dot"></span>'+t('forward.label')+'</div>'
+    + '<div class="forward-card-preview">'
+      + '<div class="forward-card-thumb">'+(fd.imageDesc?escapeHtml(fd.imageDesc.slice(0,18)):'—')+'</div>'
+      + '<div class="forward-card-info">'
+        + '<div class="forward-card-author">'+escapeHtml(fd.author||'')+'</div>'
+        + '<div class="forward-card-text">'+escapeHtml(fd.caption||'')+'</div>'
+      + '</div>'
+    + '</div>'
+    + '<div class="forward-card-label">'+t('forward.label')+'</div>'
+  + '</div>';
+}
+
+/* forward card helper used by renderMsgFeedHtml */
 
 function applyPhoneRadius(){
   const r = state.settings.phoneRadius != null ? state.settings.phoneRadius : 46;
@@ -6709,6 +8807,10 @@ function init(){
   initChatSelBar();
   initDmSelBar();
   initOfflineApp();
+  initCharsMenu();
+  // Wire chatListGroupBtn
+  const grpBtn = document.getElementById('chatListGroupBtn');
+  if(grpBtn) grpBtn.addEventListener('click', ()=>openGroupChatModal());
 }
 
 init();
