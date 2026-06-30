@@ -3423,6 +3423,10 @@ function resolveIgPd(scope){
   if(scope==='idol') return pd.instagram;
   if(scope==='idolAlt') return pd.instagramAlt;
   if(scope==='user') return pd.userInstagram;
+  if(scope==='userMy'){
+    if(!pd.myPosts) pd.myPosts=[];
+    return { posts: pd.myPosts };
+  }
   if(scope==='userAlt'){
     if(!pd.userInstagram.altPosts) pd.userInstagram.altPosts=[];
     if(!pd.userInstagram.altDms) pd.userInstagram.altDms=[];
@@ -3812,6 +3816,8 @@ function renderUserInstagramAlt(){
         bindCommentDblClick(el, ()=>post2, ()=>renderUserInstagramAlt());
       }
     });
+    // Long-press a post to forward or delete it (same as idol posts)
+    setTimeout(()=>renderIgBodyWithLongPress('userAlt'), 30);
   } else if(userAltIgActiveTab==='explore'){
     if(!pd.userInstagram.altTrending) pd.userInstagram.altTrending=[];
     const trending = pd.userInstagram.altTrending;
@@ -6973,6 +6979,8 @@ function getOrCreateIgSel(scope){
     : scope==='idolAlt' ? 'igAltBody'
     : scope==='idol_dm' ? 'igBody'
     : scope==='user_dm' ? 'userIgBody'
+    : scope==='userMy' ? 'userIgBody'
+    : scope==='userAlt' ? 'userAltIgBody'
     : 'userIgBody';
   const barId = 'igSelBar_'+scope;
   // Ensure sel bar exists
@@ -7003,7 +7011,7 @@ function getOrCreateIgSel(scope){
 }
 
 function renderIgBodyWithLongPress(scope){
-  const bodyId = scope==='idol' ? 'igBody' : scope==='idolAlt' ? 'igAltBody' : 'userIgBody';
+  const bodyId = scope==='idol' ? 'igBody' : scope==='idolAlt' ? 'igAltBody' : scope==='userAlt' ? 'userAltIgBody' : 'userIgBody';
   const body = document.getElementById(bodyId);
   if(!body) return;
   const pane = body.querySelector('.ig-pane.active');
@@ -7015,9 +7023,16 @@ function renderIgBodyWithLongPress(scope){
   const sel = getOrCreateIgSel(scope);
 
   posts.forEach((el,i)=>{
-    const p = postList[i];
+    // Some post lists (myPosts/altPosts) render newest-first, so DOM order
+    // does not match storage order. If the element already carries its real
+    // storage index (set by renderUserPostHtml/renderUserAltPostHtml), use that.
+    const ownIdxAttr = el.getAttribute('data-user-post-idx') !== null ? el.getAttribute('data-user-post-idx')
+      : el.getAttribute('data-user-alt-post-idx') !== null ? el.getAttribute('data-user-alt-post-idx')
+      : null;
+    const realIdx = ownIdxAttr !== null ? parseInt(ownIdxAttr,10) : i;
+    const p = postList[realIdx];
     if(p && !p.id) p.id = uid('p');
-    if(p) el.setAttribute('data-msg-id', p.id||String(i));
+    if(p) el.setAttribute('data-msg-id', p.id||String(realIdx));
   });
 
   attachLongPress(pane, '.ig-post', 600, (el)=>{
@@ -7039,6 +7054,8 @@ function renderIgBodyWithLongPress(scope){
             saveState(); sel.exit();
             if(scope==='idol') renderInstagram();
             else if(scope==='idolAlt') renderInstagramAlt();
+            else if(scope==='userMy') renderUserInstagram();
+            else if(scope==='userAlt') renderUserInstagramAlt();
             else renderUserInstagram();
             showToast(t('toast.postDeleted'));
           },
@@ -8732,18 +8749,11 @@ function openPhotoPicker(callback){
     const up=e.target.closest('#ppUploadBtn, #ppVideoBtn');
     if(up){
       const isVid=up.id==='ppVideoBtn';
-      const inp=document.createElement('input'); inp.type='file'; inp.accept=isVid?'video/*':'image/*';
-      inp.onchange=async()=>{
-        if(!inp.files||!inp.files[0]) return;
-        close();
-        let dataUrl='';
-        if(!isVid){ try{ dataUrl=await fileToResizedDataUrl(inp.files[0],480); }catch(e){} }
-        // Ask for description
-        showPromptModal(isVid?t('ig.videoDesc'):t('ig.imageDesc'), '', (desc)=>{
-          callback(dataUrl, desc, isVid);
-        });
-      };
-      inp.click();
+      close();
+      // No real file picker — go straight to the description prompt
+      showPromptModal(isVid?t('ig.videoDesc'):t('ig.imageDesc'), '', (desc)=>{
+        callback('', desc, isVid);
+      });
     }
   }
   overlay.addEventListener('click', onClick);
@@ -8854,7 +8864,7 @@ document.getElementById('albumRefreshBtn').addEventListener('click', ()=>refresh
    BUBBLE — add photo/video support to bubble photo button
 =================================================================== */
 document.getElementById('bubblePhotoBtn').addEventListener('click', ()=>{
-  openBubbleMediaPicker((dataUrl, desc, isVideo)=>{
+  openPhotoPicker((dataUrl, desc, isVideo)=>{
     const ch=getCurrentChar(); if(!ch) return;
     const pd=ensurePhoneData(ch);
     const round={id:uid('r'), photo:true, isVideo:!!isVideo, text:desc, mediaUrl:dataUrl||'', replies:[], expanded:false};
@@ -8872,61 +8882,6 @@ document.getElementById('bubblePhotoBtn').addEventListener('click', ()=>{
     })();
   });
 });
-
-/* Bubble-only photo/video picker: same panel UI and album-preview flow as openPhotoPicker,
-   but the "Upload a Photo/Video" buttons skip the real file picker and go straight to
-   the description prompt (no actual upload). */
-function openBubbleMediaPicker(callback){
-  const ch = getCurrentChar();
-  const pd = ch ? ensurePhoneData(ch) : null;
-  const albumItems = (pd && pd.album && pd.album.items) ? pd.album.items : [];
-  const lang = state.settings.language||'zh';
-
-  const overlay = document.getElementById('promptOverlay');
-  const card = document.getElementById('promptCard');
-  card.innerHTML = '<div class="prompt-card-title">'+t('btn.sendPhoto')+'</div>'
-    + '<div style="display:flex;gap:8px;margin-bottom:12px;">'
-      + '<button class="btn-block secondary" id="bpUploadBtn" style="flex:1;padding:9px 0;font-size:13px;">'+(lang==='en'?'Upload a Photo':'上传图片')+'</button>'
-      + '<button class="btn-block secondary" id="bpVideoBtn" style="flex:1;padding:9px 0;font-size:13px;">'+(lang==='en'?'Upload a Video':'上传视频')+'</button>'
-    + '</div>'
-    + (albumItems.length ? '<div style="font-size:11.5px;color:var(--text-3);margin-bottom:6px;">'+t('album.fromLibrary')+'</div>'
-        + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:120px;overflow-y:auto;margin-bottom:10px;">'
-          + albumItems.map((item,i)=>'<div data-album-pick="'+i+'" style="aspect-ratio:1/1;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-size:10px;color:var(--text-3);position:relative;'+(item.mediaUrl?'background-image:url('+item.mediaUrl+');background-size:cover;background-position:center;':'')+'">'
-              +(item.mediaUrl?'':(item.isVideo?'VID':'IMG'))
-              +(item.isVideo?'<span style="position:absolute;bottom:2px;left:3px;font-size:8px;color:#fff;background:rgba(0,0,0,0.5);padding:1px 4px;border-radius:3px;">'+t('video.label').toUpperCase()+'</span>':'')
-            +'</div>').join('')
-        + '</div>' : '')
-    + '<div class="prompt-card-actions">'
-      + '<button class="pc-cancel" data-v="__cancel">'+t('btn.cancel')+'</button>'
-    + '</div>';
-  overlay.classList.add('open');
-  function close(){ overlay.classList.remove('open'); overlay.removeEventListener('click', onClick); }
-  function onClick(e){
-    const btn=e.target.closest('[data-v]');
-    if(btn){ if(btn.getAttribute('data-v')==='__cancel') close(); return; }
-    if(e.target===overlay){ close(); return; }
-    const albumPick=e.target.closest('[data-album-pick]');
-    if(albumPick){
-      const idx=parseInt(albumPick.getAttribute('data-album-pick'),10);
-      const item=albumItems[idx]; if(!item) return;
-      // Show preview popup before confirming selection
-      showMediaPreviewModal(item.mediaUrl||'', item.desc||'', item.isVideo, ()=>{
-        close(); callback(item.mediaUrl||'', item.desc||'', item.isVideo);
-      });
-      return;
-    }
-    const up=e.target.closest('#bpUploadBtn, #bpVideoBtn');
-    if(up){
-      const isVid=up.id==='bpVideoBtn';
-      close();
-      // No real file picker — go straight to the description prompt
-      showPromptModal(isVid?t('ig.videoDesc'):t('ig.imageDesc'), '', (desc)=>{
-        callback('', desc, isVid);
-      });
-    }
-  }
-  overlay.addEventListener('click', onClick);
-}
 
 /* ===================================================================
    IG COMMENT SYSTEM — for idol's Instagram posts
@@ -8955,9 +8910,19 @@ function renderIgPostComments(postEl, post, scope, postIdx, isAlt){
   if(comments.length > 3){
     html += '<span class="ig-comment-expand-btn" id="igCommentExpandBtn">'+(expanded?t('ig.commentCollapse'):''+t('ig.commentExpand')+' ('+comments.length+')')+'</span>';
   }
-  html += '<div class="ig-comment-input-row">'
-    + '<input class="ig-comment-input" id="igCommentInput_'+postIdx+'" placeholder="'+t('ig.commentPlaceholder')+'">'
-    + '<button class="ig-comment-send" id="igCommentSendBtn_'+postIdx+'">'+t('ig.commentSend')+'</button>'
+  const ch = getCurrentChar();
+  const hasAlt = ch && ch.userAltIgId && ch.userAltIgId.trim();
+  html += '<div class="ig-comment-input-row" style="flex-direction:column;gap:5px;align-items:stretch;">'
+    + (hasAlt ? '<div style="display:flex;gap:5px;margin-bottom:3px;">'
+      + '<select class="ig-comment-acct" id="igCommentAcct_'+postIdx+'" style="font-size:11px;color:var(--text-2);background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:3px 6px;flex:0 0 auto;">'
+        + '<option value="main">'+escapeHtml(ch.userMainIgId||ch.userName||t('ig.mainAccountLabel'))+'</option>'
+        + '<option value="alt">'+escapeHtml(ch.userAltIgId)+'</option>'
+      + '</select>'
+    + '</div>' : '')
+    + '<div style="display:flex;gap:6px;align-items:center;">'
+      + '<input class="ig-comment-input" id="igCommentInput_'+postIdx+'" placeholder="'+t('ig.commentPlaceholder')+'">'
+      + '<button class="ig-comment-send" id="igCommentSendBtn_'+postIdx+'">'+t('ig.commentSend')+'</button>'
+    + '</div>'
   + '</div>';
   html += '</div>';
   return html;
@@ -9037,13 +9002,17 @@ function bindIgCommentEvents(container, post, scope, postIdx){
   // Send comment
   const sendBtn=container.querySelector('#igCommentSendBtn_'+postIdx);
   const inp=container.querySelector('#igCommentInput_'+postIdx);
+  const acctSel=container.querySelector('#igCommentAcct_'+postIdx);
   if(sendBtn && inp){
     sendBtn.addEventListener('click', ()=>{
       const val=inp.value.trim(); if(!val) return;
       const replyTo=inp.getAttribute('data-reply-to');
       const ch=getCurrentChar();
       if(!post.comments) post.comments=[];
-      const userName=ch?(ch.userName||'用户'):'用户';
+      const acct = acctSel ? acctSel.value : 'main';
+      const userName = (acct==='alt' && ch && ch.userAltIgId)
+        ? ch.userAltIgId
+        : (ch?(ch.userMainIgId||ch.userName||'用户'):'用户');
       if(replyTo!==null && replyTo!==''){
         const rIdx=parseInt(replyTo,10);
         if(post.comments[rIdx]){
@@ -9126,8 +9095,13 @@ function renderUserIgMyPosts(pd, body, ch){
   body.querySelectorAll('[data-user-post-idx]').forEach(el=>{
     const idx=parseInt(el.getAttribute('data-user-post-idx'),10);
     const post=myPosts[idx];
-    if(post) bindIgCommentEvents(el, post, 'user_my_'+idx, idx);
+    if(post){
+      bindIgCommentEvents(el, post, 'user_my_'+idx, idx);
+      bindCommentDblClick(el, ()=>post, ()=>renderUserIgBody());
+    }
   });
+  // Long-press a post to forward or delete it (same as idol posts)
+  setTimeout(()=>renderIgBodyWithLongPress('userMy'), 30);
 }
 
 function renderUserPostHtml(post, idx, ch){
