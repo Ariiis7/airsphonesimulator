@@ -2958,6 +2958,9 @@ function ensurePhoneData(ch){
   if(!pd.userAlbum) pd.userAlbum = {items:[]};
   if(!pd.callLog) pd.callLog = {calls:[]};
   if(!pd.idolChat) pd.idolChat = {contacts:[]};
+  // Migrate legacy singular offlineSummary into the new array form (keeps the
+  // last two consolidated summaries instead of overwriting a single one).
+  if(!Array.isArray(pd.offlineSummaries)) pd.offlineSummaries = (pd.offlineSummary && pd.offlineSummary.trim()) ? [pd.offlineSummary.trim()] : [];
   return pd;
 }
 
@@ -4034,7 +4037,17 @@ function maybeAutoConsolidateMemory(ch){
   }catch(e){ /* never let background consolidation break content generation */ }
 }
 
-function buildBaseSystemPrompt(ch, extra){
+function buildBaseSystemPrompt(ch, extra, opts){
+  opts = opts || {};
+  // chatMsgLimit: how many recent Chat messages to inject (default ~30回合/60条，
+  // Bubble生成时会传入更小的值以控制自己的参考量)。
+  const chatMsgLimit = opts.chatMsgLimit || 60;
+  // offlineDialogueCount: 参考线下互动时，取最近几条线下记录里的对话部分
+  // （引号里的话）。Chat生成时传入10，其余默认5。
+  const offlineDialogueCount = opts.offlineDialogueCount || 5;
+  // compact: Bubble生成时开启，适度收紧其余各段参考量，确保总输入不会过大
+  // 导致生成失败或截断。
+  const compact = !!opts.compact;
   maybeAutoConsolidateMemory(ch);
   const relation = relationshipStatusPromptText(ch);
   const wb = worldBookCombinedText();
@@ -4045,11 +4058,13 @@ function buildBaseSystemPrompt(ch, extra){
   // 这样存档变得再大，这里注入的内容量也基本不会继续膨胀。
   const memoryParts = [];
 
-  // 聊天记录（私信）——其他内容生成如果要参考chat，参考最近30回合（约60条消息）
-  const chatCtx = recentUserChatContext(ch, 60);
+  // 聊天记录（私信）——其他内容生成如果要参考chat，参考最近30回合（约60条消息）；
+  // Bubble生成时会传入chatMsgLimit=30（约15回合），控制在更小范围内。
+  const chatCtx = recentUserChatContext(ch, chatMsgLimit);
   if(chatCtx) memoryParts.push(chatCtx);
 
-  // Bubble 发言记录（含用户在idol手机上发送的内容）
+  // Bubble 发言记录（含用户在idol手机上发送的内容）——固定只参考最近3个回合，
+  // 不随调用方变化。
   try{
     const pd = ensurePhoneData(ch);
     if(pd.bubble && pd.bubble.rounds && pd.bubble.rounds.length){
@@ -4071,13 +4086,14 @@ function buildBaseSystemPrompt(ch, extra){
   // Instagram 帖子摘要（大号 + 小号）
   try{
     const pd = ensurePhoneData(ch);
+    const igN = compact ? 1 : 2;
     if(pd.instagram && pd.instagram.posts && pd.instagram.posts.length){
-      const recentPosts = pd.instagram.posts.slice(-2);
+      const recentPosts = pd.instagram.posts.slice(-igN);
       const postLines = recentPosts.map(p=>'idol（Instagram）：'+p.caption).join('\n');
       if(postLines) memoryParts.push('\n【idol最近的Instagram帖子（请保持风格一致）】\n'+postLines);
     }
     if(pd.instagramAlt && pd.instagramAlt.posts && pd.instagramAlt.posts.length){
-      const recentAltPosts = pd.instagramAlt.posts.slice(-2);
+      const recentAltPosts = pd.instagramAlt.posts.slice(-igN);
       const altPostLines = recentAltPosts.map(p=>'idol（小号）：'+p.caption).join('\n');
       if(altPostLines) memoryParts.push('\n【idol小号最近发布的内容（隐蔽账号，idol自己知道）】\n'+altPostLines);
     }
@@ -4085,10 +4101,10 @@ function buildBaseSystemPrompt(ch, extra){
     // 明确标注归属，避免生成内容时把用户发过的东西误当成idol自己发的（或反之）。
     const myLines = [];
     if(pd.userInstagram && pd.userInstagram.myPosts && pd.userInstagram.myPosts.length){
-      pd.userInstagram.myPosts.slice(-2).forEach(p=>myLines.push('用户本人（Instagram大号）：'+p.caption));
+      pd.userInstagram.myPosts.slice(-igN).forEach(p=>myLines.push('用户本人（Instagram大号）：'+p.caption));
     }
     if(pd.userInstagram && pd.userInstagram.altPosts && pd.userInstagram.altPosts.length){
-      pd.userInstagram.altPosts.slice(-2).forEach(p=>myLines.push('用户本人（Instagram小号，身份保密）：'+p.caption));
+      pd.userInstagram.altPosts.slice(-igN).forEach(p=>myLines.push('用户本人（Instagram小号，身份保密）：'+p.caption));
     }
     if(myLines.length) memoryParts.push('\n【用户自己发布的Instagram帖子（用户本人发的，与idol的帖子区分，请分清内容归属）】\n'+myLines.join('\n'));
   }catch(e){}
@@ -4097,19 +4113,23 @@ function buildBaseSystemPrompt(ch, extra){
   try{
     const pd = ensurePhoneData(ch);
     const dmLines = [];
-    (pd.instagram && pd.instagram.dms || []).slice(-2).forEach(dm=>{
-      const recent = (dm.messages||[]).slice(-3).map(m=>msgHistoryLine(m, m.from==='me'?'idol':dm.name)).join('\n');
+    const dmN = compact ? 1 : 2;
+    const dmMsgN = compact ? 2 : 3;
+    (pd.instagram && pd.instagram.dms || []).slice(-dmN).forEach(dm=>{
+      const recent = (dm.messages||[]).slice(-dmMsgN).map(m=>msgHistoryLine(m, m.from==='me'?'idol':dm.name)).join('\n');
       if(recent) dmLines.push('与「'+dm.name+'」的私信：\n'+recent);
     });
-    (pd.instagramAlt && pd.instagramAlt.dms || []).slice(-1).forEach(dm=>{
-      const recent = (dm.messages||[]).slice(-3).map(m=>msgHistoryLine(m, m.from==='me'?'idol（小号）':dm.name)).join('\n');
-      if(recent) dmLines.push('小号与「'+dm.name+'」的私信：\n'+recent);
-    });
+    if(!compact){
+      (pd.instagramAlt && pd.instagramAlt.dms || []).slice(-1).forEach(dm=>{
+        const recent = (dm.messages||[]).slice(-dmMsgN).map(m=>msgHistoryLine(m, m.from==='me'?'idol（小号）':dm.name)).join('\n');
+        if(recent) dmLines.push('小号与「'+dm.name+'」的私信：\n'+recent);
+      });
+    }
     if(dmLines.length) memoryParts.push('\n【idol最近的Instagram私信（idol都记得自己聊过什么）】\n'+dmLines.join('\n\n'));
   }catch(e){}
 
   // 用户Chat应用里与其他联系人（含由私信转来的联系人）的对话摘要
-  try{
+  if(!compact) try{
     const pd = ensurePhoneData(ch);
     const contacts = pd.userContactChats || [];
     if(contacts.length){
@@ -4122,7 +4142,7 @@ function buildBaseSystemPrompt(ch, extra){
   }catch(e){}
 
   // idol手机Chat应用里与其他联系人（NPC）的对话摘要
-  try{
+  if(!compact) try{
     const pd = ensurePhoneData(ch);
     const icContacts = (pd.idolChat && pd.idolChat.contacts) || [];
     if(icContacts.length){
@@ -4147,7 +4167,7 @@ function buildBaseSystemPrompt(ch, extra){
   }catch(e){}
 
   // PayPal 消费记录摘要
-  try{
+  if(!compact) try{
     const pd = ensurePhoneData(ch);
     if(pd.paypal && pd.paypal.transactions && pd.paypal.transactions.length){
       const recentTx = pd.paypal.transactions.slice(0,3).map(tx=>tx.name+'：'+(tx.amount<0?'-':'+')+'$'+Math.abs(tx.amount)+'（'+tx.date+'）').join('\n');
@@ -4156,7 +4176,7 @@ function buildBaseSystemPrompt(ch, extra){
   }catch(e){}
 
   // Maps 行程摘要
-  try{
+  if(!compact) try{
     const pd = ensurePhoneData(ch);
     if(pd.maps && pd.maps.stops && pd.maps.stops.length){
       const stopLines = pd.maps.stops.map(s=>s.time+' '+s.place+'：'+s.desc).join('\n');
@@ -4168,13 +4188,13 @@ function buildBaseSystemPrompt(ch, extra){
   try{
     const pd = ensurePhoneData(ch);
     if(pd.album && pd.album.items && pd.album.items.length){
-      const albLines = pd.album.items.slice(0,4).map(it=>(it.isVideo?'[视频] ':'[照片] ')+(it.desc||'').slice(0,60)).join('\n');
+      const albLines = pd.album.items.slice(0, compact?2:4).map(it=>(it.isVideo?'[视频] ':'[照片] ')+(it.desc||'').slice(0,60)).join('\n');
       if(albLines) memoryParts.push('\n【idol手机相册里的内容（idol自己知道相册里有什么）】\n'+albLines);
     }
   }catch(e){}
 
   // Notes 备忘录摘要
-  try{
+  if(!compact) try{
     const pd = ensurePhoneData(ch);
     if(pd.notes && pd.notes.items && pd.notes.items.length){
       const recentNotes = pd.notes.items.slice(-1);
@@ -4198,30 +4218,26 @@ function buildBaseSystemPrompt(ch, extra){
       const auto = getAutoMemoryEntry(ch);
       const manual = entries.filter(e=>!e.auto);
       let manualText = manual.map(e=>(e.title?'['+e.title+'] ':'')+e.content).filter(Boolean).join('\n');
-      manualText = capHistoryText(manualText, 4000);
+      manualText = capHistoryText(manualText, compact ? 2000 : 4000);
       const memLines = [auto ? ((auto.title?'['+auto.title+'] ':'')+auto.content) : '', manualText].filter(Boolean).join('\n');
       if(memLines) memoryParts.push('\n【角色记忆（重要事件与背景，其中"自动整合记忆"是更早期历史的压缩摘要，生成内容时请参考并保持一致）】\n'+memLines);
     }
   }catch(e){}
 
-  // 剧情记忆摘要——Chat聊天与线下相处是同一条时间线，不分开算：优先使用滚动摘要
-  // （由线下页面每次生成时一并产出，见offlineSummary），只有还没有摘要时才回退到
-  // 少量原始线下对话，避免同一段内容被重复大段注入。
+  // 剧情记忆摘要——最近两段的摘要 + 线下互动中说过的话（引号内的对话部分，
+  // 不含大段动作/场景描写）。Chat生成时参考最近10条线下记录里的对话，
+  // 其余默认参考最近5条。
   try{
     const pd = ensurePhoneData(ch);
     const offlineCtx = [];
-    if(pd.offlineSummary && pd.offlineSummary.trim()){
-      offlineCtx.push('剧情摘要（含线下相处内容，与聊天同属一条时间线）：'+capHistoryText(pd.offlineSummary.trim(), 600));
-    }else{
-      if(pd.offlineScenes && pd.offlineScenes.length){
-        offlineCtx.push('最近线下场景：'+pd.offlineScenes[0].text.slice(0,200));
-      }
-      if(pd.offlineChatMsgs && pd.offlineChatMsgs.length){
-        const recent = pd.offlineChatMsgs.slice(-3).map(m=>(m.from==='me'?(ch.userName||'用户'):(ch.idolName||'idol'))+'：'+m.text).join('\n');
-        offlineCtx.push('线下对话记录：\n'+recent);
-      }
+    if(pd.offlineSummaries && pd.offlineSummaries.length){
+      offlineCtx.push('剧情摘要（含线下相处内容，与聊天同属一条时间线，最近两段，按时间先后排列）：\n'+capHistoryText(pd.offlineSummaries.join('\n'), 900));
     }
-    if(offlineCtx.length) memoryParts.push('\n【线下互动记忆（请与此保持一致）】\n'+offlineCtx.join('\n'));
+    if(pd.offlineChatMsgs && pd.offlineChatMsgs.length){
+      const dialogue = capHistoryText(pd.offlineChatMsgs.slice(-offlineDialogueCount).map(m=>extractQuotedDialogue(m.text)).filter(Boolean).join('\n'), compact ? 800 : 1500);
+      if(dialogue) offlineCtx.push('线下互动中说过的话（最近'+offlineDialogueCount+'条记录里的对话部分）：\n'+dialogue);
+    }
+    if(offlineCtx.length) memoryParts.push('\n【线下互动记忆（请与此保持一致）】\n'+offlineCtx.join('\n\n'));
   }catch(e){}
 
   return [
@@ -4230,7 +4246,7 @@ function buildBaseSystemPrompt(ch, extra){
     '【用户人设】姓名：'+(ch.userName||'未命名')+'；简介：'+(ch.userBio||'无'),
     '【关系设定】'+relation,
     (ch.idolAltName && ch.idolAltName.trim()) ? '【小号身份规则】idol的Instagram小号「'+ch.idolAltName.trim()+'」是匿名账号，除非剧情特别需要，一般情况下没有人知道这个小号背后其实是idol本人，粉丝、网友、私信对象等都应把它当作一个普通匿名账号对待，不会主动识破或提及其真实身份。' : '',
-    wb ? ('【世界书 / 生成要求】\n'+wb) : '【世界书】无特殊设定。',
+    wb ? ('【世界书 / 生成要求】\n'+(compact ? capHistoryText(wb, 3000) : wb)) : '【世界书】无特殊设定。',
     memoryParts.join(''),
     getNewsContext(),
     '【语言要求】除非是无法翻译的专有名词、品牌名或英文缩写，全部内容必须使用简体中文输出。',
@@ -4275,11 +4291,11 @@ function buildOfflineSystemPrompt(ch, extra){
   }catch(e){}
 
   // 剧情记忆摘要 —— 覆盖"Chat聊天"和"线下相处"两边已经发生的一切，由每次线下
-  // 生成时模型一并输出、滚动更新（见offlineSummary），保持简短。
+  // 生成时模型一并输出、滚动更新（见offlineSummaries），只保留最近两段，保持简短。
   try{
     const pd = ensurePhoneData(ch);
-    if(pd.offlineSummary && pd.offlineSummary.trim()){
-      memoryParts.push('\n【剧情记忆摘要（Chat聊天与线下相处是同一条时间线的剧情，请当作连续发生的同一个故事，不要割裂看待；此摘要涵盖两边已发生的一切，请与此保持一致）】\n'+capHistoryText(pd.offlineSummary.trim(), 800));
+    if(pd.offlineSummaries && pd.offlineSummaries.length){
+      memoryParts.push('\n【剧情记忆摘要（Chat聊天与线下相处是同一条时间线的剧情，请当作连续发生的同一个故事，不要割裂看待；以下是最近两段的摘要，按时间先后排列，请与此保持一致）】\n'+capHistoryText(pd.offlineSummaries.join('\n'), 900));
     }
   }catch(e){}
 
@@ -4300,7 +4316,7 @@ function buildOfflineSystemPrompt(ch, extra){
    BUBBLE APP — idol broadcasts to fans, fans reply
 =================================================================== */
 async function bubbleGenerateFanReplies(ch, idolText){
-  const sys = buildBaseSystemPrompt(ch, '现在请为idol刚刚发出的一条消息，生成来自不同粉丝的回复。');
+  const sys = buildBaseSystemPrompt(ch, '现在请为idol刚刚发出的一条消息，生成来自不同粉丝的回复。', {chatMsgLimit:30, compact:true});
   const usr = 'idol刚刚发送的内容是：「'+idolText+'」\n请生成恰好8条来自不同粉丝的回复评论，粉丝姓名（网名/ID）各不相同且口语化。\n输出 JSON 格式：{"replies":[{"name":"粉丝昵称","text":"回复内容"}, ... 共8条]}';
   const data = await generateJSON(sys, usr, 3500);
   if(data && Array.isArray(data.replies)) return data.replies.slice(0,8);
@@ -4314,13 +4330,14 @@ async function refreshBubble(){
   const pd = ensurePhoneData(ch);
   showGenerating();
   try{
-    const sys = buildBaseSystemPrompt(ch, '请生成idol过去在 Bubble（粉丝互动泡泡软件）里发布过的历史消息记录。');
-    const usr = '请生成 3 到 4 条idol过去发送给粉丝的消息（可以是文字感想，也可以是配文照片）。\n输出 JSON：{"messages":[{"photo":false,"text":"消息内容"}, ...]}\n如果某条是配文照片，"photo"设为true，"text"则填写这张照片的文字描述（因为这是纯文字模拟，照片用文字描述代替）。\n每条消息生成后，紧接着各生成8条来自不同粉丝、昵称各异、口语化自然的回复评论，放在对应的"replies"字段里：{"messages":[{"photo":false,"text":"...","replies":[{"name":"...","text":"..."},...共8条]}, ...]}';
-    const data = await generateJSON(sys, usr, 3500);
+    const sys = buildBaseSystemPrompt(ch, '请生成idol过去在 Bubble（粉丝互动泡泡软件）里发布过的历史消息记录。', {chatMsgLimit:30, compact:true});
+    const usr = '请生成 3 到 4 条idol过去发送给粉丝的消息（可以是纯文字感想，也可以是配图片，也可以是配视频）。\n输出 JSON：{"messages":[{"photo":false,"isVideo":false,"text":"消息内容"}, ...]}\n如果某条带图片或视频，"photo"设为true；如果带的是视频而不是图片，再把"isVideo"设为true（纯图片则isVideo为false）。带媒体时"text"填写这段图片/视频内容的文字描述（因为这是纯文字模拟，图片/视频用文字描述代替）。\n每条消息生成后，紧接着各生成8条来自不同粉丝、昵称各异、口语化自然的回复评论，放在对应的"replies"字段里：{"messages":[{"photo":false,"isVideo":false,"text":"...","replies":[{"name":"...","text":"..."},...共8条]}, ...]}';
+    const data = await generateJSON(sys, usr, 6000);
     if(data && Array.isArray(data.messages) && data.messages.length){
       const newRounds = data.messages.map(m=>({
         id:uid('r'),
         photo: !!m.photo,
+        isVideo: !!m.isVideo,
         text: m.text||'',
         replies: Array.isArray(m.replies) ? m.replies.slice(0,8) : [],
         expanded:false
@@ -4502,7 +4519,15 @@ function igPostHtml(ch, p, overrideName){
       + (secondaryDisplay ? ' <span style="font-size:11.5px;color:var(--text-3);font-weight:400;">'+escapeHtml(secondaryDisplay)+'</span>' : '')
       +'</div><div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
   }
-  if(p.hasImage){ html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+'</div>'; }
+  if(p.hasImage){
+    if(p.isVideo){
+      html += '<div class="video-bubble" style="width:100%;margin-bottom:8px;"><div class="video-bubble-thumb">'
+        +'<div class="video-bubble-play"></div><span class="video-bubble-badge">'+t('video.label')+'</span></div>'
+        +'<div class="video-bubble-label">'+escapeHtml(p.imageDesc||'')+'</div></div>';
+    } else {
+      html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+'</div>';
+    }
+  }
   html += '<div class="ig-caption">'+escapeHtml(p.caption||'')+'</div>';
   html += igStatsHtml(p);
   // Show first 3 comments collapsed, all when expanded — with reply buttons and nested replies
@@ -5019,7 +5044,7 @@ async function autoGenerateAltPostComments(post, ch){
 /* ---- generation: idol main ---- */
 async function generateIgPosts(ch){
   const sys = buildBaseSystemPrompt(ch, '请生成idol在 Instagram 上发布的帖子。');
-  const usr = '生成 5 篇idol发布的 Instagram 帖子，部分帖子配图、部分不配图。每篇帖子配 8 条粉丝评论（评论者各不相同，仅作为展示样本），并附点赞数、评论总数、转发数——commentCount（评论总数）请根据idol的人设知名度/粉丝量级合理设定，不需要等于comments数组的实际条数，人气idol的评论总数通常远大于展示出来的样本数（例如可以是几千甚至上万）。\n输出 JSON：{"posts":[{"hasImage":true,"imageDesc":"图片内容的文字描述（若hasImage为false则留空字符串）","caption":"配文","time":"如 3小时前","likes":12000,"commentCount":5400,"shareCount":58,"comments":[{"name":"评论者昵称","text":"评论内容"}，共8条]}, ... 共5篇]}';
+  const usr = '生成 5 篇idol发布的 Instagram 帖子，部分帖子配图、部分配视频、部分不配图。每篇帖子配 8 条粉丝评论（评论者各不相同，仅作为展示样本），并附点赞数、评论总数、转发数——commentCount（评论总数）请根据idol的人设知名度/粉丝量级合理设定，不需要等于comments数组的实际条数，人气idol的评论总数通常远大于展示出来的样本数（例如可以是几千甚至上万）。\n输出 JSON：{"posts":[{"hasImage":true,"isVideo":false,"imageDesc":"图片或视频内容的文字描述（若hasImage为false则留空字符串）","caption":"配文","time":"如 3小时前","likes":12000,"commentCount":5400,"shareCount":58,"comments":[{"name":"评论者昵称","text":"评论内容"}，共8条]}, ... 共5篇]}\n如果这篇是配视频而不是配图片，"isVideo"设为true（纯图片或无配图则isVideo为false）。';
   const data = await generateJSON(sys, usr);
   return (data && Array.isArray(data.posts)) ? data.posts.slice(0,5) : null;
 }
@@ -5048,9 +5073,21 @@ async function generateDms(ch, mode){
     ? '请生成idol在其隐蔽的Instagram小号上收到的私信列表。这个小号没有人知道是idol本人，发信人多是idol自己关注的少数密友、同行或匿名小号，语气更私人、更不设防。'
     : '请生成idol收到的私信列表，发信人类型多样：粉丝、黑粉、私生饭/狗仔、神秘人、合作方等。idol通常不会回复粉丝和黑粉的私信。';
   const sys = buildBaseSystemPrompt(ch, who+' 注意：无论哪种情况，私信发信人中都不会出现任何被塑造为恋人、地下恋人身份的角色，Instagram私信里只是普通的社交关系（朋友、粉丝、同好、网友等）。');
-  const usr = '生成 10 条私信对话，每条包含发信人昵称、关系标签（用2到4个字概括，不能是恋人/地下恋人一类的标签）、以及1到3条该发信人发来的初始消息（仅对方发的消息，一般不主动回复，除非发信人身份特殊）。\n输出 JSON：{"dms":[{"name":"昵称","tag":"标签","messages":[{"from":"them","text":"消息内容"}, ...]}, ... 共10条]}';
+  const usr = '生成 10 条私信对话，每条包含发信人昵称、关系标签（用2到4个字概括，不能是恋人/地下恋人一类的标签）、以及1到3条该发信人发来的初始消息（仅对方发的消息，一般不主动回复，除非发信人身份特殊）。每条消息大多是文字，也可以偶尔是发来的图片或视频（因为是纯文字模拟，图片/视频用文字描述代替）。\n输出 JSON：{"dms":[{"name":"昵称","tag":"标签","messages":[{"type":"text","text":"消息内容"}, ...]}, ... 共10条]}\n普通文字消息用{"type":"text","text":"..."}；如果发的是图片用{"type":"photo","desc":"图片内容描述"}；如果是视频用{"type":"video","desc":"视频内容描述"}。';
   const data = await generateJSON(sys, usr, 3500);
-  return (data && Array.isArray(data.dms)) ? data.dms.slice(0,10) : null;
+  if(!data || !Array.isArray(data.dms)) return null;
+  return data.dms.slice(0,10).map(dm=>{
+    const now = Date.now();
+    const messages = (Array.isArray(dm.messages) ? dm.messages : [])
+      .filter(item=>item && (item.text||item.desc))
+      .map((item,i)=>{
+        if(item.type==='photo'||item.type==='video'){
+          return {from:'them', isMedia:true, isVideo:item.type==='video', mediaUrl:'', mediaDesc:(item.desc||'').trim(), text:'['+(item.type==='video'?t('video.label'):t('label.photo'))+']', id:uid('dm'), ts:now+i*1000};
+        }
+        return {from:'them', text:(item.text||'').trim(), id:uid('dm'), ts:now+i*1000};
+      });
+    return Object.assign({}, dm, {messages});
+  });
 }
 
 /* ---- idol main refresh ---- */
@@ -5292,7 +5329,7 @@ async function generateAltSearchHistory(ch){
 /* ---- idol alt refresh ---- */
 async function igAltRefreshPosts(ch, pd){
   const sys = buildBaseSystemPrompt(ch, '请生成idol在隐蔽小号上发布的帖子，语气和内容比公开账号更私人、更不设防，是idol未经包装的真实一面。');
-  const usr = '生成 5 篇帖子，部分配图、部分不配图，每篇配 1 到 3 条评论（评论者多为idol信任的密友圈，仅作为展示样本），并附点赞数、评论总数、转发数——commentCount请根据小号粉丝很少的设定合理设定，不需要等于comments数组的实际条数。\n输出 JSON：{"posts":[{"hasImage":true,"imageDesc":"图片描述","caption":"配文","time":"如 2小时前","likes":80,"commentCount":15,"shareCount":2,"comments":[{"name":"昵称","text":"评论"}]}, ... 共5篇]}';
+  const usr = '生成 5 篇帖子，部分配图、部分配视频、部分不配图，每篇配 1 到 3 条评论（评论者多为idol信任的密友圈，仅作为展示样本），并附点赞数、评论总数、转发数——commentCount请根据小号粉丝很少的设定合理设定，不需要等于comments数组的实际条数。\n输出 JSON：{"posts":[{"hasImage":true,"isVideo":false,"imageDesc":"图片或视频描述","caption":"配文","time":"如 2小时前","likes":80,"commentCount":15,"shareCount":2,"comments":[{"name":"昵称","text":"评论"}]}, ... 共5篇]}\n如果这篇是配视频而不是配图片，"isVideo"设为true（纯图片或无配图则isVideo为false）。';
   const data = await generateJSON(sys, usr);
   if(data && Array.isArray(data.posts)){ pd.posts = data.posts.map(p=>Object.assign({},p,{id:uid('p')})); saveState(); }
 }
@@ -6272,7 +6309,8 @@ async function triggerIdolChatReply(){
       +'- 消息之间要有逻辑连贯性，不要重复同一意思\n'
       +'- 根据剧情需要，你也可以选择撤回idol之前发送过的某条消息，在recall_ids字段填写要撤回的消息id（如果不需要撤回则填空数组）\n'
       +'- 根据剧情需要，idol也可以发送照片或视频给用户（极少数情况下，比如分享自拍、分享当下场景），此时将该条消息的type设为"photo"或"video"并附上详细描述（desc，至少30字描写画面内容），其余普通文字消息type设为"text"\n'
-      +'- 根据剧情需要（例如想把经纪人、朋友、助理等身边人介绍给用户认识），可以极少数情况下推送一张联系人名片，此时将该条消息type设为"card"，并填写name（对方的称呼/昵称）、tag（关系标签，2到6字，如"经纪人"、"闺蜜"、"助理"）、bio（对这个人的简介，20字以内，用于后续对话保持人设一致），这种情况非常少见，不要频繁使用'
+      +'- 根据剧情需要（例如想把经纪人、朋友、助理等身边人介绍给用户认识），可以极少数情况下推送一张联系人名片，此时将该条消息type设为"card"，并填写name（对方的称呼/昵称）、tag（关系标签，2到6字，如"经纪人"、"闺蜜"、"助理"）、bio（对这个人的简介，20字以内，用于后续对话保持人设一致），这种情况非常少见，不要频繁使用',
+      {offlineDialogueCount:10}
     );
     const history = capHistoryText(pd.messages.slice(-40).map(m=>{
       const speaker = m.from==='me' ? (ch.userName||'用户') : (ch.idolName||'idol');
@@ -6559,7 +6597,7 @@ document.getElementById('userIgTabs').addEventListener('click', (e)=>{
 
 async function generateUserFeed(ch){
   const sys = buildBaseSystemPrompt(ch, '请生成用户Instagram动态页里看到的、其他网友发布的帖子（可能包含关于idol的讨论、粉丝日常、八卦、无关的生活分享等）。');
-  const usr = '生成 8 条来自不同网友的帖子，部分配图、部分不配图。每篇配 1 到 3 条评论（仅作为展示样本），并附点赞数、评论总数、转发数——commentCount请根据发帖人的身份/热度合理设定，不需要等于comments数组的实际条数。\n输出 JSON：{"feed":[{"author":"发帖人昵称","hasImage":true,"imageDesc":"图片描述（无图则留空）","caption":"配文","time":"如 2小时前","likes":320,"commentCount":48,"shareCount":9,"comments":[{"name":"昵称","text":"评论"}]}, ... 共8条]}';
+  const usr = '生成 8 条来自不同网友的帖子，部分配图、部分配视频、部分不配图。每篇配 1 到 3 条评论（仅作为展示样本），并附点赞数、评论总数、转发数——commentCount请根据发帖人的身份/热度合理设定，不需要等于comments数组的实际条数。\n输出 JSON：{"feed":[{"author":"发帖人昵称","hasImage":true,"isVideo":false,"imageDesc":"图片或视频描述（无配图/视频则留空）","caption":"配文","time":"如 2小时前","likes":320,"commentCount":48,"shareCount":9,"comments":[{"name":"昵称","text":"评论"}]}, ... 共8条]}\n如果这条是配视频而不是配图片，"isVideo"设为true（纯图片或无配图则isVideo为false）。';
   const data = await generateJSON(sys, usr);
   return (data && Array.isArray(data.feed)) ? data.feed.slice(0,8) : null;
 }
@@ -9446,9 +9484,9 @@ function wireOfflineChatBar(){
       const coveredChat = pd.summaryCoveredChatCount || 0;
       const newChatLines = capHistoryText(chatMsgs.slice(coveredChat).slice(-12).map(m=>msgHistoryLine(m, m.from==='me'?(ch.userName||'用户'):(ch.idolName||'idol'))).join('\n'), 2000);
       const recentOfflineDialogue = capHistoryText(pd.offlineChatMsgs.slice(-10).map(m=>extractQuotedDialogue(m.text)).filter(Boolean).join('\n'), 2000);
-      const lastSummary = (pd.offlineSummary && pd.offlineSummary.trim()) ? pd.offlineSummary.trim() : '';
+      // 上一段/上两段的摘要已经由 buildOfflineSystemPrompt 通过 offlineSummaries
+      // 注入到system prompt里了，这里不再重复塞一遍，避免同一段内容被喂两次。
       const deltaCtx = (newChatLines ? '【Chat里最近新聊的内容】\n'+newChatLines+'\n\n' : '')
-                     + (lastSummary ? '【上一段线下互动摘要】\n'+lastSummary+'\n\n' : '')
                      + (recentOfflineDialogue ? '【最近线下互动中说过的话（最多10条记录里的对话部分）】\n'+recentOfflineDialogue+'\n\n' : '');
       const sys = buildOfflineSystemPrompt(ch,
         '现在你们正在线下相处，请以小说笔法描写接下来发生的事，第三人称视角，[动作描写..."说的话"]交替出现，至少300字，语言富有文学感，融合场景、动作、对话和内心描写。段落之间请用换行分隔，像小说排版一样自然分段，每段聚焦一个场景片段或情感节拍，不要写成一整段不分行的文字。'+sceneCtx
@@ -9464,7 +9502,11 @@ function wireOfflineChatBar(){
         const now=Date.now();
         const newMsgs = data.messages.filter(Boolean).map((txt,i)=>({from:'them',text:txt.trim(),id:uid('oc'),ts:now+i*1000}));
         newMsgs.forEach(m=>pd.offlineChatMsgs.push(m));
-        if(data.summary && data.summary.trim()) pd.offlineSummary = data.summary.trim();
+        if(data.summary && data.summary.trim()){
+          if(!Array.isArray(pd.offlineSummaries)) pd.offlineSummaries = [];
+          pd.offlineSummaries.push(data.summary.trim());
+          if(pd.offlineSummaries.length > 2) pd.offlineSummaries = pd.offlineSummaries.slice(-2);
+        }
         pd.summaryCoveredChatCount = chatMsgs.length;
         saveState();
         // Show notification for first message
@@ -10640,8 +10682,8 @@ function openContactChat(idx){
       const history = capHistoryText((currentC.messages||[]).slice(-40).map(m=>(m.from==='me'?speaker:currentC.name)+'[id:'+m.id+']：'+(m.recalled?'[撤回]':m.text)).join('\n'));
       const bioCtx = currentC.bio ? '人物介绍：'+currentC.bio+'\n' : '';
       const memCtx = (!currentC.bio && currentC.dmMemory) ? ('这是你和用户之前在私信里的对话记录，请保持人设、语气与之前完全一致：\n'+currentC.dmMemory+'\n') : '';
-      const sys = buildBaseSystemPrompt(currentCh, '现在请扮演「'+currentC.name+'」（'+(currentC.tag||'联系人')+'）。'+bioCtx+memCtx+'根据对话历史自然地回复用户，可以发1-3条消息。根据剧情需要可以撤回自己之前的消息，在recall_ids填写消息id（不需要则填[]）。根据剧情需要（例如想把自己认识的其他人介绍给用户），可以极少数情况下推送一张联系人名片，此时该条消息type设为"card"，并填写name（对方称呼）、tag（关系标签，2到6字）、bio（简介，20字以内），这种情况非常少见，不要频繁使用。');
-      const usr = '对话历史（每条消息有id标记）：\n'+history+'\n\n请生成「'+currentC.name+'」接下来发的消息。\n输出 JSON：{"messages":[{"type":"text","text":"消息内容"}],"recall_ids":[]}\n普通文字消息用{"type":"text","text":"..."}；推送联系人名片用{"type":"card","name":"对方称呼","tag":"关系标签","bio":"简介"}。recall_ids填写想撤回的自己之前消息的id，不撤回则填[]。';
+      const sys = buildBaseSystemPrompt(currentCh, '现在请扮演「'+currentC.name+'」（'+(currentC.tag||'联系人')+'）。'+bioCtx+memCtx+'根据对话历史自然地回复用户，可以发1-3条消息。根据剧情需要可以撤回自己之前的消息，在recall_ids填写消息id（不需要则填[]）。根据剧情需要，也可以极少数情况下发照片或视频给用户，此时该条消息type设为"photo"或"video"并附上详细描述（desc，至少30字描写画面内容），其余普通文字消息type设为"text"。根据剧情需要（例如想把自己认识的其他人介绍给用户），可以极少数情况下推送一张联系人名片，此时该条消息type设为"card"，并填写name（对方称呼）、tag（关系标签，2到6字）、bio（简介，20字以内），这种情况非常少见，不要频繁使用。');
+      const usr = '对话历史（每条消息有id标记）：\n'+history+'\n\n请生成「'+currentC.name+'」接下来发的消息。\n输出 JSON：{"messages":[{"type":"text","text":"消息内容"}],"recall_ids":[]}\n普通文字消息用{"type":"text","text":"..."}；照片用{"type":"photo","desc":"..."}；视频用{"type":"video","desc":"..."}；推送联系人名片用{"type":"card","name":"对方称呼","tag":"关系标签","bio":"简介"}。recall_ids填写想撤回的自己之前消息的id，不撤回则填[]。';
       const data = await generateJSON(sys, usr, 3500);
       if(data && Array.isArray(data.messages) && data.messages.length){
         // Handle recalls
@@ -10653,22 +10695,25 @@ function openContactChat(idx){
         }
         const now=Date.now();
         const newMsgs=data.messages
-          .filter(item=>item && (typeof item==='string' ? item.trim() : (item.text||(item.type==='card'&&item.name))))
+          .filter(item=>item && (typeof item==='string' ? item.trim() : (item.text||item.desc||(item.type==='card'&&item.name))))
           .map((item,i)=>{
             if(typeof item==='string'){
               return {from:'them', text:item.trim(), id:uid('m'), ts:now+i*1000};
+            }
+            if(item.type==='photo'||item.type==='video'){
+              return {from:'them', isMedia:true, isVideo:item.type==='video', mediaUrl:'', mediaDesc:(item.desc||'').trim(), text:'['+(item.type==='video'?t('video.label'):t('label.photo'))+']', id:uid('m'), ts:now+i*1000};
             }
             if(item.type==='card'){
               return {from:'them', isCard:true, cardData:{name:(item.name||'').trim(), tag:(item.tag||'').trim(), bio:(item.bio||'').trim(), avatar:''}, text:'[CARD]', id:uid('m'), ts:now+i*1000};
             }
             return {from:'them', text:(item.text||'').trim(), id:uid('m'), ts:now+i*1000};
           })
-          .filter(m=>m.isCard || (m.text && m.text.trim()));
+          .filter(m=>m.isMedia || m.isCard || (m.text && m.text.trim()));
         if(!newMsgs.length){ throw new Error('Model response had no usable messages after filtering'); }
         newMsgs.forEach(m=>currentC.messages.push(m));
         saveState();
         // Show notification
-        if(newMsgs.length) showMsgNotification('Chat', currentC.name, newMsgs[0].isCard?('['+t('card.push')+']'):newMsgs[0].text);
+        if(newMsgs.length) showMsgNotification('Chat', currentC.name, newMsgs[0].isCard?('['+t('card.push')+']'):newMsgs[0].isMedia?('['+(newMsgs[0].isVideo?t('video.label'):t('label.photo'))+']'):newMsgs[0].text);
         // Stream
         const feed2 = document.getElementById('userChatFeed');
         const cAsCh2 = {idolName:currentC.name, idolAvatar:currentC.avatar||'', userName:currentCh.userName, userAvatar:currentCh.userAvatar};
@@ -10909,16 +10954,27 @@ function openIdolChatContact(idx){
       const speaker = currentCh.idolName || 'idol';
       const history = capHistoryText((currentC.messages||[]).slice(-40).map(m=>(m.from==='me'?speaker:currentC.name)+'：'+m.text).join('\n'));
       const tagCtx = currentC.tag ? '关系：'+currentC.tag+'\n' : '';
-      const sys = buildBaseSystemPrompt(currentCh, '现在请你站在「'+currentC.name+'」（'+(currentC.tag||'联系人')+'）的角度，'+tagCtx+'根据对话历史自然地回复idol，可以发1-3条消息，符合该联系人与idol的关系和身份。');
-      const usr = '对话历史：\n'+history+'\n\n请生成「'+currentC.name+'」接下来发的消息。\n输出 JSON：{"messages":["消息1","消息2",...]}';
+      const sys = buildBaseSystemPrompt(currentCh, '现在请你站在「'+currentC.name+'」（'+(currentC.tag||'联系人')+'）的角度，'+tagCtx+'根据对话历史自然地回复idol，可以发1-3条消息，符合该联系人与idol的关系和身份。根据剧情需要，也可以极少数情况下发照片或视频给idol，此时该条消息type设为"photo"或"video"并附上详细描述（desc，至少30字描写画面内容），其余普通文字消息type设为"text"。');
+      const usr = '对话历史：\n'+history+'\n\n请生成「'+currentC.name+'」接下来发的消息。\n输出 JSON：{"messages":[{"type":"text","text":"消息内容"}, ...]}\n普通文字消息用{"type":"text","text":"..."}；照片用{"type":"photo","desc":"..."}；视频用{"type":"video","desc":"..."}。';
       const data = await generateJSON(sys, usr, 3500);
       if(data && Array.isArray(data.messages) && data.messages.length){
         const now = Date.now();
-        const newMsgs = data.messages.filter(tx=>tx&&tx.trim()).map((tx,i)=>({from:'them', text:tx.trim(), id:uid('m'), ts:now+i*1000}));
+        const newMsgs = data.messages
+          .filter(item=>item && (typeof item==='string' ? item.trim() : (item.text||item.desc)))
+          .map((item,i)=>{
+            if(typeof item==='string'){
+              return {from:'them', text:item.trim(), id:uid('m'), ts:now+i*1000};
+            }
+            if(item.type==='photo'||item.type==='video'){
+              return {from:'them', isMedia:true, isVideo:item.type==='video', mediaUrl:'', mediaDesc:(item.desc||'').trim(), text:'['+(item.type==='video'?t('video.label'):t('label.photo'))+']', id:uid('m'), ts:now+i*1000};
+            }
+            return {from:'them', text:(item.text||'').trim(), id:uid('m'), ts:now+i*1000};
+          })
+          .filter(m=>m.isMedia || (m.text && m.text.trim()));
         if(!newMsgs.length){ throw new Error('Model response had no usable messages after filtering'); }
         newMsgs.forEach(m=>currentC.messages.push(m));
         saveState();
-        if(newMsgs.length) showMsgNotification('Chat', currentC.name, newMsgs[0].text);
+        if(newMsgs.length) showMsgNotification('Chat', currentC.name, newMsgs[0].isMedia?('['+(newMsgs[0].isVideo?t('video.label'):t('label.photo'))+']'):newMsgs[0].text);
         const feed2 = document.getElementById('idolChatFeed');
         const cAsCh2 = {idolName:currentC.name, idolAvatar:currentC.avatar||'', userName:currentCh.idolName, userAvatar:currentCh.idolAvatar};
         const existing = currentC.messages.slice(0, currentC.messages.length - newMsgs.length);
