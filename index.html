@@ -388,6 +388,7 @@ input, textarea{ outline:none; }
   text-align:center;padding:16px;
   font-size:12px;color:var(--text-2);line-height:1.6;
   margin-bottom:8px;
+  position:relative;
 }
 .ig-caption{font-size:13px;line-height:1.5;margin-bottom:6px;}
 .ig-likes{font-size:11.5px;color:var(--text-3);margin-bottom:6px;}
@@ -2451,7 +2452,8 @@ const I18N = {
     'card.received':'收到一张名片',
     'card.added':'已添加到通讯录',
     'memory.hint':'角色记忆 — 记录每次生成内容带来的重要事件，会自动注入上下文。',
-    'memory.autoHint':'为防止存档变大后生成失败，聊天记录、动态、私信等内容会被自动整合压缩成记忆条目（标有"自动"）。每次整合会新增一条记忆，不会覆盖旧的；旧的原始记录不会再逐条塞进请求里，生成内容时只会参考最新一条自动整合记忆。',
+    'memory.autoHint':'为防止存档变大后生成失败，聊天记录、动态、私信等内容会被自动整合压缩成记忆条目（标有"自动"）。每次整合会新增一条记忆，从上一条结束的地方继续往下写，不会覆盖、也不会重复旧的内容；旧的原始记录不会再逐条塞进请求里，生成内容时会按顺序参考所有自动整合记忆。',
+    'memory.autoToggleLabel':'自动整合记忆',
     'memory.autoTitle':'自动整合记忆',
     'memory.autoBadge':'自动',
     'memory.autoRefreshBtn':'立即整合记忆',
@@ -2738,7 +2740,8 @@ const I18N = {
     'card.received':'A contact card received',
     'card.added':'Added to contacts',
     'memory.hint':'Character memories — record key events from generated content. Injected automatically into context.',
-    'memory.autoHint':'To keep large save files from breaking generation, chat logs, posts, DMs, etc. are automatically compressed into memory entries (marked "Auto"). Each consolidation adds a new entry instead of overwriting the previous one — older raw history is no longer stuffed into every request; only the latest auto-consolidated entry is used when generating content.',
+    'memory.autoHint':'To keep large save files from breaking generation, chat logs, posts, DMs, etc. are automatically compressed into memory entries (marked "Auto"). Each consolidation adds a new entry that continues on from where the last one left off — it never overwrites or repeats older content. Older raw history is no longer stuffed into every request; generation refers to all auto-consolidated entries in order instead.',
+    'memory.autoToggleLabel':'Auto-consolidate memory',
     'memory.autoTitle':'Auto-consolidated memory',
     'memory.autoBadge':'Auto',
     'memory.autoRefreshBtn':'Consolidate memory now',
@@ -3853,13 +3856,23 @@ const AUTO_MEM_DELTA_THRESHOLD = 1200;   // chars of *new* raw material before r
 const _memoryConsolidating = new Set();
 
 function getAutoMemoryEntry(ch){
-  // Consolidation now appends a new entry each time instead of overwriting a
-  // single one, so multiple auto-consolidated entries can coexist — return
-  // the most recently created one (it's cumulative/comprehensive and
-  // supersedes earlier ones for context-building purposes).
+  // Each consolidation appends a new entry that only covers what wasn't
+  // already recorded (a "next chapter"), rather than a full cumulative
+  // rewrite — so this returns just the most recent one, useful as the
+  // continuation point when consolidating again (or for the delta-threshold
+  // check). To read the full accumulated memory, use
+  // getAllAutoMemoryEntries() instead.
   const autos = (ch && ch.memoryEntries || []).filter(e=>e.auto);
   if(!autos.length) return null;
   return autos.reduce((a,b)=>(b.updatedAt||0) >= (a.updatedAt||0) ? b : a);
+}
+
+/* All auto-consolidated entries, oldest first — since each one is only a
+   "next chapter" continuing from the last, the full accumulated memory is
+   all of them read in order, not just the latest. */
+function getAllAutoMemoryEntries(ch){
+  const autos = (ch && ch.memoryEntries || []).filter(e=>e.auto);
+  return autos.slice().sort((a,b)=>(a.updatedAt||0)-(b.updatedAt||0));
 }
 
 /* Generous (but still bounded) raw-material gather, used only as input to
@@ -3991,14 +4004,14 @@ async function runMemoryConsolidation(ch, opts){
     const raw = buildFullArchiveText(ch);
     if(!raw || !raw.trim()) return false;
     const auto = getAutoMemoryEntry(ch);
-    const sys = '你是一个记忆整理助手，负责把一个虚构角色的手机模拟原始互动素材，浓缩整理成一段完整、连贯、自然的中文记忆摘要，供后续生成内容时保持角色一致性使用。要求：\n'
+    const sys = '你是一个记忆整理助手，负责把一个虚构角色的手机模拟原始互动素材，浓缩整理成一段新的记忆条目，供后续生成内容时保持角色一致性使用。这是一个持续顺延更新的记忆系统：每次整理都会新增一条记忆，从上一条记忆结束的地方继续往下写，而不是把所有历史重新写一遍。要求：\n'
       + '1. 用叙述性语言写成自然的一段或几段话，不要分点列举，不要使用markdown标记，不要使用表情符号；\n'
-      + '2. 保留关键事件、人物关系的发展变化、重要约定或梗、idol与用户互动中的重要细节和转折；\n'
+      + '2. 只记录"已有的记忆摘要"里还没涵盖过的新内容——新发生的事件、人物关系的新进展、新的约定或梗、新的重要细节和转折；原始素材里如果有和已有摘要重复、已经记录过的部分，直接跳过，不要重复写；\n'
       + '3. 舍弃无关紧要的重复琐碎内容，不要逐条罗列历史消息；\n'
-      + '4. 总字数控制在500到900字之间；\n'
-      + '5. 只输出摘要正文本身，不要输出任何说明、标题或前后缀。';
-    const usr = (auto && auto.content ? ('【已有的记忆摘要，请在此基础上更新、补充、去芜存菁】\n'+auto.content+'\n\n') : '')
-      + '【原始素材】\n'+raw;
+      + '4. 总字数控制在300到700字之间；\n'
+      + '5. 只输出这段新记忆的正文本身，不要输出任何说明、标题或前后缀，也不要复述已有摘要已经写过的内容。';
+    const usr = (auto && auto.content ? ('【已有的记忆摘要——这部分内容已经记录过了，新记忆不需要重复】\n'+auto.content+'\n\n') : '')
+      + '【原始素材（可能包含已有摘要里提到过的旧内容，请只从中提炼尚未被记录过的新内容）】\n'+raw;
     const summary = await callAPI(sys, usr);
     if(!summary || !summary.trim()) return false;
     const entries = ensureMemoryEntries(ch);
@@ -4032,6 +4045,7 @@ async function runMemoryConsolidation(ch, opts){
 function maybeAutoConsolidateMemory(ch){
   try{
     if(!ch || !ch.id) return;
+    if(state.settings.autoConsolidateMemory === false) return; // manual-only mode: user triggers via the Settings button instead
     if(_memoryConsolidating.has(ch.id)) return;
     if(shouldConsolidateMemory(ch)) runMemoryConsolidation(ch);
   }catch(e){ /* never let background consolidation break content generation */ }
@@ -4039,9 +4053,9 @@ function maybeAutoConsolidateMemory(ch){
 
 function buildBaseSystemPrompt(ch, extra, opts){
   opts = opts || {};
-  // chatMsgLimit: how many recent Chat messages to inject (default ~30回合/60条，
+  // chatMsgLimit: how many recent Chat messages to inject (default ~25回合/50条，
   // Bubble生成时会传入更小的值以控制自己的参考量)。
-  const chatMsgLimit = opts.chatMsgLimit || 60;
+  const chatMsgLimit = opts.chatMsgLimit || 50;
   // offlineDialogueCount: 参考线下互动时，取最近几条线下记录里的对话部分
   // （引号里的话）。Chat生成时传入10，其余默认5。
   const offlineDialogueCount = opts.offlineDialogueCount || 5;
@@ -4058,7 +4072,7 @@ function buildBaseSystemPrompt(ch, extra, opts){
   // 这样存档变得再大，这里注入的内容量也基本不会继续膨胀。
   const memoryParts = [];
 
-  // 聊天记录（私信）——其他内容生成如果要参考chat，参考最近30回合（约60条消息）；
+  // 聊天记录（私信）——其他内容生成如果要参考chat，参考最近25回合（约50条消息）；
   // Bubble生成时会传入chatMsgLimit=30（约15回合），控制在更小范围内。
   const chatCtx = recentUserChatContext(ch, chatMsgLimit);
   if(chatCtx) memoryParts.push(chatCtx);
@@ -4207,20 +4221,22 @@ function buildBaseSystemPrompt(ch, extra, opts){
   try{
     const entries = ch.memoryEntries || [];
     if(entries.length){
-      // The auto-consolidated summary is already self-bounded (~500-900字),
-      // so it's kept intact. Manual entries are hand-authored by the person
-      // and can keep growing indefinitely over a long-running save, so only
-      // those are capped — otherwise this section alone could eventually
-      // push every single generation call (chat, bubble, DMs...) past the
-      // model's context window. Consolidation now appends a new auto entry
-      // each time instead of overwriting one, so only the latest (most
-      // comprehensive/cumulative) auto entry is injected here.
-      const auto = getAutoMemoryEntry(ch);
+      // Consolidation now appends a new "chapter" each time that only covers
+      // what wasn't already recorded, continuing on from the last one —
+      // rather than one entry that gets fully rewritten to stay
+      // comprehensive. So the full accumulated memory is ALL auto entries
+      // read in order, not just the latest; cap the combined text so a
+      // long-running save with many chapters can't balloon this section.
+      // Manual entries are hand-authored and capped separately for the
+      // same reason.
+      const autos = getAllAutoMemoryEntries(ch);
+      let autoText = autos.map(a=>(a.title?'['+a.title+'] ':'')+a.content).filter(Boolean).join('\n');
+      autoText = capHistoryText(autoText, compact ? 2000 : 4000);
       const manual = entries.filter(e=>!e.auto);
       let manualText = manual.map(e=>(e.title?'['+e.title+'] ':'')+e.content).filter(Boolean).join('\n');
       manualText = capHistoryText(manualText, compact ? 2000 : 4000);
-      const memLines = [auto ? ((auto.title?'['+auto.title+'] ':'')+auto.content) : '', manualText].filter(Boolean).join('\n');
-      if(memLines) memoryParts.push('\n【角色记忆（重要事件与背景，其中"自动整合记忆"是更早期历史的压缩摘要，生成内容时请参考并保持一致）】\n'+memLines);
+      const memLines = [autoText, manualText].filter(Boolean).join('\n');
+      if(memLines) memoryParts.push('\n【角色记忆（重要事件与背景，其中"自动整合记忆"系列是按时间顺序顺延写成的历史压缩摘要，请按顺序理解并保持一致）】\n'+memLines);
     }
   }catch(e){}
 
@@ -4277,16 +4293,18 @@ function buildOfflineSystemPrompt(ch, extra){
   // （线下页面的生成按钮）统一算好增量后直接放进user prompt里，避免同一段内容
   // 在system prompt和user prompt里各出现一次、白白占用两倍篇幅。
 
-  // 角色记忆条目（自动整合记忆 + 手动条目，逻辑与buildBaseSystemPrompt一致）
+  // 角色记忆条目（自动整合记忆系列 + 手动条目，逻辑与buildBaseSystemPrompt一致）
   try{
     const entries = ch.memoryEntries || [];
     if(entries.length){
-      const auto = getAutoMemoryEntry(ch);
+      const autos = getAllAutoMemoryEntries(ch);
+      let autoText = autos.map(a=>(a.title?'['+a.title+'] ':'')+a.content).filter(Boolean).join('\n');
+      autoText = capHistoryText(autoText, 4000);
       const manual = entries.filter(e=>!e.auto);
       let manualText = manual.map(e=>(e.title?'['+e.title+'] ':'')+e.content).filter(Boolean).join('\n');
       manualText = capHistoryText(manualText, 4000);
-      const memLines = [auto ? ((auto.title?'['+auto.title+'] ':'')+auto.content) : '', manualText].filter(Boolean).join('\n');
-      if(memLines) memoryParts.push('\n【角色记忆（重要事件与背景，其中"自动整合记忆"是更早期历史的压缩摘要，生成内容时请参考并保持一致）】\n'+memLines);
+      const memLines = [autoText, manualText].filter(Boolean).join('\n');
+      if(memLines) memoryParts.push('\n【角色记忆（重要事件与背景，其中"自动整合记忆"系列是按时间顺序顺延写成的历史压缩摘要，请按顺序理解并保持一致）】\n'+memLines);
     }
   }catch(e){}
 
@@ -4317,9 +4335,9 @@ function buildOfflineSystemPrompt(ch, extra){
 =================================================================== */
 async function bubbleGenerateFanReplies(ch, idolText){
   const sys = buildBaseSystemPrompt(ch, '现在请为idol刚刚发出的一条消息，生成来自不同粉丝的回复。', {chatMsgLimit:30, compact:true});
-  const usr = 'idol刚刚发送的内容是：「'+idolText+'」\n请生成恰好8条来自不同粉丝的回复评论，粉丝姓名（网名/ID）各不相同且口语化。\n输出 JSON 格式：{"replies":[{"name":"粉丝昵称","text":"回复内容"}, ... 共8条]}';
+  const usr = 'idol刚刚发送的内容是：「'+idolText+'」\n请生成恰好10条来自不同粉丝的回复评论，粉丝姓名（网名/ID）各不相同且口语化。\n输出 JSON 格式：{"replies":[{"name":"粉丝昵称","text":"回复内容"}, ... 共10条]}';
   const data = await generateJSON(sys, usr, 3500);
-  if(data && Array.isArray(data.replies)) return data.replies.slice(0,8);
+  if(data && Array.isArray(data.replies)) return data.replies.slice(0,10);
   throw new Error('Could not parse a valid reply list from the API response');
 }
 
@@ -4331,7 +4349,7 @@ async function refreshBubble(){
   showGenerating();
   try{
     const sys = buildBaseSystemPrompt(ch, '请生成idol过去在 Bubble（粉丝互动泡泡软件）里发布过的历史消息记录。', {chatMsgLimit:30, compact:true});
-    const usr = '请生成 3 到 4 条idol过去发送给粉丝的消息（可以是纯文字感想，也可以是配图片，也可以是配视频）。\n输出 JSON：{"messages":[{"photo":false,"isVideo":false,"text":"消息内容"}, ...]}\n如果某条带图片或视频，"photo"设为true；如果带的是视频而不是图片，再把"isVideo"设为true（纯图片则isVideo为false）。带媒体时"text"填写这段图片/视频内容的文字描述（因为这是纯文字模拟，图片/视频用文字描述代替）。\n每条消息生成后，紧接着各生成8条来自不同粉丝、昵称各异、口语化自然的回复评论，放在对应的"replies"字段里：{"messages":[{"photo":false,"isVideo":false,"text":"...","replies":[{"name":"...","text":"..."},...共8条]}, ...]}';
+    const usr = '请生成 3 到 4 条idol过去发送给粉丝的消息（可以是纯文字感想，也可以是配图片，也可以是配视频）。\n输出 JSON：{"messages":[{"photo":false,"isVideo":false,"text":"消息内容"}, ...]}\n如果某条带图片或视频，"photo"设为true；如果带的是视频而不是图片，再把"isVideo"设为true（纯图片则isVideo为false）。带媒体时"text"填写这段图片/视频内容的文字描述（因为这是纯文字模拟，图片/视频用文字描述代替）。\n每条消息生成后，紧接着各生成10条来自不同粉丝、昵称各异、口语化自然的回复评论，放在对应的"replies"字段里：{"messages":[{"photo":false,"isVideo":false,"text":"...","replies":[{"name":"...","text":"..."},...共10条]}, ...]}';
     const data = await generateJSON(sys, usr, 6000);
     if(data && Array.isArray(data.messages) && data.messages.length){
       const newRounds = data.messages.map(m=>({
@@ -4339,7 +4357,7 @@ async function refreshBubble(){
         photo: !!m.photo,
         isVideo: !!m.isVideo,
         text: m.text||'',
-        replies: Array.isArray(m.replies) ? m.replies.slice(0,8) : [],
+        replies: Array.isArray(m.replies) ? m.replies.slice(0,10) : [],
         expanded:false
       }));
       // Keep existing rounds, stream new ones in
@@ -4520,13 +4538,7 @@ function igPostHtml(ch, p, overrideName){
       +'</div><div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
   }
   if(p.hasImage){
-    if(p.isVideo){
-      html += '<div class="video-bubble" style="width:100%;margin-bottom:8px;"><div class="video-bubble-thumb">'
-        +'<div class="video-bubble-play"></div><span class="video-bubble-badge">'+t('video.label')+'</span></div>'
-        +'<div class="video-bubble-label">'+escapeHtml(p.imageDesc||'')+'</div></div>';
-    } else {
-      html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+'</div>';
-    }
+    html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+(p.isVideo?'<span class="album-video-badge">video</span>':'')+'</div>';
   }
   html += '<div class="ig-caption">'+escapeHtml(p.caption||'')+'</div>';
   html += igStatsHtml(p);
@@ -4577,13 +4589,7 @@ function userFeedPostHtml(p, postIdx){
     + '<div><div class="ig-post-name">'+escapeHtml(p.author||'')+(isIdolPost?'<span style="font-size:10px;color:var(--text-3);font-weight:400;margin-left:5px;">• idol</span>':'')+'</div>'
     + '<div class="ig-post-time">'+escapeHtml(p.time||'')+'</div></div></div>';
   if(p.hasImage){
-    if(p.isVideo){
-      html += '<div class="video-bubble" style="width:100%;margin-bottom:8px;"><div class="video-bubble-thumb">'
-        +'<div class="video-bubble-play"></div><span class="video-bubble-badge">'+t('video.label')+'</span></div>'
-        +'<div class="video-bubble-label">'+escapeHtml(p.imageDesc||'')+'</div></div>';
-    } else {
-      html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+'</div>';
-    }
+    html += '<div class="ig-image-block">'+escapeHtml(p.imageDesc||'')+(p.isVideo?'<span class="album-video-badge">video</span>':'')+'</div>';
   }
   html += '<div class="ig-caption">'+escapeHtml(p.caption||'')+'</div>';
   html += igStatsHtml(p);
@@ -4946,15 +4952,8 @@ function renderUserAltPostHtml(post, idx, ch, altId){
       + '<div class="ig-post-time">'+escapeHtml(post.time||'')+'</div>'
     + '</div></div>';
   if(post.hasImage){
-    if(post.isVideo){
-      html += '<div class="video-bubble" style="width:100%;margin-bottom:8px;"><div class="video-bubble-thumb">'
-        +(post.mediaUrl?'<div style="width:100%;height:100%;background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;"></div>':'')
-        +'<div class="video-bubble-play"></div><span class="video-bubble-badge">'+t('video.label')+'</span></div>'
-        +'<div class="video-bubble-label">'+escapeHtml(post.imageDesc||'')+'</div></div>';
-    } else {
-      const imgStyle = post.mediaUrl ? 'background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;' : '';
-      html += '<div class="ig-image-block" style="'+(imgStyle||'')+'">'+( imgStyle?'':escapeHtml(post.imageDesc||'') )+'</div>';
-    }
+    const imgStyle = post.mediaUrl ? 'background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;' : '';
+    html += '<div class="ig-image-block" style="'+(imgStyle||'')+'">'+( imgStyle?'':escapeHtml(post.imageDesc||'') )+(post.isVideo?'<span class="album-video-badge">video</span>':'')+'</div>';
   }
   html += '<div class="ig-caption">'+escapeHtml(post.caption||'')+'</div>';
   html += igStatsHtml(post);
@@ -8867,8 +8866,13 @@ function renderSettingsMemory(){
   const ch = getCurrentChar();
   if(!ch){ body.innerHTML='<div class="empty-state">'+t('toast.charMissing')+'</div>'; return; }
   const entries = ensureMemoryEntries(ch);
+  const autoOn = state.settings.autoConsolidateMemory !== false;
   let html = '<div class="field-hint" style="margin-bottom:10px;">'+t('memory.hint')+'</div>';
   html += '<div class="field-hint" style="margin-bottom:12px;">'+t('memory.autoHint')+'</div>';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'
+    + '<span style="font-size:13px;color:var(--text-2);">'+t('memory.autoToggleLabel')+'</span>'
+    + '<div id="memAutoConsolidateToggle" class="ios-toggle'+(autoOn?' on':'')+'"></div>'
+    + '</div>';
   html += '<button class="btn-block secondary" id="memAutoRefreshBtn" style="margin-bottom:16px;">'+t('memory.autoRefreshBtn')+'</button>';
   if(!entries.length){
     html += '<div class="empty-state">'+t('memory.empty')+'</div>';
@@ -8887,6 +8891,13 @@ function renderSettingsMemory(){
     el.addEventListener('click', ()=>openMemoryEntry(parseInt(el.getAttribute('data-mem-idx'),10)));
   });
   document.getElementById('memAddBtn').addEventListener('click', ()=>openMemoryEntry(null));
+
+  const autoToggle = document.getElementById('memAutoConsolidateToggle');
+  if(autoToggle) autoToggle.addEventListener('click', ()=>{
+    state.settings.autoConsolidateMemory = !(state.settings.autoConsolidateMemory !== false);
+    saveState();
+    renderSettingsMemory();
+  });
 
   const refreshBtn = document.getElementById('memAutoRefreshBtn');
   refreshBtn.addEventListener('click', async ()=>{
@@ -11266,7 +11277,7 @@ function renderAlbum(){
       const hasImg = !!item.mediaUrl;
       return '<div class="album-thumb" data-msg-id="'+item.id+'">'
         + '<div class="album-thumb-inner'+(hasImg?' has-img':'')+'" style="'+(hasImg?'background-image:url('+item.mediaUrl+');background-size:cover;background-position:center;':'')+'">'+( hasImg?'': escapeHtml((item.desc||'').slice(0,20)) )+'</div>'
-        + (isVideo ? '<span class="album-video-badge">'+t('video.label').toUpperCase()+'</span>' : '')
+        + (isVideo ? '<span class="album-video-badge">video</span>' : '')
         + (item.saved ? '<span class="album-saved-badge"><svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></span>' : '')
       + '</div>';
     }).join('')
@@ -11435,7 +11446,7 @@ function renderUserAlbum(){
       const hasImg = !!item.mediaUrl;
       return '<div class="album-thumb" data-msg-id="'+item.id+'">'
         + '<div class="album-thumb-inner'+(hasImg?' has-img':'')+'" style="'+(hasImg?'background-image:url('+item.mediaUrl+');background-size:cover;background-position:center;':'')+'">'+( hasImg?'': escapeHtml((item.desc||'').slice(0,20)) )+'</div>'
-        + (isVideo ? '<span class="album-video-badge">'+t('video.label').toUpperCase()+'</span>' : '')
+        + (isVideo ? '<span class="album-video-badge">video</span>' : '')
       + '</div>';
     }).join('')
   + '</div>';
@@ -11817,19 +11828,8 @@ function renderUserPostHtml(post, idx, ch){
     + '<div><div class="ig-post-name" style="font-size:14px;font-weight:700;color:var(--text);">'+escapeHtml(userName)+'</div><div class="ig-post-time">'+escapeHtml(post.time||'')+'</div></div></div>';
   // Image or video block
   if(post.hasImage||post.imageDesc){
-    if(post.isVideo){
-      html += '<div class="video-bubble" style="width:100%;margin-bottom:8px;">'
-        + '<div class="video-bubble-thumb">'
-          + (post.mediaUrl?'<div style="width:100%;height:100%;background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;"></div>':'')
-          + '<div class="video-bubble-play"></div>'
-          + '<span class="video-bubble-badge">'+t('video.label')+'</span>'
-        + '</div>'
-        + '<div class="video-bubble-label">'+escapeHtml(post.imageDesc||'')+'</div>'
-      + '</div>';
-    } else {
-      const imgStyle = post.mediaUrl ? ('background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;') : '';
-      html += '<div class="ig-image-block" style="'+(imgStyle||'')+'">'+( imgStyle?'':escapeHtml(post.imageDesc||'') )+'</div>';
-    }
+    const imgStyle = post.mediaUrl ? ('background-image:url('+post.mediaUrl+');background-size:cover;background-position:center;') : '';
+    html += '<div class="ig-image-block" style="'+(imgStyle||'')+'">'+( imgStyle?'':escapeHtml(post.imageDesc||'') )+(post.isVideo?'<span class="album-video-badge">video</span>':'')+'</div>';
   }
   html += '<div class="ig-caption">'+escapeHtml(post.caption||'')+'</div>';
   html += igStatsHtml(post);
